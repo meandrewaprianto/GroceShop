@@ -189,6 +189,14 @@ Berikut adalah peta jalan (roadmap) dan status pengerjaan proyek GroceShop:
   - **Promosi Payday Bulanan (`Monthly Offers`):** Tugas cron terjadwal (`0 10 1 * *`) setiap tanggal 1 jam 10:00 untuk mengirimkan email berisi 6 produk promo terpopuler kepada semua pengguna terdaftar dalam mode batching (10 user per batch).
   - **Penetapan Kurir Otomatis (`Auto-Assign Rider`):** Memantau event `order/placed`, menunggu selama 5 menit (`step.sleep`), lalu secara otomatis menetapkan kurir aktif yang tidak sibuk serta memicu kode OTP serah terima unik 6-digit.
   - Integrasi **Nodemailer Brevo SMTP Relay** (`smtp-relay.brevo.com`) dengan template email HTML modern dan responsif.
+- [x] **Real-Time Courier Tracking Server (Socket.io):**
+  - Integrasi Node.js HTTP server dengan **Socket.io** server untuk komunikasi full-duplex dua arah.
+  - Implementasi mekanisme room dinamis (`order:{orderId}`) untuk mengisolasi data koordinat pelacakan pesanan.
+  - Penyaluran data instan (`receive-live-location`) dari kurir ke pelanggan bersangkutan secara real-time dipadukan penyimpanan data asinkronus ke PostgreSQL menggunakan Prisma.
+- [x] **Modul Router & Controller Delivery Partner (`deliveryPartnerRouter`):**
+  - Penyambungan rute `/api/delivery` ke server Express utama.
+  - Implementasi rute login khusus kurir, melihat penugasan aktif/selesai, detail pengiriman, update status pengantaran, pembatalan, pengisian kode OTP verifikasi, serta backup location update berbasis HTTP fallback.
+  - Proteksi penuh menggunakan middleware autentikasi `deliveryAuth`.
 
 ### Phase 5: Sentuhan Premium, Animasi & Launching 🔴 (PLANNED)
 - [ ] Integrasi animasi transisi antar halaman (Page Transitions).
@@ -200,7 +208,6 @@ Berikut adalah peta jalan (roadmap) dan status pengerjaan proyek GroceShop:
 - [ ] **Integrasi API Frontend & Backend secara Menyeluruh:** Hubungkan React client agar mengonsumsi REST API dari server Express untuk Autentikasi, CRUD produk, buku alamat, manajemen keranjang, riwayat order, dan halaman pelacakan pesanan.
 - [ ] **Validasi Skema Input (Backend):** Terapkan pustaka validasi skema seperti `Zod` pada request body di endpoint Registrasi, Login, CRUD Product, dan Checkout untuk mencegah data corrupt dan SQL injection.
 - [ ] **Penanganan Error Terpusat & Logging:** Tingkatkan middleware error handling di backend agar dapat menangkap error spesifik Prisma dan menambahkan logging library seperti `winston` atau `morgan` untuk analisis error produksi.
-- [ ] **Live Courier Tracking (Real-Time):** Integrasikan WebSocket (Socket.io) untuk memperbarui koordinat kurir pada database dan memicu pergerakan truk kurir di `LiveMap` client secara real-time.
 - [ ] **Simulasi OTP Delivery Confirmation:** Bangun fitur simulasi serah terima menggunakan modal input. Jika kode OTP yang dimasukkan cocok dengan `order.deliveryOtp`, status pesanan berubah menjadi `"Delivered"` secara lokal — sebagai representasi dari alur validasi kurir di dunia nyata.
 - [ ] **Integrasi Peta Leaflet di `Addresses.tsx`:** Tambahkan fitur *pick location on map* saat pengguna menambahkan atau mengedit alamat baru.
 - [ ] **Auth Context & Session Management:** Implementasikan `AuthContext` yang menyimpan data sesi login pengguna (`User` interface) secara global, menggantikan simulasi login statis saat ini.

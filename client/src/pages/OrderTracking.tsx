@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom"
+import { useEffect, useState, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import type { Order } from "../types";
 import { dummyDashboardOrdersData } from "../assets/assets";
 import Loading from "../components/Loading";
@@ -7,6 +7,7 @@ import { ArrowLeftIcon, MapPinIcon, PhoneIcon } from "lucide-react";
 import OrderOTP from "../components/OrderTracking/OrderOTP";
 import LiveMap from "../components/OrderTracking/LiveMap";
 import OrderTimeLine from "../components/OrderTracking/OrderTimeLine";
+import { io, Socket } from "socket.io-client";
 
 const OrderTracking = () => {
     const currency = import.meta.env.VITE_CURRENCY_SYMBOL || '$';
@@ -16,10 +17,49 @@ const OrderTracking = () => {
     const [loading, setLoading] = useState(true);
     const [liveLocation, setLiveLocation] = useState<{ lat: number; lng: number } | null>(null);
 
+    const socketRef = useRef<Socket | null>(null);
+
     useEffect(() => {
-        setOrder(dummyDashboardOrdersData.find((o) => o._id === id) as any);
+        // Di masa mendatang ganti dengan real API call:
+        // const res = await fetch(`/api/orders/${id}`);
+        const foundOrder = dummyDashboardOrdersData.find((o) => o._id === id);
+        setOrder(foundOrder as any);
+        
+        if (foundOrder && foundOrder.liveLocation) {
+            setLiveLocation(foundOrder.liveLocation as any);
+        }
+        
         setLoading(false);
     }, [id, navigate]);
+
+    // Logika WebSocket Client untuk Menerima Koordinat Kurir Real-Time
+    useEffect(() => {
+        if (!id) return;
+
+        const socketUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+        const socket = io(socketUrl);
+        socketRef.current = socket;
+
+        socket.on("connect", () => {
+            console.log("Connected to tracking WebSocket server");
+            // Masuk ke room pelacakan order ini
+            socket.emit("join-order-room", id);
+        });
+
+        // Dengarkan koordinat live dari kurir
+        socket.on("receive-live-location", (data: { lat: number; lng: number; updatedAt: string }) => {
+            console.log("Received new coordinates:", data);
+            setLiveLocation({ lat: data.lat, lng: data.lng });
+        });
+
+        // Cleanup: Tutup koneksi saat user meninggalkan halaman
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+                socketRef.current = null;
+            }
+        };
+    }, [id]);
 
     if (loading) return <Loading />
     if (!order) return null;
@@ -131,7 +171,7 @@ const OrderTracking = () => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default OrderTracking
+export default OrderTracking;
