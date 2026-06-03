@@ -229,7 +229,7 @@ graph TD
     classDef delivery fill:#fff1f2,stroke:#e11d48,stroke-width:2px,color:#e11d48;
 
     %% Elements
-    A["main.tsx: BrowserRouter"] :::root --> B("App.tsx: Routes Container") :::root
+    A["main.tsx: BrowserRouter"] :::root --> B["App.tsx: Routes Container"] :::root
     B --> C{"Pilih Rute"} :::root
     
     %% Public Routes Layout (AppLayout)
@@ -237,7 +237,7 @@ graph TD
     
     %% AppLayout Components
     L_Layout --> L_Banner["Banner.tsx - Promosi"] :::layout
-    L_Layout --> L_Navbar["Navbar.tsx - Header & Search"] :::layout
+    L_Layout --> L_Navbar["Navbar.tsx - Header dan Search"] :::layout
     L_Layout --> L_Outlet["Outlet - Content Area"] :::layout
     L_Layout --> L_Footer["Footer - Informasi"] :::layout
     
@@ -256,7 +256,7 @@ graph TD
     %% Protected Routes
     PR_Group --> PR_Checkout["Checkout.tsx - Pembayaran"] :::protected
     PR_Group --> PR_Orders["MyOrders.tsx - Riwayat Belanja"] :::protected
-    PR_Group --> PR_Track["OrderTracking.tsx - Peta & Kurir"] :::protected
+    PR_Group --> PR_Track["OrderTracking.tsx - Peta dan Kurir"] :::protected
     PR_Group --> PR_Addr["Addresses.tsx - Buku Alamat"] :::protected
     
     %% Standalone Routes
