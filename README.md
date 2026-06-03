@@ -229,51 +229,60 @@ graph TD
     classDef delivery fill:#fff1f2,stroke:#e11d48,stroke-width:2px,color:#e11d48;
 
     %% Elements
-    A["main.tsx: BrowserRouter"] :::root --> B["App.tsx: Routes Container"] :::root
-    B --> C{"Pilih Rute"} :::root
+    A["main.tsx: BrowserRouter"] --> B["App.tsx: Routes Container"]
+    B --> C{"Pilih Rute"}
     
     %% Public Routes Layout (AppLayout)
-    C -->|Rute Utama /| L_Layout["AppLayout.tsx - Main Layout Wrapper"] :::layout
+    C -->|Rute Utama /| L_Layout["AppLayout.tsx - Main Layout Wrapper"]
     
     %% AppLayout Components
-    L_Layout --> L_Banner["Banner.tsx - Promosi"] :::layout
-    L_Layout --> L_Navbar["Navbar.tsx - Header dan Search"] :::layout
-    L_Layout --> L_Outlet["Outlet - Content Area"] :::layout
-    L_Layout --> L_Footer["Footer - Informasi"] :::layout
+    L_Layout --> L_Banner["Banner.tsx - Promosi"]
+    L_Layout --> L_Navbar["Navbar.tsx - Header dan Search"]
+    L_Layout --> L_Outlet["Outlet - Content Area"]
+    L_Layout --> L_Footer["Footer - Informasi"]
     
     %% Public Sub-routes
-    L_Outlet --> P_Home["Home.tsx - Beranda"] :::public
-    L_Outlet --> P_Catalog["Products.tsx - Katalog Grocery"] :::public
-    L_Outlet --> P_Detail["ProductPage.tsx - Detail Produk"] :::public
-    L_Outlet --> P_Search["SearchResults.tsx - Cari"] :::public
-    L_Outlet --> P_Deals["FlashDeals.tsx - Penawaran Kilat"] :::public
+    L_Outlet --> P_Home["Home.tsx - Beranda"]
+    L_Outlet --> P_Catalog["Products.tsx - Katalog Grocery"]
+    L_Outlet --> P_Detail["ProductPage.tsx - Detail Produk"]
+    L_Outlet --> P_Search["SearchResults.tsx - Cari"]
+    L_Outlet --> P_Deals["FlashDeals.tsx - Penawaran Kilat"]
     
     %% Guarded Paths
-    L_Outlet --> G_Guard["ProtectedRoute.tsx - Route Guard"] :::guard
-    G_Guard -->|Belum Login| P_Login["Login.tsx - Sign In / Sign Up"] :::public
-    G_Guard -->|Sudah Login| PR_Group["Akses Halaman Terproteksi"] :::protected
+    L_Outlet --> G_Guard["ProtectedRoute.tsx - Route Guard"]
+    G_Guard -->|Belum Login| P_Login["Login.tsx - Sign In / Sign Up"]
+    G_Guard -->|Sudah Login| PR_Group["Akses Halaman Terproteksi"]
     
     %% Protected Routes
-    PR_Group --> PR_Checkout["Checkout.tsx - Pembayaran"] :::protected
-    PR_Group --> PR_Orders["MyOrders.tsx - Riwayat Belanja"] :::protected
-    PR_Group --> PR_Track["OrderTracking.tsx - Peta dan Kurir"] :::protected
-    PR_Group --> PR_Addr["Addresses.tsx - Buku Alamat"] :::protected
+    PR_Group --> PR_Checkout["Checkout.tsx - Pembayaran"]
+    PR_Group --> PR_Orders["MyOrders.tsx - Riwayat Belanja"]
+    PR_Group --> PR_Track["OrderTracking.tsx - Peta dan Kurir"]
+    PR_Group --> PR_Addr["Addresses.tsx - Buku Alamat"]
     
     %% Standalone Routes
     C -->|Rute /login| P_Login
 
     %% Admin Routes
-    C -->|Rute /admin| A_Layout["AdminLayout.tsx - Admin Layout"] :::admin
-    A_Layout --> A_Dash["AdminDashboard.tsx"] :::admin
-    A_Layout --> A_Prod["AdminProducts.tsx"] :::admin
-    A_Layout --> A_ProdForm["AdminProductForm.tsx - New/Edit"] :::admin
-    A_Layout --> A_Ord["AdminOrders.tsx"] :::admin
-    A_Layout --> A_DP["AdminDeliveryPartners.tsx"] :::admin
+    C -->|Rute /admin| A_Layout["AdminLayout.tsx - Admin Layout"]
+    A_Layout --> A_Dash["AdminDashboard.tsx"]
+    A_Layout --> A_Prod["AdminProducts.tsx"]
+    A_Layout --> A_ProdForm["AdminProductForm.tsx - New/Edit"]
+    A_Layout --> A_Ord["AdminOrders.tsx"]
+    A_Layout --> A_DP["AdminDeliveryPartners.tsx"]
 
     %% Delivery Routes
-    C -->|Rute /delivery/login| D_Login["DeliveryLogin.tsx - Kurir Login"] :::delivery
-    C -->|Rute /delivery| D_Layout["DeliveryLayout.tsx - Kurir Layout"] :::delivery
-    D_Layout --> D_Dash["DeliveryDashboard.tsx - Daftar Order Kurir"] :::delivery
+    C -->|Rute /delivery/login| D_Login["DeliveryLogin.tsx - Kurir Login"]
+    C -->|Rute /delivery| D_Layout["DeliveryLayout.tsx - Kurir Layout"]
+    D_Layout --> D_Dash["DeliveryDashboard.tsx - Daftar Order Kurir"]
+
+    %% Class Assignments
+    class A,B,C root;
+    class L_Layout,L_Banner,L_Navbar,L_Outlet,L_Footer layout;
+    class P_Home,P_Catalog,P_Detail,P_Search,P_Deals,P_Login public;
+    class G_Guard guard;
+    class PR_Group,PR_Checkout,PR_Orders,PR_Track,PR_Addr protected;
+    class A_Layout,A_Dash,A_Prod,A_ProdForm,A_Ord,A_DP admin;
+    class D_Login,D_Layout,D_Dash delivery;
 ```
 
 ### 💡 Deskripsi Alur Aplikasi
