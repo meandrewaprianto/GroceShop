@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom"
 import type { Product } from "../types";
-import { categoriesData, dummyProducts } from "../assets/assets";
+import { categoriesData } from "../assets/assets";
 import { ChevronDown, Home, SlidersHorizontal, XIcon } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import Loading from "../components/Loading";
 import FilterPanel from "../components/FilterPanel";
+import api from "../config/api";
+import toast from "react-hot-toast";
 
 
 const Products = () => {
@@ -28,61 +30,52 @@ const Products = () => {
     const fetchProducts = async () => {
         setLoading(true);
 
-        let filtered = [...dummyProducts];
+        try {
+            // Mapping parameter sort ke API backend
+            let apiSort = "";
+            if (sort === "price_asc") apiSort = "price-low";
+            else if (sort === "price_desc") apiSort = "price-high";
 
-        // 1. Filter berdasarkan Category
-        if (category) {
-            filtered = filtered.filter((p) => p.category === category);
-        }
+            const params: Record<string, any> = {};
+            if (category) params.category = category;
+            if (organic) params.organic = organic;
+            if (minPrice) params.minPrice = minPrice;
+            if (maxPrice) params.maxPrice = maxPrice;
+            if (apiSort) params.sort = apiSort;
 
-        // 2. Filter berdasarkan Organic
-        if (organic === "true") {
-            filtered = filtered.filter((p) => p.isOrganic === true);
-        } else if (organic === "false") {
-            filtered = filtered.filter((p) => p.isOrganic === false);
-        }
+            const { data } = await api.get("/products/", { params });
+            const allProducts = data.products || [];
 
-        // 3. Filter berdasarkan minPrice
-        if (minPrice) {
-            const min = Number(minPrice);
-            if (!isNaN(min)) {
-                filtered = filtered.filter((p) => p.price >= min);
+            // 1. Client-side filter tambahan jika diperlukan (seperti isOrganic jika backend tidak memfilter)
+            let filtered = [...allProducts];
+            if (organic === "true") {
+                filtered = filtered.filter((p: any) => p.isOrganic === true);
+            } else if (organic === "false") {
+                filtered = filtered.filter((p: any) => p.isOrganic === false);
             }
-        }
 
-        // 4. Filter berdasarkan maxPrice
-        if (maxPrice) {
-            const max = Number(maxPrice);
-            if (!isNaN(max)) {
-                filtered = filtered.filter((p) => p.price <= max);
+            // 2. Client-side sorting tambahan untuk rating dan name jika backend belum handle
+            if (sort === "rating") {
+                filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            } else if (sort === "name") {
+                filtered.sort((a, b) => a.name.localeCompare(b.name));
             }
+
+            setTotalFilteredCount(filtered.length);
+
+            const total = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+            setTotalPages(total);
+
+            const currentPage = Math.min(Math.max(1, page), total || 1);
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const paginated = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+            setProducts(paginated);
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || error?.message || "Failed to fetch products");
+        } finally {
+            setLoading(false);
         }
-
-        // 5. Urutkan (Sorting)
-        if (sort === "price_asc") {
-            filtered.sort((a, b) => a.price - b.price);
-        } else if (sort === "price_desc") {
-            filtered.sort((a, b) => b.price - a.price);
-        } else if (sort === "rating") {
-            filtered.sort((a, b) => b.rating - a.rating);
-        } else if (sort === "name") {
-            filtered.sort((a, b) => a.name.localeCompare(b.name));
-        }
-
-        // 6. Hitung total filtered count
-        setTotalFilteredCount(filtered.length);
-
-        // 7. Hitung total halaman
-        const total = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-        setTotalPages(total);
-
-        // 8. Ambil produk untuk halaman saat ini
-        const currentPage = Math.min(Math.max(1, page), total || 1);
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        const paginated = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-        setProducts(paginated);
-        setLoading(false);
     }
 
     const updateFilter = (key: string, value: string) => {
@@ -169,7 +162,7 @@ const Products = () => {
                         ) : (
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 xl:gap-8">
                                 {products.map((product) => product.stock > 0 && (
-                                    <ProductCard key={product._id} product={product} />
+                                    <ProductCard key={product.id} product={product} />
                                 ))}
                             </div>
                         )}

@@ -148,7 +148,10 @@ Berikut adalah peta jalan (roadmap) dan status pengerjaan proyek GroceShop:
 - [ ] **Komponen Peta & Geocoding:** Integrasi Leaflet di `Addresses.tsx` untuk menentukan pin lokasi pengantaran baru.
 
 ### Phase 4: Manajemen State & Aliran Data (State Management) 🟡 (IN PROGRESS)
-- [ ] **Auth Context:** Menyimpan data sesi login user (`User` interface).
+- [x] **Auth Context & Session Management (`AuthContext.tsx`):**
+  - Menyimpan data sesi login pengguna (`User` interface) secara global di seluruh aplikasi React.
+  - Alur registrasi (`/api/auth/register`), login (`/api/auth/login`), dan logout otomatis dengan persistensi token dan user data di `localStorage`.
+  - Integrasi Axios Interceptor (`api.ts`) untuk otomatis menyisipkan *JWT Bearer token* di header otorisasi setiap HTTP request dan mendeteksi token kedaluwarsa (HTTP 401).
 - [x] **Cart Context (`CartContext.tsx`):** Implementasi penuh menggunakan `createContext` + `useState` + `useEffect`. Fitur yang tersedia:
   - `addToCart(product, quantity?)` — menambahkan produk ke keranjang; jika sudah ada, quantity di-increment. Sidebar otomatis terbuka setiap kali item ditambahkan.
   - `removeFromCart(productId)` — menghapus item dari keranjang.
@@ -160,7 +163,9 @@ Berikut adalah peta jalan (roadmap) dan status pengerjaan proyek GroceShop:
   - **Integrasi Global:** `CartProvider` membungkus `<App />` di `main.tsx`, menjadikan context tersedia di seluruh aplikasi.
   - Hook publik `useCart()` diekspos dengan guard error jika digunakan di luar `CartProvider`.
 - [ ] **Order Context:** Logika pembuatan order baru, riwayat order, dan tracking status order.
-- [ ] **Integrasi API/Mock Services:** Pembuatan custom hooks untuk fetch data produk organik dari mock data.
+- [x] **Integrasi API Backend Produk:**
+  - Migrasi halaman katalog utama (`Products.tsx`) dari dummy assets ke API backend `/api/products` dengan filtering dinamis (kategori, organic, min-max price, sort).
+  - Integrasi grid produk terpopuler (`PopularProducts.tsx`) menggunakan fetch data API backend diurutkan berdasarkan rating terbaik (`sort=rating`).
 
 ### Phase 4.5: Backend Server Development (Node.js, Express, Prisma, Postgres) 🟢 (COMPLETED)
 - [x] **Inisialisasi Server & Boilerplate:**
@@ -205,12 +210,11 @@ Berikut adalah peta jalan (roadmap) dan status pengerjaan proyek GroceShop:
 - [ ] Uji coba aliran checkout akhir dan integrasi notifikasi sukses lewat `react-hot-toast`.
 
 ### 📝 TODO & Future Integrations / Improvements
-- [ ] **Integrasi API Frontend & Backend secara Menyeluruh:** Hubungkan React client agar mengonsumsi REST API dari server Express untuk Autentikasi, CRUD produk, buku alamat, manajemen keranjang, riwayat order, dan halaman pelacakan pesanan.
+- [ ] **Integrasi API Frontend & Backend secara Menyeluruh:** Hubungkan React client agar mengonsumsi REST API dari server Express untuk buku alamat, manajemen keranjang, dan riwayat order.
 - [ ] **Validasi Skema Input (Backend):** Terapkan pustaka validasi skema seperti `Zod` pada request body di endpoint Registrasi, Login, CRUD Product, dan Checkout untuk mencegah data corrupt dan SQL injection.
 - [ ] **Penanganan Error Terpusat & Logging:** Tingkatkan middleware error handling di backend agar dapat menangkap error spesifik Prisma dan menambahkan logging library seperti `winston` atau `morgan` untuk analisis error produksi.
 - [ ] **Simulasi OTP Delivery Confirmation:** Bangun fitur simulasi serah terima menggunakan modal input. Jika kode OTP yang dimasukkan cocok dengan `order.deliveryOtp`, status pesanan berubah menjadi `"Delivered"` secara lokal — sebagai representasi dari alur validasi kurir di dunia nyata.
 - [ ] **Integrasi Peta Leaflet di `Addresses.tsx`:** Tambahkan fitur *pick location on map* saat pengguna menambahkan atau mengedit alamat baru.
-- [ ] **Auth Context & Session Management:** Implementasikan `AuthContext` yang menyimpan data sesi login pengguna (`User` interface) secara global, menggantikan simulasi login statis saat ini.
 - [ ] **Integrasi Ulasan Produk Dinamis:** Saat ini antarmuka ulasan pelanggan (Customer Reviews) sudah diimplementasikan (via `DummyReviewsSection.tsx`), namun masih menggunakan *mock data* yang di-*generate* secara statis. Komponen ini akan diperbarui untuk mendukung sistem ulasan yang sepenuhnya dinamis (*real-time* rendering dan form *submit* ulasan) segera setelah integrasi dengan layanan *Backend* dan *Database* diselesaikan.
 - [ ] **Global Search Autocomplete:** Membangun *dropdown* saran pencarian dinamis (*debounced*) pada *search bar* utama untuk meningkatkan interaktivitas penemuan produk.
 - [ ] **Fitur Wishlist (Produk Favorit):** Mengizinkan pengguna untuk menyimpan produk yang diminati (selain dari keranjang belanja), lengkap dengan sinkronisasi ke profil dan tampilan halamannya tersendiri.

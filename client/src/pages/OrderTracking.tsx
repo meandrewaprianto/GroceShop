@@ -1,13 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { Order } from "../types";
-import { dummyDashboardOrdersData } from "../assets/assets";
 import Loading from "../components/Loading";
 import { ArrowLeftIcon, MapPinIcon, PhoneIcon } from "lucide-react";
 import OrderOTP from "../components/OrderTracking/OrderOTP";
 import LiveMap from "../components/OrderTracking/LiveMap";
 import OrderTimeLine from "../components/OrderTracking/OrderTimeLine";
 import { io, Socket } from "socket.io-client";
+import api from "../config/api";
+import toast from "react-hot-toast";
 
 const OrderTracking = () => {
     const currency = import.meta.env.VITE_CURRENCY_SYMBOL || '$';
@@ -20,19 +21,29 @@ const OrderTracking = () => {
     const socketRef = useRef<Socket | null>(null);
 
     useEffect(() => {
-        // Di masa mendatang ganti dengan real API call:
-        // const res = await fetch(`/api/orders/${id}`);
-        const foundOrder = dummyDashboardOrdersData.find((o) => o._id === id);
-        setOrder(foundOrder as any);
-        
-        if (foundOrder && foundOrder.liveLocation) {
-            setLiveLocation(foundOrder.liveLocation as any);
-        }
-        
-        setLoading(false);
+        if (!id) return;
+
+        const fetchOrder = async () => {
+            setLoading(true);
+            try {
+                const { data } = await api.get(`/orders/${id}`);
+                setOrder(data.order);
+
+                if (data.order?.liveLocation) {
+                    setLiveLocation(data.order.liveLocation);
+                }
+            } catch (error: any) {
+                toast.error(error.response?.data?.message || "Order not found");
+                navigate("/orders");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrder();
     }, [id, navigate]);
 
-    // Logika WebSocket Client untuk Menerima Koordinat Kurir Real-Time
+    // Logika WebSocket Client untuk Menerima Koordinat Kurir Real-Time & Update Status
     useEffect(() => {
         if (!id) return;
 
@@ -50,6 +61,12 @@ const OrderTracking = () => {
         socket.on("receive-live-location", (data: { lat: number; lng: number; updatedAt: string }) => {
             console.log("Received new coordinates:", data);
             setLiveLocation({ lat: data.lat, lng: data.lng });
+        });
+
+        // Dengarkan update status order secara real-time
+        socket.on("order-status-updated", (data: { status: string; statusHistory: any[] }) => {
+            console.log("Received status update:", data);
+            setOrder((prev) => prev ? { ...prev, status: data.status, statusHistory: data.statusHistory } : null);
         });
 
         // Cleanup: Tutup koneksi saat user meninggalkan halaman
@@ -73,7 +90,7 @@ const OrderTracking = () => {
                 {/* Order id, status, date */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-2xl font-semibold text-app-green">Order #{order._id.slice(-8).toUpperCase()}</h1>
+                        <h1 className="text-2xl font-semibold text-app-green">Order #{order.id.slice(-8).toUpperCase()}</h1>
                         <p className="text-sm text-app-text-light mt-1">Placed on {new Date(order.createdAt).toLocaleDateString("id-ID", { month: "long", day: "numeric", year: "numeric" })}</p>
                     </div>
                     <span className={`px-4 py-1.5 text-sm font-semibold rounded-full ${order.status === 'Delivered' ? "bg-green-100 text-green-700" : order.status === "Cancelled" ? "bg-red-100 text-red-700" : "bg-app-orange/10 text-app-orange"}`}>

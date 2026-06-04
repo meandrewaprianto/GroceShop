@@ -102,8 +102,6 @@ export const getUserOrders = async (req: Request, res: Response) => {
     })
 
     res.json({ orders });
-
-
 }
 
 // Get single order
@@ -135,6 +133,11 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     history.push({ status, note: note || `Order ${status.toLowerCase()}`, timestamp: new Date() });
 
     const updateOrder = await prisma.order.update({ where: { id: req.params.id as string }, data: { status, statusHistory: history } })
+
+    const io = req.app.get("io");
+    if (io) {
+        io.to(`order:${updateOrder.id}`).emit("order-status-updated", { status, statusHistory: history });
+    }
 
     res.json({ order: updateOrder })
 }

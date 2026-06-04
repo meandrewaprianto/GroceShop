@@ -1,11 +1,13 @@
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from "react-leaflet";
 import { MapPinIcon } from "lucide-react";
 import { iconsForLeafpad } from "../../assets/assets";
 import L from "leaflet";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import "leaflet/dist/leaflet.css";
 
 export default function LiveMap({ order, liveLocation }: { order: any, liveLocation: any }) {
+    const [routeCoords, setRouteCoords] = useState<[number, number][]>([]);
 
     // Custom delivery truck icon
     const truckIcon = new L.Icon({
@@ -23,12 +25,50 @@ export default function LiveMap({ order, liveLocation }: { order: any, liveLocat
         popupAnchor: [0, -32],
     });
 
-    // Component to re-center map when location changes
-    function MapUpdater({ center }: { center: [number, number] }) {
+    const destLat = order.shippingAddress?.lat ? Number(order.shippingAddress.lat) : null;
+    const destLng = order.shippingAddress?.lng ? Number(order.shippingAddress.lng) : null;
+
+    // Fetch navigation path from OSRM (Google Maps-like routing)
+    useEffect(() => {
+        if (!liveLocation || liveLocation.lat === 0 || !destLat || !destLng) {
+            setRouteCoords([]);
+            return;
+        }
+
+        const fetchRoute = async () => {
+            try {
+                const url = `https://router.project-osrm.org/route/v1/driving/${liveLocation.lng},${liveLocation.lat};${destLng},${destLat}?overview=full&geometries=geojson`;
+                const { data } = await axios.get(url);
+                if (data.routes && data.routes[0]) {
+                    // OSRM returns coordinates as [lng, lat], we map it to [lat, lng] for leaflet
+                    const coords = data.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]) as [number, number][];
+                    setRouteCoords(coords);
+                } else {
+                    setRouteCoords([[liveLocation.lat, liveLocation.lng], [destLat, destLng]]);
+                }
+            } catch (error) {
+                console.error("OSRM Routing API failed, falling back to straight line:", error);
+                setRouteCoords([[liveLocation.lat, liveLocation.lng], [destLat, destLng]]);
+            }
+        };
+
+        fetchRoute();
+    }, [liveLocation?.lat, liveLocation?.lng, destLat, destLng]);
+
+    // Component to re-center map when location changes and fit bounds to include both driver and destination
+    function MapUpdater({ live, dest, route }: { live: [number, number] | null; dest: [number, number] | null; route: [number, number][] }) {
         const map = useMap();
         useEffect(() => {
-            map.setView(center, map.getZoom());
-        }, [center, map]);
+            if (route.length > 0) {
+                map.fitBounds(route, { padding: [50, 50] });
+            } else if (live && dest && dest[0] !== 0) {
+                map.fitBounds([live, dest], { padding: [50, 50] });
+            } else if (live) {
+                map.setView(live, map.getZoom());
+            } else if (dest) {
+                map.setView(dest, map.getZoom());
+            }
+        }, [live, dest, route, map]);
         return null;
     }
 
@@ -42,17 +82,29 @@ export default function LiveMap({ order, liveLocation }: { order: any, liveLocat
                             <Marker position={[liveLocation.lat, liveLocation.lng]} icon={truckIcon}>
                                 <Popup>Delivery Partner</Popup>
                             </Marker>
-                            {order.shippingAddress.lat && order.shippingAddress.lng && (
-                                <Marker position={[order.shippingAddress.lat, order.shippingAddress.lng]} icon={destinationIcon}>
-                                    <Popup>Delivery Address</Popup>
-                                </Marker>
+                            {destLat && destLng && (
+                                <>
+                                    <Marker position={[destLat, destLng]} icon={destinationIcon}>
+                                        <Popup>Delivery Address</Popup>
+                                    </Marker>
+                                    <Polyline
+                                        positions={routeCoords.length > 0 ? routeCoords : [[liveLocation.lat, liveLocation.lng], [destLat, destLng]]}
+                                        color="#16a34a"
+                                        dashArray="5, 10"
+                                        weight={4}
+                                    />
+                                </>
                             )}
-                            <MapUpdater center={[liveLocation.lat, liveLocation.lng]} />
+                            <MapUpdater
+                                live={[liveLocation.lat, liveLocation.lng]}
+                                dest={destLat && destLng ? [destLat, destLng] : null}
+                                route={routeCoords}
+                            />
                         </MapContainer>
-                    ) : order.shippingAddress.lat && order.shippingAddress.lng ? (
-                        <MapContainer center={[order.shippingAddress.lat, order.shippingAddress.lng]} zoom={15} style={{ height: "100%", width: "100%" }} zoomControl={false}>
+                    ) : destLat && destLng ? (
+                        <MapContainer center={[destLat, destLng]} zoom={15} style={{ height: "100%", width: "100%" }} zoomControl={false}>
                             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                            <Marker position={[order.shippingAddress.lat, order.shippingAddress.lng]} icon={destinationIcon}>
+                            <Marker position={[destLat, destLng]} icon={destinationIcon}>
                                 <Popup>Delivery Address</Popup>
                             </Marker>
                         </MapContainer>

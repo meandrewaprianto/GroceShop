@@ -25,7 +25,7 @@ export const getDeliveryPartners = async (req: Request, res: Response) => {
     const partners = await prisma.deliveryPartner.findMany({
         orderBy: { createdAt: "desc" }
     })
-    res.json(partners);
+    res.json({ partners });
 }
 
 // Create delivery partner profile
@@ -53,7 +53,7 @@ export const updateDeliveryPartner = async (req: Request, res: Response) => {
     if (name) data.name = name;
     if (phone) data.phone = phone;
     if (vehicleType) data.vehicleType = vehicleType;
-    if (isActive) data.isActive = isActive;
+    data.isActive = isActive;
 
     try {
         const partner = await prisma.deliveryPartner.update({
@@ -93,11 +93,16 @@ export const assignDeliveryPartner = async (req: Request, res: Response) => {
             })
     }
 
-    await prisma.order.update({
+    const updatedOrder = await prisma.order.update({
         where: { id: order?.id },
         data: { deliveryPartnerId: partner?.id, deliveryOtp: otp, status, statusHistory: history }
     })
 
-    res.json({ order });
+    const io = req.app.get("io");
+    if (io) {
+        io.to(`order:${order?.id}`).emit("order-status-updated", { status, statusHistory: history });
+    }
+
+    res.json({ order: updatedOrder });
 }
 

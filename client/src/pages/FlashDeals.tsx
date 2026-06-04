@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react"
 import { useSearchParams } from "react-router-dom";
 import type { Product } from "../types";
-import { dummyProducts } from "../assets/assets";
 import { Zap } from "lucide-react";
 import Loading from "../components/Loading";
 import ProductCard from "../components/ProductCard";
+import api from "../config/api";
 
 const FlashDeals = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -16,20 +16,30 @@ const FlashDeals = () => {
     const ITEMS_PER_PAGE = 10;
 
     useEffect(() => {
-        // 1. Filter barang yang stoknya ada dan diskon >= 10%
-        const flashDealsProducts = dummyProducts.filter((p: Product) => p.stock > 0 && p.discount >= 10);
-        
-        // 2. Hitung total halaman
-        const total = Math.ceil(flashDealsProducts.length / ITEMS_PER_PAGE);
-        setTotalPages(total);
-        
-        // 3. Potong data berdasarkan halaman yang aktif (Pagination)
-        const currentPage = Math.min(Math.max(1, page), total || 1);
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        const paginatedDeals = flashDealsProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+        const fetchFlashDeals = async () => {
+            setLoading(true);
+            try {
+                const params = new URLSearchParams({
+                    page: String(page),
+                    limit: String(ITEMS_PER_PAGE),
+                    minDiscount: "10",
+                    inStock: "true",
+                });
 
-        setProducts(paginatedDeals);
-        setTimeout(() => setLoading(false), 500)
+                const { data } = await api.get(`/products/flash-deals?${params.toString()}`);
+
+                const fetchedProducts: Product[] = data.products ?? [];
+                setProducts(fetchedProducts);
+                setTotalPages(data.totalPages ?? 1);
+            } catch (error) {
+                console.error("Failed to fetch flash deals:", error);
+                setProducts([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFlashDeals();
     }, [page])
 
     const handlePageChange = (newPage: number) => {
@@ -65,7 +75,7 @@ const FlashDeals = () => {
                         <>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
                                 {products.map((product) => (
-                                    <ProductCard key={product._id} product={product} />
+                                    <ProductCard key={product.id} product={product} />
                                 ))}
                             </div>
 

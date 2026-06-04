@@ -3,22 +3,36 @@ import { prisma } from "../config/prisma.js"
 
 // GET /api/products/flash-deals
 export const getFlashDeals = async (req: Request, res: Response) => {
-    const products = await prisma.product.findMany({
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.max(1, Number(req.query.limit) || 10);
+
+    // Ambil semua produk dengan stok > 0
+    const allProducts = await prisma.product.findMany({
         where: { stock: { gt: 0 } },
         orderBy: { originalPrice: "desc" }
-    })
+    });
 
-    const productsWithDiscount = products.map((p: any) => {
-        const discount = p.originalPrice && p.price ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0;
-        return { ...p, discount }
-    })
+    // Hitung diskon dan filter yang >= 10%
+    const flashDeals = allProducts
+        .map((p: any) => {
+            const discount = p.originalPrice && p.price
+                ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
+                : 0;
+            return { ...p, discount };
+        })
+        .filter((p: any) => p.discount >= 10);
 
-    res.json({ products: productsWithDiscount.slice(0, 8) });
+    const totalPages = Math.max(1, Math.ceil(flashDeals.length / limit));
+    const safePage = Math.min(page, totalPages);
+    const startIndex = (safePage - 1) * limit;
+    const products = flashDeals.slice(startIndex, startIndex + limit);
+
+    res.json({ products, totalPages, page: safePage, total: flashDeals.length });
 }
 
 // GET /api/products
 export const getProducts = async (req: Request, res: Response) => {
-    const { category, search, minPrice, maxPrice, sort } = req.query;
+    const { category, search, minPrice, maxPrice, sort, limit } = req.query;
 
     const where: any = {}
     if (category && category !== 'all') where.category = category as string;
@@ -34,7 +48,9 @@ export const getProducts = async (req: Request, res: Response) => {
     else if (sort === "price-high") orderBy.price = 'desc'
     else orderBy.createdAt = 'desc';
 
-    const products = await prisma.product.findMany({ where, orderBy });
+    const takeLimit = limit ? Number(limit) : undefined;
+
+    const products = await prisma.product.findMany({ where, orderBy, ...(takeLimit ? { take: takeLimit } : {}) });
 
     const productsWithDiscount = products.map((p: any) => {
         const discount = p.originalPrice && p.price ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0;
@@ -72,6 +88,6 @@ export const updateProduct = async (req: Request, res: Response) => {
 
 // DELETE /api/products/:id
 export const deleteProduct = async (req: Request, res: Response) => {
-    await prisma.product.delete({ where: { id: req.params.id as string } });
-    res.json({ message: "Deleted" });
+    await prisma.product.update({ where: { id: req.params.id as string }, data: { stock: Number(0) } });
+    res.json({ message: "Product Updated" });
 }

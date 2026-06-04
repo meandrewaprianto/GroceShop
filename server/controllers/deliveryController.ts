@@ -46,7 +46,7 @@ export const getMyDelivery = async (req: Request, res: Response) => {
     const where: any = { deliveryPartnerId: req.partner?.id }
 
     if (status === "active") {
-        where.status = { in: ["Assigned", "Packed", "Out of Delivery"] }
+        where.status = { in: ["Assigned", "Packed", "Out for Delivery"] }
     } else if (status === "completed") {
         where.status = { in: ["Delivered", "Cancelled"] }
     }
@@ -99,6 +99,11 @@ export const completeDelivery = async (req: Request, res: Response) => {
         data: { status: "Delivered", statusHistory: history, deliveryOtp: "" }
     })
 
+    const io = req.app.get("io");
+    if (io) {
+        io.to(`order:${order.id}`).emit("order-status-updated", { status: "Delivered", statusHistory: history });
+    }
+
     res.json({ updatedOrder, message: "Delivery completed successfully" });
 }
 
@@ -123,6 +128,11 @@ export const cancelDelivery = async (req: Request, res: Response) => {
         data: { status: "Cancelled", statusHistory: history }
     })
 
+    const io = req.app.get("io");
+    if (io) {
+        io.to(`order:${order?.id}`).emit("order-status-updated", { status: "Cancelled", statusHistory: history });
+    }
+
     res.json({ order: updatedOrder })
 }
 
@@ -130,7 +140,7 @@ export const cancelDelivery = async (req: Request, res: Response) => {
 // PUT /api/delivery/my-deliveries/:id/status
 export const updateDeliveryStatus = async (req: Request, res: Response) => {
     const { status } = req.body;
-    const allowedStatuses = ["Packed", "Out of Delivery"];
+    const allowedStatuses = ["Packed", "Out for Delivery"];
 
     if (!allowedStatuses.includes(status)) {
         return res.status(400).json({ message: "Invalid status update" });
@@ -149,6 +159,11 @@ export const updateDeliveryStatus = async (req: Request, res: Response) => {
         data: { status, statusHistory: history }
     })
 
+    const io = req.app.get("io");
+    if (io) {
+        io.to(`order:${order?.id}`).emit("order-status-updated", { status, statusHistory: history });
+    }
+
     res.json({ order: updatedOrder })
 }
 
@@ -161,7 +176,7 @@ export const updateDeliveryLocation = async (req: Request, res: Response) => {
         where: {
             id: req.params.id as string,
             deliveryPartnerId: req.partner?.id,
-            status: { in: ["Assigned", "Packed", "Out of Delivery"] }
+            status: { in: ["Assigned", "Packed", "Out for Delivery"] }
         }
     })
 

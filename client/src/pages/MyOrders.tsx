@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import type { Order } from "../types";
 import { Link, useSearchParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { dummyDashboardOrdersData, statusColors } from "../assets/assets";
+import { statusColors } from "../assets/assets";
 import Loading from "../components/Loading";
 import { CalendarIcon, ChevronRightIcon, PackageIcon, XIcon } from "lucide-react";
+import api from "../config/api";
+import toast from "react-hot-toast";
 
 const MyOrders = () => {
     const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "$";
@@ -19,8 +21,16 @@ const MyOrders = () => {
     const { clearCart } = useCart();
 
     const fetchOrders = async () => {
-        setOrders(dummyDashboardOrdersData as any);
-        setLoading(false);
+        setLoading(true);
+        try {
+            const params = activeTab !== "all" ? `?status=${activeTab}` : "";
+            const { data } = await api.get(`/orders${params}`);
+            setOrders(data.orders)
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || error?.message);
+        } finally {
+            setLoading(false);
+        }
     }
 
     useEffect(() => {
@@ -65,12 +75,12 @@ const MyOrders = () => {
                 ) : (
                     <div className="space-y-4">
                         {orders.map((order) => (
-                            <div key={order._id} className="block max-w-4xl bg-white rounded-2xl p-5 hover:shadow transition-all">
+                            <div key={order.id} className="block max-w-4xl bg-white rounded-2xl p-5 hover:shadow transition-all">
                                 {/* Order Id, Date, Status */}
                                 <div className="flex items-start justify-between mb-3">
                                     {/* Left */}
                                     <div>
-                                        <p className="text-sm font-medium text-app-green">Order #{order._id.slice(-8).toUpperCase()}</p>
+                                        <p className="text-sm font-medium text-app-green">Order #{order.id.slice(-8).toUpperCase()}</p>
                                         <div className="flex items-center gap-2 mt-1 ">
                                             <CalendarIcon className="size-3 text-app-text-light" />
                                             <span className="text-xs text-app-text-light">{new Date(order.createdAt).toLocaleDateString("id-ID", { month: "short", day: "numeric", year: "numeric" })}</span>
@@ -110,7 +120,7 @@ const MyOrders = () => {
                                         <span className="text-app-text-light">{order.items.length} items</span>
                                         <span className="font-semibold text-app-green text-base">{currency}{order.total.toFixed(2)}</span>
                                     </div>
-                                    <Link to={`/orders/${order._id}`} className="px-4 py-2 bg-app-green text-white text-xs font-medium rounded-xl hover:bg-app-green-light transition-colors">
+                                    <Link to={`/orders/${order.id}`} className="px-4 py-2 bg-app-green text-white text-xs font-medium rounded-xl hover:bg-app-green-light transition-colors">
                                         Track Order
                                     </Link>
                                 </div>
@@ -125,7 +135,7 @@ const MyOrders = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={() => setSelectedOrderForModal(null)}>
                     <div className="bg-white rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col animate-fade-in" onClick={(e) => e.stopPropagation()}>
                         <div className="p-4 border-b border-app-border flex justify-between items-center">
-                            <h3 className="font-semibold text-app-green">Items in Order #{selectedOrderForModal._id.slice(-8).toUpperCase()}</h3>
+                            <h3 className="font-semibold text-app-green">Items in Order #{selectedOrderForModal.id.slice(-8).toUpperCase()}</h3>
                             <button onClick={() => setSelectedOrderForModal(null)} className="p-1 hover:bg-app-cream rounded-md text-app-text-light">
                                 <XIcon className="size-5" />
                             </button>
