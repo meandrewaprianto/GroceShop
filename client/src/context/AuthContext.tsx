@@ -5,8 +5,8 @@ import api from "../config/api";
 import toast from "react-hot-toast";
 
 interface AuthContextType {
-    user: User | null;
-    token: string | null;
+    user: User;
+    token: string;
     loading: boolean;
     login: (email: string, password: string) => Promise<void>
     register: (name: string, email: string, password: string) => Promise<void>
