@@ -82,7 +82,7 @@ const Checkout = () => {
 
     // Populate address from user's default address
     useState(() => {
-        if (user.addresses.length) {
+        if (user?.addresses?.length) {
             const defaultAddr = user.addresses.find((a) => a.isDefault) || user.addresses[0]
             setAddress({
                 id: defaultAddr.id,

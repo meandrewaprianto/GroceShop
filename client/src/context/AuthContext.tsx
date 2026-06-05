@@ -5,8 +5,8 @@ import api from "../config/api";
 import toast from "react-hot-toast";
 
 interface AuthContextType {
-    user: User;
-    token: string;
+    user: User | null;
+    token: string | null;
     loading: boolean;
     login: (email: string, password: string) => Promise<void>
     register: (name: string, email: string, password: string) => Promise<void>
@@ -18,8 +18,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const navigate = useNavigate();
-    const [user, setUser] = useState<User | null>();
-    const [token, setToken] = useState<string | null>();
+    const [user, setUser] = useState<User | null>(null);
+    const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
