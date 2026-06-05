@@ -53,7 +53,7 @@ const Addresses = () => {
                             lng: position.coords.longitude,
                         })
                     },
-                    (error: any) => {
+                    (error) => {
                         if (retries > 0) {
                             retries--;
                             setTimeout(attempt, 1000);
@@ -111,7 +111,7 @@ const Addresses = () => {
     useEffect(() => {
         api.get('/addresses').then(({ data }) => {
             setAddresses(data.addresses);
-        }).catch((error: any) => {
+        }).catch((error) => {
             toast.error(error.response?.data?.message || error?.message)
         }).finally(() => {
             setLoading(false);

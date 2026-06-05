@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon } from "lucide-react";
-import { categoriesData, dummyProducts } from "../../assets/assets";
+import { categoriesData } from "../../assets/assets";
 import Loading from "../../components/Loading";
 import api from "../../config/api";
 import toast from "react-hot-toast";
@@ -45,7 +45,7 @@ export default function AdminProductForm() {
                         isOrganic: p.isOrganic,
                     })
                 }
-            } catch (error: any) {
+            } catch (error) {
                 toast.error(error.response?.data?.message || "Failed to load Data");
             } finally {
                 setLoading(false)
@@ -89,7 +89,7 @@ export default function AdminProductForm() {
                 toast.success('Product created successfully')
             }
             navigate('/admin/products')
-        } catch (error: any) {
+        } catch (error) {
             toast.error(error.response?.data?.message || "Failed to save product")
         } finally {
             setSaving(false)

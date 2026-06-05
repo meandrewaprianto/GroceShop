@@ -20,7 +20,7 @@ export default function DeliveryLogin() {
             toast.success("Login Successfully");
             navigate('/delivery')
         } catch (error) {
-            toast.error(error?.response?.data?.message || error?.message);
+            toast.error(error?.message);
         } finally {
             setLoading(false);
         }
