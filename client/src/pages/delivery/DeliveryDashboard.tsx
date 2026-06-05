@@ -84,12 +84,24 @@ export default function DeliveryDashboard() {
                             return;
                         }
 
-                        activeOrders.forEach((order) => {
-                            socket.emit("send-live-location", {
-                                orderId: order.id,
-                                lat: latitude,
-                                lng: longitude,
-                            });
+                        activeOrders.forEach(async (order) => {
+                            if (socket && socket.connected) {
+                                socket.emit("send-live-location", {
+                                    orderId: order.id,
+                                    lat: latitude,
+                                    lng: longitude,
+                                });
+                            }
+
+                            // HTTP fallback to update database in serverless/Vercel environments
+                            try {
+                                await axios.put(`${API_URL}/delivery/my-deliveries/${order.id}/location`, {
+                                    lat: latitude,
+                                    lng: longitude
+                                }, getAuthHeaders());
+                            } catch (err) {
+                                console.error("HTTP location update failed:", err);
+                            }
                         });
                     },
                     (error) => {

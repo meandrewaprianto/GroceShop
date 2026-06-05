@@ -226,7 +226,7 @@ Berikut adalah peta jalan (roadmap) dan status pengerjaan proyek GroceShop:
 - [x] **Integrasi Ulasan Produk Dinamis:** Saat ini antarmuka ulasan pelanggan (Customer Reviews) sudah diimplementasikan (via `DummyReviewsSection.tsx`), namun masih menggunakan *mock data* yang di-*generate* secara statis. Komponen ini akan diperbarui untuk mendukung sistem ulasan yang sepenuhnya dinamis (*real-time* rendering dan form *submit* ulasan) segera setelah integrasi dengan layanan *Backend* dan *Database* diselesaikan.
 - [ ] **Global Search Autocomplete:** Membangun *dropdown* saran pencarian dinamis (*debounced*) pada *search bar* utama untuk meningkatkan interaktivitas penemuan produk.
 - [ ] **Fitur Wishlist (Produk Favorit):** Mengizinkan pengguna untuk menyimpan produk yang diminati (selain dari keranjang belanja), lengkap dengan sinkronisasi ke profil dan tampilan halamannya tersendiri.
-- [ ] **Payment Gateway Integration:** Menghubungkan proses pada halaman `Checkout.tsx` dengan penyedia pembayaran eksternal (mis. Stripe atau Midtrans) untuk mensimulasikan transaksi yang sesungguhnya.
+- [x] **Payment Gateway Integration (Stripe):** Menghubungkan proses pembayaran pada halaman `Checkout.tsx` dengan Stripe Checkout Session dan menangani status pembayaran via Stripe Webhook (`api/stripe`).
 - [ ] **Progressive Web App (PWA):** Mengimplementasikan konfigurasi *Service Worker* dan *Web Manifest* sehingga aplikasi GroceShop dapat diinstal (installable) pada *smartphone* atau *desktop* layaknya aplikasi asli, serta memiliki mode *offline fallback*.
 - [ ] **Dark Mode Toggle:** Menambahkan utilitas pengubah tema (*light/dark mode*) secara utuh dengan memaksimalkan variabel warna Tailwind CSS v4.
 

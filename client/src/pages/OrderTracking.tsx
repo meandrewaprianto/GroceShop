@@ -69,8 +69,30 @@ const OrderTracking = () => {
             setOrder((prev) => prev ? { ...prev, status: data.status, statusHistory: data.statusHistory } : null);
         });
 
-        // Cleanup: Tutup koneksi saat user meninggalkan halaman
+        // Fallback polling: poll order status/location every 5 seconds in case WebSockets are not available
+        const pollInterval = setInterval(async () => {
+            try {
+                const { data } = await api.get(`/orders/${id}`);
+                if (data.order?.liveLocation) {
+                    setLiveLocation(data.order.liveLocation);
+                }
+                if (data.order) {
+                    setOrder((prev) => {
+                        if (!prev) return data.order;
+                        if (prev.status !== data.order.status || JSON.stringify(prev.statusHistory) !== JSON.stringify(data.order.statusHistory)) {
+                            return data.order;
+                        }
+                        return prev;
+                    });
+                }
+            } catch (err) {
+                console.error("HTTP fallback polling failed:", err);
+            }
+        }, 5000);
+
+        // Cleanup: Tutup koneksi & hapus interval saat user meninggalkan halaman
         return () => {
+            clearInterval(pollInterval);
             if (socketRef.current) {
                 socketRef.current.disconnect();
                 socketRef.current = null;
