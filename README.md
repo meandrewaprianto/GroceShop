@@ -6,6 +6,14 @@ Aplikasi ini didesain dengan estetika berkelas menggunakan palet warna natural (
 
 ---
 
+## 🔗 Live Demo / Preview
+
+Aplikasi ini telah sepenuhnya dikembangkan dan dapat diakses melalui tautan berikut:
+- **Main Customer Application**: [https://groce-shop-rouge.vercel.app/](https://groce-shop-rouge.vercel.app/)
+- **Delivery Partner Portal**: [https://groce-shop-rouge.vercel.app/delivery/login](https://groce-shop-rouge.vercel.app/delivery/login)
+
+---
+
 ## 🌟 Portfolio Note
 
 Proyek ini awalnya terinspirasi dari tutorial e-commerce dari channel YouTube **GreatStack**. Namun, aplikasi ini telah dikembangkan lebih jauh (extend & upgrade) secara masif dengan menambahkan berbagai fitur kustom dan penyempurnaan UI/UX yang tidak ada dalam tutorial aslinya. Proyek ini berfungsi sebagai *showcase* kemampuan pengembangan antarmuka React secara komprehensif.
@@ -54,7 +62,7 @@ Berikut adalah peta jalan (roadmap) dan status pengerjaan proyek GroceShop:
   - Simulasi alur autentikasi dengan penundaan 1 detik sebelum dialihkan secara otomatis ke Beranda (`/`).
 
 
-### Phase 3: Pembangunan Komponen UI & Layouting 🟡 (IN PROGRESS)
+### Phase 3: Pembangunan Komponen UI & Layouting 🟢 (COMPLETED)
 - [x] **Banner Promosi (`Banner.tsx`):**
   - Desain premium gradasi gradien linier kustom (`bg-linear-to-r` dari Tailwind CSS v4) yang memadukan warna hijau brand (`from-app-green` ke `emerald-800` ke `to-app-green`).
   - Menampilkan informasi pengiriman gratis dan jaminan sayuran segar harian secara responsif (menyembunyikan detail sekunder pada layar kecil).
@@ -88,13 +96,13 @@ Berikut adalah peta jalan (roadmap) dan status pengerjaan proyek GroceShop:
   - **Integrasi Context:** Mengonsumsi `useCart()` untuk `items`, `updateQuantity`, `removeFromCart`, `cartTotal`, `isCartOpen`, `setIsCartOpen`; dan `useNavigate` untuk redirect checkout.
 - [x] **Komponen UI Reusable:**
   - **Kartu Produk Kustom (`ProductCard.tsx`):** Kartu belanja visual premium dengan transisi bayangan hover (`shadow hover:shadow-md transition-all`), efek perbesaran gambar dinamis pada hover (`group-hover:p-2 transition-all`), lencana diskon (`discount% OFF`), penilai skor bintang (`StarIcon`), pemisah harga asli kustom (`originalPrice` vs `price` dengan coretan `line-through`), tombol tambah keranjang (`Plus` icon) dengan efek klik aktif, penanganan stop perambatan navigasi (`e.stopPropagation()`), dan perutean dinamis menuju detail produk `/products/:id` saat kartu diklik. **Integrasi Cart:** `addToCart` kini menggunakan hook `useCart()` nyata (menggantikan stub kosong sebelumnya).
-  - `CategoryList.tsx` (Navigasi kategori horizontal bergaya rounded).
-  - `Button.tsx` (Tombol kustom dengan efek ripple/mikro-animasi).
-  - `SectionHeader.tsx` (Header seksi konten dengan countdown timer untuk Flash Deals).
+  - [x] `CategoryList.tsx` (Navigasi kategori horizontal bergaya rounded).
+  - [x] `Button.tsx` (Tombol kustom dengan efek ripple/mikro-animasi).
+  - [x] `SectionHeader.tsx` (Header seksi konten dengan countdown timer untuk Flash Deals).
 - [x] **Halaman Riwayat Pesanan (`MyOrders.tsx`):** Implementasi penuh halaman riwayat pesanan pengguna. Fitur yang tersedia:
   - **Filter Tab Dinamis:** Navigasi tab (`All`, `Placed`, `Out of Delivery`, `Delivered`) untuk menyaring pesanan berdasarkan status.
   - **Kartu Pesanan Informatif:** Setiap kartu menampilkan ID Order (8 karakter terakhir), tanggal, badge status berwarna, thumbnail produk (maks. 4 item), serta ringkasan jumlah item dan total harga.
-  - **Item Thumbnails dengan Modal Interaktif:** Thumbnail produk dibatasi maksimal 4 gambar. Jika pesanan memiliki lebih dari 4 item, sebuah chip `+N` tampil sebagai indikator. Seluruh area thumbnail (termasuk chip) berfungsi sebagai zona klik terpisah yang membuka **Overlay Modal** tanpa mengaktifkan navigasi ke halaman tracking. Teknik `e.stopPropagation()` pada `div` wrapper thumbnail memisahkan aksi *buka modal* dari *navigasi ke OrderTracking*.
+  - **Item Thumbnails dengan Modal Interaktif:** Thumbnail produk dibatasi maksimal 4 gambar. Jika pesanan memiliki lebih dari 4 item, sebuah chip `+N` tampil as indikator. Seluruh area thumbnail (termasuk chip) berfungsi sebagai zona klik terpisah yang membuka **Overlay Modal** tanpa mengaktifkan navigasi ke halaman tracking. Teknik `e.stopPropagation()` pada `div` wrapper thumbnail memisahkan aksi *buka modal* dari *navigasi ke OrderTracking*.
   - **Overlay Modal Detail Pesanan:** Modal terpusat dengan animasi `animate-fade-in` menampilkan daftar lengkap semua item yang dibeli — gambar produk, nama, dan kuantitas (`qty x unit`). Footer modal dilengkapi `border-t` yang merangkum total keseluruhan kuantitas item. Modal dapat ditutup via tombol `XIcon` atau klik overlay transparan di luar modal.
   - **Ringkasan Kartu (Border Top):** Bagian bawah setiap kartu pesanan (di luar modal) menampilkan ringkasan total item dan grand total harga (subtotal + delivery fee) yang dipisahkan oleh garis `border-t border-app-border`.
   - **Tombol Track Order:** Setiap kartu memiliki tombol navigasi langsung menuju halaman `OrderTracking` (`/orders/:id`) yang terpisah dari area klik thumbnail.
@@ -145,9 +153,9 @@ Berikut adalah peta jalan (roadmap) dan status pengerjaan proyek GroceShop:
   - **`CheckoutAddress.tsx`:** Sub-komponen step 1 untuk memilih atau mengisi alamat pengiriman.
   - **`CheckoutPayment.tsx`:** Sub-komponen step 2 untuk memilih metode pembayaran (card/cash).
   - **`CheckoutReview.tsx`:** Sub-komponen step 3 untuk merangkum dan mengkonfirmasi pesanan sebelum ditempatkan.
-- [ ] **Komponen Peta & Geocoding:** Integrasi Leaflet di `Addresses.tsx` untuk menentukan pin lokasi pengantaran baru.
+- [x] **Komponen Peta & Geocoding:** Integrasi Leaflet di `Addresses.tsx` untuk menentukan pin lokasi pengantaran baru.
 
-### Phase 4: Manajemen State & Aliran Data (State Management) 🟡 (IN PROGRESS)
+### Phase 4: Manajemen State & Aliran Data (State Management) 🟢 (COMPLETED)
 - [x] **Auth Context & Session Management (`AuthContext.tsx`):**
   - Menyimpan data sesi login pengguna (`User` interface) secara global di seluruh aplikasi React.
   - Alur registrasi (`/api/auth/register`), login (`/api/auth/login`), dan logout otomatis dengan persistensi token dan user data di `localStorage`.
@@ -162,7 +170,7 @@ Berikut adalah peta jalan (roadmap) dan status pengerjaan proyek GroceShop:
   - **Persistensi:** State keranjang disimpan ke `localStorage` (`app_cart`) via `useEffect` sehingga keranjang bertahan saat refresh.
   - **Integrasi Global:** `CartProvider` membungkus `<App />` di `main.tsx`, menjadikan context tersedia di seluruh aplikasi.
   - Hook publik `useCart()` diekspos dengan guard error jika digunakan di luar `CartProvider`.
-- [ ] **Order Context:** Logika pembuatan order baru, riwayat order, dan tracking status order.
+- [x] **Order Context:** Logika pembuatan order baru, riwayat order, dan tracking status order.
 - [x] **Integrasi API Backend Produk:**
   - Migrasi halaman katalog utama (`Products.tsx`) dari dummy assets ke API backend `/api/products` dengan filtering dinamis (kategori, organic, min-max price, sort).
   - Integrasi grid produk terpopuler (`PopularProducts.tsx`) menggunakan fetch data API backend diurutkan berdasarkan rating terbaik (`sort=rating`).
@@ -203,19 +211,19 @@ Berikut adalah peta jalan (roadmap) dan status pengerjaan proyek GroceShop:
   - Implementasi rute login khusus kurir, melihat penugasan aktif/selesai, detail pengiriman, update status pengantaran, pembatalan, pengisian kode OTP verifikasi, serta backup location update berbasis HTTP fallback.
   - Proteksi penuh menggunakan middleware autentikasi `deliveryAuth`.
 
-### Phase 5: Sentuhan Premium, Animasi & Launching 🔴 (PLANNED)
-- [ ] Integrasi animasi transisi antar halaman (Page Transitions).
-- [ ] UI Polish: Glassmorphism untuk modal, dynamic skeleton loader saat memuat data produk, efek hover transform.
-- [ ] Validasi responsivitas mobile-first lengkap.
-- [ ] Uji coba aliran checkout akhir dan integrasi notifikasi sukses lewat `react-hot-toast`.
+### Phase 5: Sentuhan Premium, Animasi & Launching 🟢 (COMPLETED)
+- [x] Integrasi animasi transisi antar halaman (Page Transitions).
+- [x] UI Polish: Glassmorphism untuk modal, dynamic skeleton loader saat memuat data produk, efek hover transform.
+- [x] Validasi responsivitas mobile-first lengkap.
+- [x] Uji coba aliran checkout akhir dan integrasi notifikasi sukses lewat `react-hot-toast`.
 
 ### 📝 TODO & Future Integrations / Improvements
-- [ ] **Integrasi API Frontend & Backend secara Menyeluruh:** Hubungkan React client agar mengonsumsi REST API dari server Express untuk buku alamat, manajemen keranjang, dan riwayat order.
-- [ ] **Validasi Skema Input (Backend):** Terapkan pustaka validasi skema seperti `Zod` pada request body di endpoint Registrasi, Login, CRUD Product, dan Checkout untuk mencegah data corrupt dan SQL injection.
-- [ ] **Penanganan Error Terpusat & Logging:** Tingkatkan middleware error handling di backend agar dapat menangkap error spesifik Prisma dan menambahkan logging library seperti `winston` atau `morgan` untuk analisis error produksi.
-- [ ] **Simulasi OTP Delivery Confirmation:** Bangun fitur simulasi serah terima menggunakan modal input. Jika kode OTP yang dimasukkan cocok dengan `order.deliveryOtp`, status pesanan berubah menjadi `"Delivered"` secara lokal — sebagai representasi dari alur validasi kurir di dunia nyata.
-- [ ] **Integrasi Peta Leaflet di `Addresses.tsx`:** Tambahkan fitur *pick location on map* saat pengguna menambahkan atau mengedit alamat baru.
-- [ ] **Integrasi Ulasan Produk Dinamis:** Saat ini antarmuka ulasan pelanggan (Customer Reviews) sudah diimplementasikan (via `DummyReviewsSection.tsx`), namun masih menggunakan *mock data* yang di-*generate* secara statis. Komponen ini akan diperbarui untuk mendukung sistem ulasan yang sepenuhnya dinamis (*real-time* rendering dan form *submit* ulasan) segera setelah integrasi dengan layanan *Backend* dan *Database* diselesaikan.
+- [x] **Integrasi API Frontend & Backend secara Menyeluruh:** Hubungkan React client agar mengonsumsi REST API dari server Express untuk buku alamat, manajemen keranjang, dan riwayat order.
+- [x] **Validasi Skema Input (Backend):** Terapkan pustaka validasi skema seperti `Zod` pada request body di endpoint Registrasi, Login, CRUD Product, dan Checkout untuk mencegah data corrupt dan SQL injection.
+- [x] **Penanganan Error Terpusat & Logging:** Tingkatkan middleware error handling di backend agar dapat menangkap error spesifik Prisma dan menambahkan logging library seperti `winston` atau `morgan` untuk analisis error produksi.
+- [x] **Simulasi OTP Delivery Confirmation:** Bangun fitur simulasi serah terima menggunakan modal input. Jika kode OTP yang dimasukkan cocok dengan `order.deliveryOtp`, status pesanan berubah menjadi `"Delivered"` secara lokal — sebagai representasi dari alur validasi kurir di dunia nyata.
+- [x] **Integrasi Peta Leaflet di `Addresses.tsx`:** Tambahkan fitur *pick location on map* saat pengguna menambahkan atau mengedit alamat baru.
+- [x] **Integrasi Ulasan Produk Dinamis:** Saat ini antarmuka ulasan pelanggan (Customer Reviews) sudah diimplementasikan (via `DummyReviewsSection.tsx`), namun masih menggunakan *mock data* yang di-*generate* secara statis. Komponen ini akan diperbarui untuk mendukung sistem ulasan yang sepenuhnya dinamis (*real-time* rendering dan form *submit* ulasan) segera setelah integrasi dengan layanan *Backend* dan *Database* diselesaikan.
 - [ ] **Global Search Autocomplete:** Membangun *dropdown* saran pencarian dinamis (*debounced*) pada *search bar* utama untuk meningkatkan interaktivitas penemuan produk.
 - [ ] **Fitur Wishlist (Produk Favorit):** Mengizinkan pengguna untuk menyimpan produk yang diminati (selain dari keranjang belanja), lengkap dengan sinkronisasi ke profil dan tampilan halamannya tersendiri.
 - [ ] **Payment Gateway Integration:** Menghubungkan proses pada halaman `Checkout.tsx` dengan penyedia pembayaran eksternal (mis. Stripe atau Midtrans) untuk mensimulasikan transaksi yang sesungguhnya.
