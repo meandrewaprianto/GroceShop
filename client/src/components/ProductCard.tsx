@@ -40,11 +40,15 @@ const ProductCard = ({ product }: Props) => {
                 )}
 
                 {/* Price + Add */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 truncated">
-                        <span className="text-base font-medium">{formatPriceToIDR(product.price)}</span>
-                        <span className="text-xs text-app-text-light block">/{product.unit}</span>
-                        {product.originalPrice > product.price && <span className="text-xs text-app-text-light line-through ml-1.5">{formatPriceToIDR(product.originalPrice)} </span>}
+                <div className="flex items-end justify-between gap-2 mt-auto">
+                    <div className="flex flex-col min-w-0">
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-sm sm:text-base font-semibold truncate">{formatPriceToIDR(product.price)}</span>
+                            <span className="text-[11px] sm:text-xs text-app-text-light shrink-0">/{product.unit}</span>
+                        </div>
+                        {product.originalPrice > product.price && (
+                            <span className="text-[11px] sm:text-xs text-app-text-light line-through">{formatPriceToIDR(product.originalPrice)}</span>
+                        )}
                     </div>
                     <button onClick={(e) => { e.stopPropagation(); addToCart(product) }} className="size-7 rounded-full bg-app-orange text-white flex-center shrink-0 hover:bg-app-orange-dark transition-colors active:scale-95">
                         <Plus className="size-3.5" />
