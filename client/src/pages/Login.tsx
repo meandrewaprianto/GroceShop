@@ -23,8 +23,10 @@ const Login = () => {
             } else {
                 await register(name, email, password);
             }
-        } catch (error) {
-            toast.error(error.response?.data?.message || error?.message)
+        } catch (error: unknown) {
+            if(error instanceof Error) {
+                toast.error(error.message);
+            }
         } finally {
             setLoading(false)
         }
