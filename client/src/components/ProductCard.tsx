@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import type { Product } from "../types"
-import { Plug, Plus, Star } from "lucide-react";
+import { Plus, Star } from "lucide-react";
 import { useCart } from "../context/CartContext";
 
 interface Props {
