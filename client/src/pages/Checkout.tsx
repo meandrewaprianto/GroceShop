@@ -68,13 +68,17 @@ const Checkout = () => {
             clearCart();
             toast.success("Order placed succesfully!");
             navigate(`/orders/${data.order.id}`);
-        } catch (error) {
-            toast.error(error.response?.data?.message || error.message);
-        } finally {
+        } catch (error: unknown) {
+            if(error instanceof Error) {
+                toast.error(error.message);
+            }
+        }finally {
             setLoading(false);
             scrollTo(0, 0)
         }
     }
+
+    
 
     // Populate address from user's default address
     useState(() => {
