@@ -45,8 +45,10 @@ export default function AdminProductForm() {
                         isOrganic: p.isOrganic,
                     })
                 }
-            } catch (error) {
-                toast.error(error.response?.data?.message || "Failed to load Data");
+            } catch (error: unknown) {
+                if(error instanceof Error) {
+                    toast.error(error.message);
+                }
             } finally {
                 setLoading(false)
             }
@@ -89,8 +91,10 @@ export default function AdminProductForm() {
                 toast.success('Product created successfully')
             }
             navigate('/admin/products')
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to save product")
+        } catch (error: unknown) {
+            if(error instanceof Error) {
+                toast.error(error.message);
+            }
         } finally {
             setSaving(false)
         }
