@@ -100,7 +100,10 @@ export const assignDeliveryPartner = async (req: Request, res: Response) => {
 
     const io = req.app.get("io");
     if (io) {
+        // Notify customer tracking page
         io.to(`order:${order?.id}`).emit("order-status-updated", { status, statusHistory: history });
+        // Notify delivery partner dashboard so it auto-refreshes without reload
+        io.to(`partner:${partner?.id}`).emit("order-assigned", { order: updatedOrder });
     }
 
     res.json({ order: updatedOrder });

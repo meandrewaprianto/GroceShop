@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { PackageIcon, NavigationIcon } from "lucide-react";
 import OtpModal from "../../components/Delivery/OtpModal";
 import CancelModal from "../../components/Delivery/CancelModal";
@@ -33,8 +33,14 @@ export default function DeliveryDashboard() {
     // Socket & Watch Refs
     const socketRef = useRef<Socket | null>(null);
     const watchIdRef = useRef<number | null>(null);
+    const ordersRef = useRef<Order[]>(orders);
 
-    const fetchOrders = async () => {
+    // Keep ordersRef in sync so geolocation callback always has latest orders
+    useEffect(() => {
+        ordersRef.current = orders;
+    }, [orders]);
+
+    const fetchOrders = useCallback(async () => {
         setLoading(true);
         try {
             const { data } = await axios.get(`${API_URL}/delivery/my-deliveries?status=${tab}`, getAuthHeaders());
@@ -44,102 +50,152 @@ export default function DeliveryDashboard() {
         } finally {
             setLoading(false);
         }
-
-    };
+    }, [tab]);
 
     useEffect(() => {
         fetchOrders();
-    }, [tab]);
+    }, [fetchOrders]);
 
-    // Logika Real-time Geolocation Sharing via WebSocket
+    // ─── Socket: listen for new assignment so dashboard updates without reload ───
     useEffect(() => {
-        if (tracking) {
-            // 1. Inisialisasi Socket.io Client
-            const socketUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
-            const socket = io(socketUrl);
-            socketRef.current = socket;
+        const socketUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+        const token = localStorage.getItem("delivery_token");
+        if (!token) return;
 
-            socket.on("connect", () => {
-                toast.success("Connected to tracking server");
-                // Join room untuk setiap order aktif
-                orders.forEach((order) => {
-                    socket.emit("join-order-room", order.id);
-                });
-            });
+        // Get partner ID from localStorage to join personal notification room
+        const savedPartner = localStorage.getItem("delivery_partner");
+        const partnerId = savedPartner ? JSON.parse(savedPartner).id : null;
 
-            // 2. Mulai mendengarkan sensor GPS perangkat menggunakan watchPosition
-            if ("geolocation" in navigator) {
-                watchIdRef.current = navigator.geolocation.watchPosition(
-                    (position) => {
-                        const { latitude, longitude } = position.coords;
+        const socket = io(socketUrl, { auth: { token } });
+        socketRef.current = socket;
 
-                        // Kirim koordinat untuk setiap pesanan aktif yang sedang diantar
-                        const activeOrders = orders.filter(
-                            (o) => o.status === "Assigned" || o.status === "Packed" || o.status === "Out for Delivery"
-                        );
-
-                        if (activeOrders.length === 0) {
-                            toast.error("No active deliveries to share location for");
-                            setTracking(false);
-                            return;
-                        }
-
-                        activeOrders.forEach(async (order) => {
-                            if (socket && socket.connected) {
-                                socket.emit("send-live-location", {
-                                    orderId: order.id,
-                                    lat: latitude,
-                                    lng: longitude,
-                                });
-                            }
-
-                            // HTTP fallback to update database in serverless/Vercel environments
-                            try {
-                                await axios.put(`${API_URL}/delivery/my-deliveries/${order.id}/location`, {
-                                    lat: latitude,
-                                    lng: longitude
-                                }, getAuthHeaders());
-                            } catch (err) {
-                                console.error("HTTP location update failed:", err);
-                            }
-                        });
-                    },
-                    (error) => {
-                        console.error("Error watching position:", error);
-                        toast.error("Failed to access GPS. Please allow location access.");
-                        setTracking(false);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        maximumAge: 10000,
-                        timeout: 5000,
-                    }
-                );
-            } else {
-                toast.error("Geolocation is not supported by your browser");
-                setTracking(false);
+        socket.on("connect", () => {
+            // Join personal room so admin assignment events reach this socket
+            if (partnerId) {
+                socket.emit("join-partner-room", partnerId);
             }
+        });
+
+        // When admin assigns this partner to a new order, refresh active tab
+        socket.on("order-assigned", () => {
+            if (tab === "active") fetchOrders();
+        });
+
+        // When any order status changes (e.g. Delivered), refresh list
+        socket.on("order-status-updated", () => {
+            fetchOrders();
+        });
+
+        return () => {
+            socket.disconnect();
+            socketRef.current = null;
+        };
+    }, [tab, fetchOrders]);
+
+    // ─── Stop tracking when no more active orders remain ───
+    useEffect(() => {
+        const hasActive = orders.some(
+            (o) => o.status === "Assigned" || o.status === "Packed" || o.status === "Out for Delivery"
+        );
+        if (tracking && !hasActive) {
+            stopTracking();
+        }
+    }, [orders]);
+
+    const stopTracking = () => {
+        if (watchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(watchIdRef.current);
+            watchIdRef.current = null;
+        }
+        setTracking(false);
+    };
+
+    const startTracking = useCallback(() => {
+        if (tracking) return;
+
+        if (!("geolocation" in navigator)) {
+            toast.error("Geolocation is not supported by your browser");
+            return;
         }
 
-        // Cleanup: Berhenti sharing saat tombol dinonaktifkan atau komponen di-unmount
+        setTracking(true);
+
+        const socketUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+        const geoSocket = io(socketUrl);
+
+        geoSocket.on("connect", () => {
+            // Join rooms for each active order
+            ordersRef.current.forEach((order) => {
+                geoSocket.emit("join-order-room", order.id);
+            });
+        });
+
+        watchIdRef.current = navigator.geolocation.watchPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+
+                const activeOrders = ordersRef.current.filter(
+                    (o) => o.status === "Assigned" || o.status === "Packed" || o.status === "Out for Delivery"
+                );
+
+                // No more active orders — stop tracking silently (no toast)
+                if (activeOrders.length === 0) {
+                    stopTracking();
+                    geoSocket.disconnect();
+                    return;
+                }
+
+                for (const order of activeOrders) {
+                    if (geoSocket.connected) {
+                        geoSocket.emit("send-live-location", {
+                            orderId: order.id,
+                            lat: latitude,
+                            lng: longitude,
+                        });
+                    }
+
+                    // HTTP fallback for serverless environments (Vercel)
+                    try {
+                        await axios.put(`${API_URL}/delivery/my-deliveries/${order.id}/location`, {
+                            lat: latitude,
+                            lng: longitude,
+                        }, getAuthHeaders());
+                    } catch (err) {
+                        console.error("HTTP location update failed:", err);
+                    }
+                }
+            },
+            (error) => {
+                console.error("Error watching position:", error);
+                toast.error("Failed to access GPS. Please allow location access.");
+                stopTracking();
+                geoSocket.disconnect();
+            },
+            { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+        );
+
+        // Store socket so we can disconnect on cleanup
+        socketRef.current = geoSocket;
+    }, [tracking]);
+
+    // Cleanup on unmount
+    useEffect(() => {
         return () => {
-            if (watchIdRef.current !== null) {
-                navigator.geolocation.clearWatch(watchIdRef.current);
-                watchIdRef.current = null;
-            }
-            if (socketRef.current) {
-                socketRef.current.disconnect();
-                socketRef.current = null;
-            }
+            stopTracking();
+            socketRef.current?.disconnect();
         };
-    }, [tracking, orders]);
+    }, []);
 
     const handleUpdateStatus = async (orderId: string, status: string) => {
-        console.log(orderId, status);
         try {
             await axios.put(`${API_URL}/delivery/my-deliveries/${orderId}/status`, { status }, getAuthHeaders());
             toast.success(`Status updated to ${status}`);
-            fetchOrders();
+            await fetchOrders();
+
+            // Auto-start location sharing when "Out for Delivery" is set
+            if (status === "Out for Delivery" && !tracking) {
+                startTracking();
+            }
         } catch (error: any) {
             toast.error(error?.response?.data?.message || "Failed")
         }
@@ -150,10 +206,11 @@ export default function DeliveryDashboard() {
         setSubmitting(true);
         try {
             await axios.put(`${API_URL}/delivery/my-deliveries/${otpModal}/complete`, { otp }, getAuthHeaders());
-            toast.success("Delivery Completed");
+            toast.success("Delivery Completed! 🎉");
             setOtpModal(null);
             setOtp("");
-            fetchOrders();
+            await fetchOrders();
+            // tracking will be stopped automatically via the orders useEffect above
         } catch (error: any) {
             toast.error(error?.response?.data?.message || "Failed")
         } finally {
@@ -201,10 +258,17 @@ export default function DeliveryDashboard() {
                 ))}
                 <div className="ml-auto">
                     <button
-                        disabled={!hasOutForDelivery}
-                        onClick={() => setTracking((prev) => !prev)}
+                        disabled={!hasOutForDelivery && !tracking}
+                        onClick={() => tracking ? stopTracking() : startTracking()}
+                        title={
+                            !hasOutForDelivery && !tracking
+                                ? "Location sharing starts automatically when status is 'Out for Delivery'"
+                                : tracking
+                                ? "Stop sharing location"
+                                : "Share your location"
+                        }
                         className={`px-4 py-2 text-sm font-medium rounded-xl transition-colors flex items-center gap-1.5 ${
-                            !hasOutForDelivery
+                            !hasOutForDelivery && !tracking
                                 ? "bg-zinc-100 text-zinc-400 border border-zinc-200 cursor-not-allowed"
                                 : tracking
                                 ? "bg-green-600 text-white"
@@ -226,7 +290,7 @@ export default function DeliveryDashboard() {
                     <p className="text-lg font-semibold text-zinc-900 mb-1">No {tab} deliveries</p>
                     <p className="text-sm text-zinc-500">
                         {tab === "active"
-                            ? "You'll see new assignments here"
+                            ? "You'll see new assignments here automatically"
                             : "Completed deliveries will appear here"}
                     </p>
                 </div>

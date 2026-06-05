@@ -40,15 +40,7 @@ export default function AdminOrders() {
         fetchPartners();
     }, []);
 
-    const handleStatusChange = async (id: string, newStatus: string) => {
-        try {
-            await api.put(`/orders/${id}/status`, { status: newStatus })
-            toast.success("Order status updated")
-            fetchOrders();
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to updated status");
-        }
-    };
+
 
     const handleAssign = async () => {
         if (!assignModal || !selectedPartner) return;
@@ -63,7 +55,7 @@ export default function AdminOrders() {
         }
     };
 
-    const statusOptions = ["Placed", "Confirmed", "Assigned", "Packed", "Out for Delivery", "Delivered", "Cancelled"];
+
     const statusColors: any = {
         Placed: "bg-blue-100 text-blue-800",
         Confirmed: "bg-amber-100 text-amber-800",
@@ -128,13 +120,9 @@ export default function AdminOrders() {
                                             )}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <select
-                                                value={order.status}
-                                                onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border-r-8 border-transparent outline-none cursor-pointer leading-tight ${statusColors[order.status] || "bg-zinc-100 text-zinc-800"}`}
-                                            >
-                                                {statusOptions.map((s) => (<option key={s} value={s}>{s}</option>))}
-                                            </select>
+                                            <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${statusColors[order.status] || "bg-zinc-100 text-zinc-800"}`}>
+                                                {order.status}
+                                            </span>
                                         </td>
                                     </tr>
                                 ))

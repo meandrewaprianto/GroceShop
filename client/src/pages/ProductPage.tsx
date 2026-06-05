@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import Loading from "../components/Loading";
 import type { Product } from "../types";
 import { ArrowLeftIcon, ArrowRightIcon, HomeIcon, LeafIcon, MinusIcon, PlusIcon, ShoppingCartIcon, StarIcon } from "lucide-react";
-import DummyReviewsSection from "../assets/DummyReviewsSection";
+import ReviewsSection from "../components/ReviewsSection";
 import ProductCard from "../components/ProductCard";
 import api from "../config/api";
+import { formatPriceToIDR } from "../utils/formatCurrency";
 
 const ProductPage = () => {
 
-    const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "$";
     const { id } = useParams();
     const navigate = useNavigate();
     const { items, addToCart, updateQuantity, removeFromCart } = useCart();
@@ -111,10 +111,10 @@ const ProductPage = () => {
                 </button>
 
                 {/* Product Detail Section */}
-                <div className="bg-white/50 rounded-2xl overflow-hidden">
+                <div className="bg-white/50 dark:bg-[#1a2332] rounded-2xl overflow-hidden dark:border dark:border-app-border/40">
                     <div className="grid md:grid-cols-2 gap-0">
                         {/* Left Side - Image */}
-                        <div className="relative flex-center p-8 md:p-12 min-h-[320px] md:min-h-[480px]">
+                        <div className="relative flex-center p-8 md:p-12 min-h-[320px] md:min-h-[480px] dark:bg-[#151d2a]">
                             <img src={product.image} alt={product.name} className="max-h-[360px] w-auto object-contain" />
                             {/* Badges */}
                             <div className="absolute top-5 left-5 flex flex-wrap gap-1.5">
@@ -154,9 +154,9 @@ const ProductPage = () => {
 
                             {/* Price */}
                             <div className="flex items-baseline gap-3 mb-5 ">
-                                <span className="text-3xl md:text-4xl font-semibold text-app-green">{currency}{product.price.toFixed(2)}</span>
+                                <span className="text-3xl md:text-4xl font-semibold text-app-green">{formatPriceToIDR(product.price)}</span>
                                 {product.originalPrice > product.price && (
-                                    <span className="text-lg text-app-text-light line-through">{currency}{product.originalPrice.toFixed(2)}</span>
+                                    <span className="text-lg text-app-text-light line-through">{formatPriceToIDR(product.originalPrice)}</span>
                                 )}
                             </div>
 
@@ -204,7 +204,19 @@ const ProductPage = () => {
                 </div>
 
                 {/* Customer Reviews */}
-                {product.reviewCount > 0 && <DummyReviewsSection product={product} />}
+                <ReviewsSection
+                    productId={product.id}
+                    productRating={product.rating}
+                    productReviewCount={product.reviewCount}
+                    onReviewsUpdate={() => {
+                        // Refresh product data to update rating and review count
+                        const refreshProduct = async () => {
+                            const { data } = await api.get(`/products/${product.id}`);
+                            setProduct(data.product);
+                        };
+                        refreshProduct();
+                    }}
+                />
 
                 {/* Related Products */}
                 {relatedProducts.length > 0 && (

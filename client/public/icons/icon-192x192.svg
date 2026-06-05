@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1b3022;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d4a35;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="28.799999999999997" fill="url(#bg)"/>
+  <circle cx="96" cy="72.96000000000001" r="23.04" fill="#faf7f2" opacity="0.9"/>
+  <circle cx="57.599999999999994" cy="157.44" r="23.04" fill="#faf7f2" opacity="0.9"/>
+  <circle cx="134.39999999999998" cy="157.44" r="23.04" fill="#faf7f2" opacity="0.9"/>
+  <path d="M96 157.44 L96 124.80000000000001 L72.96000000000001 105.60000000000001 L96 86.4 L119.03999999999999 105.60000000000001 L96 124.80000000000001" fill="none" stroke="#faf7f2" stroke-width="3.84" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="96" y="53.760000000000005" text-anchor="middle" fill="#faf7f2" font-family="Arial, sans-serif" font-weight="bold" font-size="15.36">GroceShop</text>
+</svg>

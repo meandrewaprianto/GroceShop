@@ -11,6 +11,7 @@ import { inngest, functions } from "./inngest/index.js";
 import addressRouter from "./routes/addressRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import deliveryPartnerRouter from "./routes/deliveryPartnerRoute.js";
+import reviewRouter from "./routes/reviewRoutes.js";
 
 import http from "http";
 import { Server } from "socket.io";
@@ -32,21 +33,27 @@ app.set("io", io);
 io.on("connection", (socket) => {
     console.log(`Socket connected: ${socket.id}`);
 
-    // Client join room berdasarkan ID Pesanan
+    // Customer joins room by order ID (for order tracking updates)
     socket.on("join-order-room", (orderId: string) => {
         socket.join(`order:${orderId}`);
         console.log(`Socket ${socket.id} joined room: order:${orderId}`);
     });
 
-    // Kirim koordinat real-time dari kurir ke pelanggan & simpan ke database
+    // Delivery partner joins their personal room (for new assignment notifications)
+    socket.on("join-partner-room", (partnerId: string) => {
+        socket.join(`partner:${partnerId}`);
+        console.log(`Socket ${socket.id} joined room: partner:${partnerId}`);
+    });
+
+    // Send real-time coordinates from courier to customer & save to database
     socket.on("send-live-location", async (data: { orderId: string; lat: number; lng: number }) => {
         const { orderId, lat, lng } = data;
         const updatedAt = new Date();
 
-        // Broadcast langsung ke pelanggan di room yang sama
+        // Broadcast directly to customer in same room
         socket.to(`order:${orderId}`).emit("receive-live-location", { lat, lng, updatedAt });
 
-        // Simpan asinkronus ke database
+        // Persist to database asynchronously
         try {
             await prisma.order.update({
                 where: { id: orderId },
@@ -81,6 +88,7 @@ app.use('/api/inngest', serve({ client: inngest, functions }));
 app.use('/api/addresses', addressRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/delivery', deliveryPartnerRouter);
+app.use('/api/reviews', reviewRouter);
 
 // Error Handling
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {

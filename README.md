@@ -1,419 +1,723 @@
-# 🛒 GroceShop - E-Commerce Grocery Application
+# 🛒 GroceShop - Full-Stack E-Commerce Grocery Application
 
-GroceShop adalah aplikasi e-commerce belanja bahan makanan (grocery) modern, premium, dan dinamis yang dibangun menggunakan stack teknologi modern: **React**, **TypeScript**, **Vite**, dan **Tailwind CSS v4**.
+<div align="center">
+
+![React](https://img.shields.io/badge/React-19.2.6-61dafb?style=flat&logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?style=flat&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8.0-646cff?style=flat&logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8?style=flat&logo=tailwindcss&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-Express_5-339933?style=flat&logo=node.js&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-7.8-2d3748?style=flat&logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-316192?style=flat&logo=postgresql&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-Payments-635bff?style=flat&logo=stripe&logoColor=white)
+
+**Aplikasi e-commerce grocery modern dengan desain premium, real-time tracking, dan integrasi payment gateway lengkap.**
+
+[Live Demo](https://groce-shop-rouge.vercel.app/) • [Admin Demo](https://groce-shop-rouge.vercel.app/admin) • [Delivery Portal](https://groce-shop-rouge.vercel.app/delivery/login)
+
+</div>
+
+---
+
+## 📖 Daftar Isi
+
+- [Tentang Proyek](#-tentang-proyek)
+- [Fitur Unggulan](#-fitur-unggulan)
+- [Tech Stack](#-tech-stack)
+- [Arsitektur Sistem](#-arsitektur-sistem)
+- [Quick Start](#-quick-start)
+- [API Documentation](#-api-documentation)
+- [Database Schema](#-database-schema)
+- [Design System](#-design-system)
+- [Project Roadmap](#-project-roadmap)
+- [Folder Structure](#-folder-structure)
+- [Environment Setup](#-environment-setup)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Credits](#-credits)
+
+---
+
+## 🎯 Tentang Proyek
+
+GroceShop adalah aplikasi e-commerce belanja bahan makanan (grocery) full-stack yang dibangun dengan **React**, **TypeScript**, **Vite**, **Tailwind CSS v4**, **Node.js**, **Express**, **Prisma ORM**, dan **PostgreSQL (Neon Serverless)**.
 
 Aplikasi ini didesain dengan estetika berkelas menggunakan palet warna natural (Forest Green & Orange Accent), tipografi premium, serta animasi mikro interaktif untuk memberikan pengalaman pengguna yang luar biasa.
 
----
-
-## 🔗 Live Demo / Preview
-
-Aplikasi ini telah sepenuhnya dikembangkan dan dapat diakses melalui tautan berikut:
-- **Main Customer Application**: [https://groce-shop-rouge.vercel.app/](https://groce-shop-rouge.vercel.app/)
-- **Delivery Partner Portal**: [https://groce-shop-rouge.vercel.app/delivery/login](https://groce-shop-rouge.vercel.app/delivery/login)
+> **📝 Portfolio Note:** Proyek ini awalnya terinspirasi dari tutorial e-commerce channel YouTube **GreatStack**, namun telah dikembangkan lebih jauh dengan berbagai fitur kustom dan penyempurnaan UI/UX yang tidak ada dalam tutorial aslinya.
 
 ---
 
-## 🌟 Portfolio Note
+## ✨ Fitur Unggulan
 
-Proyek ini awalnya terinspirasi dari tutorial e-commerce dari channel YouTube **GreatStack**. Namun, aplikasi ini telah dikembangkan lebih jauh (extend & upgrade) secara masif dengan menambahkan berbagai fitur kustom dan penyempurnaan UI/UX yang tidak ada dalam tutorial aslinya. Proyek ini berfungsi sebagai *showcase* kemampuan pengembangan antarmuka React secara komprehensif.
+### 🛍️ **Customer Experience**
 
-**✨ Fitur Ekstra Kustom (Beyond the Tutorial):**
-- **Sistem Filter Dinamis (URL-Driven):** Filter berlapis (Kategori, Organik, Rentang Harga, Sorting) dengan state persisten pada URL tanpa menggunakan package eksternal, memudahkan pengguna untuk membagikan tautan (shareable links) pencarian.
-- **Validasi Rentang Harga Tingkat Lanjut:** Komponen `FilterPanel` dilengkapi penanganan khusus untuk validasi input harga secara interaktif (mencegah angka negatif dan secara otomatis menyinkronkan batas minimum-maksimum saat kehilangan fokus / *onBlur*, menjaga kenyamanan UX saat pengguna mengetik).
-- **Algoritma Flash Deals & Pagination Cerdas:** Halaman promo khusus Flash Deals difilter secara algoritmik (hanya menampilkan produk `stock > 0` dan `discount >= 10%`). Sistem aplikasi ini juga telah dilengkapi mekanisme *client-side pagination* reaktif (`Products.tsx` & `FlashDeals.tsx`) yang beradaptasi secara real-time terhadap panjang data yang tersaji.
-- **Sistem Keranjang Reaktif & Drawer Modal:** Logika keranjang global (*Context*) yang mengimplementasikan UX mutakhir: pembaruan kuantitas produk secara dua-arah (*two-way synchronization*), di mana penambahan/pengurangan item pada layar secara instan masuk ke dalam keranjang, dan penghapusan item otomatis menyetel ulang form kuantitas ke default (`1`). Serta integrasi filter menggunakan *drawer* animasi mulus.
-- **Desain UI/UX Premium (Tailwind v4):** Mengubah desain dasar dengan palet warna terstruktur (Forest Green & Orange Accent), tipografi modern (DM Serif Display & Outfit), serta implementasi mikro-animasi pada komponen.
+- 🎨 **Desain Premium** - UI/UX modern dengan glassmorphism & micro-animations
+- 🔍 **Global Search Autocomplete** - Pencarian instan dengan dropdown saran & keyboard navigation
+- 🔍 **Smart Search & Filter** - Filter dinamis URL-driven (kategori, organik, harga, sorting)
+- 🛒 **Reactive Cart** - Keranjang real-time dengan persistensi localStorage
+- 💳 **Multiple Payment** - Stripe (kartu kredit) & Cash on Delivery (COD)
+- 📍 **Real-Time Tracking** - Pelacakan kurir live dengan peta interaktif
+- ⭐ **Product Reviews** - Review & rating dengan integrasi purchase verification (hanya pembeli)
+- 📱 **Responsive Design** - Mobile-first approach untuk semua device
 
----
+### 👨‍💼 **Admin Dashboard**
 
-## 🗺️ Project Roadmap & Progress Tracker
+- 📊 **Analytics Dashboard** - Statistik penjualan, order, dan revenue
+- 📦 **Product Management** - CRUD lengkap dengan upload gambar ke Cloudinary
+- 📋 **Order Management** - Manajemen pesanan & assign kurir
+- 🚴 **Delivery Partners** - Manajemen mitra kurir
 
-Berikut adalah peta jalan (roadmap) dan status pengerjaan proyek GroceShop:
+### 🚴 **Delivery Partner Portal**
 
-### Phase 1: Inisialisasi & Fondasi Sistem 🟢 (COMPLETED)
-- [x] Inisialisasi proyek menggunakan Vite + React + TypeScript.
-- [x] Konfigurasi Tailwind CSS v4 menggunakan `@tailwindcss/vite` untuk build super cepat.
-- [x] Pembuatan sistem desain (custom theme) di `index.css` (Warna, Tipografi, Scrollbar kustom, & Utility Classes).
-- [x] Instalasi library inti yang dibutuhkan proyek:
-  - `react-router-dom` (Sistem navigasi)
-  - `react-hot-toast` (Notifikasi interaktif)
-  - `lucide-react` & `@icons-pack/react-simple-icons` (Paket icon modern)
-  - `leaflet`, `react-leaflet`, dan `@types/leaflet` (Peta interaktif & deklarasi tipe data untuk alamat & pelacakan kurir)
-- [x] Pendefinisian data modeling & TypeScript Interfaces komprehensif di `src/types/index.ts`.
+- 📲 **Auto-Assignment** - Penugasan otomatis via background jobs
+- 🔢 **OTP Verification** - Sistem OTP 6-digit untuk konfirmasi delivery
+- 🗺️ **GPS Tracking** - Berbagi lokasi real-time ke customer
+- 📊 **Dashboard** - Daftar tugas & status delivery
 
-### Phase 2: Arsitektur Halaman & Routing 🟢 (COMPLETED)
-- [x] Pembuatan layout dasar aplikasi (`AppLayout.tsx`) sebagai kerangka visual global.
-- [x] Pembuatan 10+ modul halaman utama (Home, Login, Products, ProductPage, FlashDeals, SearchResults, Checkout, Addresses, MyOrders, OrderTracking).
-- [x] Konfigurasi `<BrowserRouter>` di `main.tsx` untuk membungkus seluruh aplikasi.
-- [x] Implementasi sistem routing terstruktur di `App.tsx` menggunakan `react-router-dom`:
-  - **Rute Publik:** `/` (Home), `/products` (Katalog), `/products/:id` (Detail), `/search` (Hasil pencarian), `/deals` (Flash Deals), dan `/login` (Autentikasi).
-  - **Rute Terproteksi:** `/checkout` (Pembayaran), `/orders` (Riwayat belanja), `/orders/:id` (Pelacakan), dan `/addresses` (Buku alamat).
-  - **Rute Admin Panel** (`/admin`): Dashboard, Products (CRUD), Orders, dan Delivery Partners — dibungkus dalam `AdminLayout` dengan sidebar navigasi khusus administrator.
-  - **Rute Delivery Partner** (`/delivery`): Login khusus kurir (`/delivery/login`) dan Dashboard kurir (`/delivery`) — dibungkus dalam `DeliveryLayout` terpisah dari layout utama pelanggan.
-- [x] Pembuatan komponen `ProtectedRoute.tsx` (Route Guard) di `src/components/` untuk melindungi halaman khusus pengguna terautentikasi.
-- [x] Integrasi sistem notifikasi global menggunakan `<Toaster>` dari `react-hot-toast` dengan styling kustom premium bernuansa warna hijau brand (`#1B3022`).
-- [x] Penstrukturan visual pada `AppLayout.tsx` (Banner, Navbar, Main area dengan `<Outlet />`, Footer, dan Cart Sidebar).
-- [x] **Implementasi Halaman Login & Registrasi (`Login.tsx`):**
-  - Desain premium split-screen responsif (Kiri: Branding visual artistik dengan gambar hero bermotif hijau brand; Kanan: Formulir dinamis).
-  - Pilihan multi-state interaktif yang mulus untuk beralih antara "Sign In" dan "Sign Up".
-  - Integrasi ikon modern (`UserIcon`, `MailIcon`, `LockIcon`) di dalam form input dengan validasi state React.
-  - Animasi pemuatan dinamis (`Loader2Icon` spinner) pada tombol kirim saat status loading aktif.
-  - Simulasi alur autentikasi dengan penundaan 1 detik sebelum dialihkan secara otomatis ke Beranda (`/`).
+### ⚡ **Advanced Features**
 
-
-### Phase 3: Pembangunan Komponen UI & Layouting 🟢 (COMPLETED)
-- [x] **Banner Promosi (`Banner.tsx`):**
-  - Desain premium gradasi gradien linier kustom (`bg-linear-to-r` dari Tailwind CSS v4) yang memadukan warna hijau brand (`from-app-green` ke `emerald-800` ke `to-app-green`).
-  - Menampilkan informasi pengiriman gratis dan jaminan sayuran segar harian secara responsif (menyembunyikan detail sekunder pada layar kecil).
-  - Mekanisme tombol tutup (`XIcon`) yang menyimpan status preferensi ke `sessionStorage` agar banner tetap tersembunyi selama sesi berlangsung.
-  - Integrasi langsung ke kerangka tata letak global `AppLayout.tsx`.
-- [x] **Navigasi Global (`Navbar.tsx`):**
-  - Antarmuka navigasi lengket (*sticky header*) yang responsif dengan efek pembatas (`border-b`) premium.
-  - Bar pencarian terintegrasi bergaya modern (`bg-orange-50` & ring focus) untuk pencarian grocery terarah ke halaman `/search?q=query`.
-  - Ikon keranjang melayang dengan indikator jumlah item (`cartCount`) bergaya lencana oranye bulat (`bg-app-orange`).
-  - Menu pengguna dinamis dengan dropdown interaktif yang didukung animasi halus (`animate-fade-in`), menyediakan pintasan rute: Sign In (jika belum masuk), Profil/Nama & Email, My Orders, Addresses, Admin Panel (khusus administrator), dan Logout.
-  - Penanganan menu seluler pintar (`MenuIcon`/`XIcon`) yang mengintegrasikan tautan navigasi tambahan pada ukuran layar kecil.
-  - **Integrasi Cart:** `cartCount` dan `setIsCartOpen` kini menggunakan hook `useCart()` nyata (sebelumnya stub statis).
-  - Terintegrasi langsung ke dalam kerangka global `AppLayout.tsx`.
-- [x] **Antarmuka Halaman Utama / Home Components (`src/components/Home/`):**
-  - **Seksi Hero Utama (`Hero.tsx`):** Desain spanduk selamat datang premium dengan gambar latar tertutup penuh (`object-cover`), overlay gradasi gelap hijau ke transparan (`bg-linear-to-r` dari `app-green` ke `transparent` menggunakan Tailwind CSS v4), lencana sayuran segar organik dengan `LeafIcon`, tipografi serif yang menawan, paragraf deskripsi dinamis, dan tombol aksi (Shop Now & Browse Categories).
-  - **Seksi Fitur Utama (`Features.tsx`):** Implementasi grid responsif (`grid grid-cols-2 md:grid-cols-4 gap-4`) dinamis yang merender list pilar layanan unggulan dari data `heroSectionData.hero_features`, lengkap dengan ikon bergaya kustom berlatar belakang krim (`bg-app-cream`), teks tebal hijau brand, serta deskripsi penjelas abu-abu lembut.
-  - **Kategori Produk Slider (`HomeCategories.tsx`):** Slider navigasi kategori horizontal yang mendukung scroll tanpa bar (`no-scrollbar`), efek hover ring pada gambar kategori (`group-hover:ring-2 ring-orange-300`), dan navigasi otomatis ke katalog `/products?category=slug` lengkap dengan pemosisian ulang scroll otomatis (`window.scrollTo(0, 0)`).
-  - **Grid Produk Terpopuler (`PopularProducts.tsx`):** Seksi dinamis yang merender daftar 10 produk terpopuler musim ini secara dinamis (`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5`) bersumber dari data `dummyProducts`, lengkap dengan judul seksi, deskripsi singkat, dan tombol "View All" berikon `ArrowRightIcon` menuju katalog lengkap. **Bug fix:** `useEffect` ditambah dependency array `[]` untuk mencegah infinite re-render.
-  - **Banner Promo Unduh Aplikasi (`AppPromoBanner.tsx`):** Seksi promosi bergaya gelap (`bg-green-950`) berbentuk kartu rounded dengan tata letak dua kolom responsif — sisi kiri menampilkan judul serif premium, deskripsi, dan tombol unduh (App Store & Google Play); sisi kanan menampilkan ilustrasi truk pengiriman (`delivery_truck`).
-  - **Formulir Newsletter (`NewsLetter.tsx`):** Seksi berlangganan newsletter bersih bergaya kartu putih (`bg-white rounded-3xl shadow-xs`) dengan ikon amplop brand, judul, deskripsi singkat, dan formulir email inline (input + tombol Subscribe) yang responsif di perangkat kecil maupun besar.
-  - **Integrasi Halaman Utama (`Home.tsx`):** Menggabungkan komponen `<Hero />`, `<Features />`, `<HomeCategories />`, `<PopularProducts />`, `<AppPromoBanner />`, dan `<NewsLetter />` secara berurutan dalam tata letak responsif beranda.
-- [x] **Footer Global (`Footer.tsx`):** Footer premium berlatar hijau brand (`bg-app-green`) dengan tata letak grid empat kolom responsif (`grid-cols-1 md:grid-cols-2 lg:grid-cols-4`) yang memuat: seksi brand (logo `BikeIcon`, deskripsi, ikon sosial media Facebook/X/Instagram dari `@icons-pack/react-simple-icons`), dua kolom tautan dinamis (Quick Links & Customer Service), kolom kontak (alamat, telepon, email dengan ikon), serta baris bawah (`border-t`) yang menampilkan copyright dan tautan kebijakan privasi. Seluruh konten bersumber dari objek `footerData` di `assets.ts`. Sudah terintegrasi penuh ke `AppLayout.tsx` menggantikan placeholder sebelumnya.
-- [x] **CartSidebar (`CartSidebar.tsx`):** Implementasi penuh sidebar keranjang belanja. Fitur yang tersedia:
-  - **Visibilitas Reaktif:** Render bersyarat (`if (!isCartOpen) return null`) dikontrol oleh `isCartOpen` dari `CartContext`.
-  - **Overlay:** Latar gelap `bg-black/40` yang dapat diklik untuk menutup sidebar.
-  - **Panel Animasi:** Drawer `fixed right-0` dengan animasi masuk `animate-slide-in-right` dan lebar maksimal `max-w-md`.
-  - **Header:** Judul "Your Cart" dengan ikon `ShoppingBagIcon`, badge jumlah item, dan tombol tutup `XIcon`.
-  - **Daftar Item:** Scroll-area yang merender setiap `CartItem` dalam kartu `bg-app-cream/60` — menampilkan gambar, nama, harga/unit, kontrol quantity (`MinusIcon`/`PlusIcon`), total per item, dan tombol hapus (`Trash2Icon`).
-  - **Empty State:** Tampilan khusus (`ShoppingBagIcon` besar + pesan) ketika keranjang kosong.
-  - **Footer Ringkasan:** Ditampilkan saat ada item — menampilkan subtotal, biaya pengiriman (gratis jika order ≥ $20, `$1.99` jika di bawah), grand total, dan tombol "Proceed to Checkout" (`bg-app-orange`) yang menavigasi ke `/checkout`.
-  - **Integrasi Context:** Mengonsumsi `useCart()` untuk `items`, `updateQuantity`, `removeFromCart`, `cartTotal`, `isCartOpen`, `setIsCartOpen`; dan `useNavigate` untuk redirect checkout.
-- [x] **Komponen UI Reusable:**
-  - **Kartu Produk Kustom (`ProductCard.tsx`):** Kartu belanja visual premium dengan transisi bayangan hover (`shadow hover:shadow-md transition-all`), efek perbesaran gambar dinamis pada hover (`group-hover:p-2 transition-all`), lencana diskon (`discount% OFF`), penilai skor bintang (`StarIcon`), pemisah harga asli kustom (`originalPrice` vs `price` dengan coretan `line-through`), tombol tambah keranjang (`Plus` icon) dengan efek klik aktif, penanganan stop perambatan navigasi (`e.stopPropagation()`), dan perutean dinamis menuju detail produk `/products/:id` saat kartu diklik. **Integrasi Cart:** `addToCart` kini menggunakan hook `useCart()` nyata (menggantikan stub kosong sebelumnya).
-  - [x] `CategoryList.tsx` (Navigasi kategori horizontal bergaya rounded).
-  - [x] `Button.tsx` (Tombol kustom dengan efek ripple/mikro-animasi).
-  - [x] `SectionHeader.tsx` (Header seksi konten dengan countdown timer untuk Flash Deals).
-- [x] **Halaman Riwayat Pesanan (`MyOrders.tsx`):** Implementasi penuh halaman riwayat pesanan pengguna. Fitur yang tersedia:
-  - **Filter Tab Dinamis:** Navigasi tab (`All`, `Placed`, `Out of Delivery`, `Delivered`) untuk menyaring pesanan berdasarkan status.
-  - **Kartu Pesanan Informatif:** Setiap kartu menampilkan ID Order (8 karakter terakhir), tanggal, badge status berwarna, thumbnail produk (maks. 4 item), serta ringkasan jumlah item dan total harga.
-  - **Item Thumbnails dengan Modal Interaktif:** Thumbnail produk dibatasi maksimal 4 gambar. Jika pesanan memiliki lebih dari 4 item, sebuah chip `+N` tampil as indikator. Seluruh area thumbnail (termasuk chip) berfungsi sebagai zona klik terpisah yang membuka **Overlay Modal** tanpa mengaktifkan navigasi ke halaman tracking. Teknik `e.stopPropagation()` pada `div` wrapper thumbnail memisahkan aksi *buka modal* dari *navigasi ke OrderTracking*.
-  - **Overlay Modal Detail Pesanan:** Modal terpusat dengan animasi `animate-fade-in` menampilkan daftar lengkap semua item yang dibeli — gambar produk, nama, dan kuantitas (`qty x unit`). Footer modal dilengkapi `border-t` yang merangkum total keseluruhan kuantitas item. Modal dapat ditutup via tombol `XIcon` atau klik overlay transparan di luar modal.
-  - **Ringkasan Kartu (Border Top):** Bagian bawah setiap kartu pesanan (di luar modal) menampilkan ringkasan total item dan grand total harga (subtotal + delivery fee) yang dipisahkan oleh garis `border-t border-app-border`.
-  - **Tombol Track Order:** Setiap kartu memiliki tombol navigasi langsung menuju halaman `OrderTracking` (`/orders/:id`) yang terpisah dari area klik thumbnail.
-  - **Empty State & Loading:** Tampilan khusus saat tidak ada order, dan komponen `Loading` saat data sedang diambil.
-- [x] **Halaman Katalog Produk (`Products.tsx`):** Implementasi penuh halaman katalog grocery yang digerakkan oleh URL (`useSearchParams`). Fitur yang tersedia:
-  - **Filter URL-driven:** Parameter `category`, `organic`, `sort`, `page`, `minPrice`, `maxPrice` dibaca dari URL dan diubah via `updateFilter()` / `clearFilters()` tanpa reload halaman.
-  - **Breadcrumb:** Navigasi kontekstual `Home → Nama Kategori / All Products` menggunakan `HomeIcon` dan `Link` dari react-router-dom.
-  - **Sidebar Filter (Desktop) & Filter Panel (`FilterPanel.tsx`):** Panel filter komprehensif (`bg-white rounded-2xl` `sticky top-24`) dengan dukungan kategori, toggle produk organik, dan filter rentang harga. Memiliki sistem validasi input kustom (`onBlur`) untuk memastikan integritas data (mencegah `minPrice` melampaui `maxPrice` dan tidak menerima nilai negatif) tanpa mengganggu UX saat pengetikan.
-  - **Header Konten:** Menampilkan nama kategori aktif (`activateCategory.name` atau "All Products"), jumlah produk ditemukan (`totalFilteredCount`), tombol filter mobile interaktif (`SlidersHorizontal` memicu animasi *slide-in-up* modal), dan dropdown sort (Newest / Price Low-High / Price High-Low / Top Rated / A-Z).
-  - **Grid Produk:** Layout responsif `grid-cols-2 sm:grid-cols-3 lg:grid-cols-4` yang merender `ProductCard` untuk setiap produk dengan `stock > 0`.
-  - **State Loading & Empty:** Loading placeholder dan empty state interaktif dengan pesan dan tombol "Clear Filters".
-  - **Pagination Dinamis:** Komponen pagination angka reaktif yang secara cerdas menghitung ulang dan menampilkan `totalPages` berdasarkan jumlah produk yang telah melewati semua filter aktif. Menampilkan highlight pada halaman yang sedang dibuka dan didukung navigasi *scroll-to-top* otomatis.
-  - **Integrasi Data:** Saat ini menggunakan data mock lokal (`dummyProducts` dan `categoriesData` dari `assets.ts`); dirancang agar mudah diganti menjadi koneksi data API nyata (production ready).
-- [x] **Halaman Flash Deals (`FlashDeals.tsx`):**
-  - **Filter Algoritmik Eksklusif:** Mengimplementasikan logika yang secara dinamis menyaring produk dari katalog untuk hanya menampilkan barang dengan persediaan (`stock > 0`) dan tingkat potongan harga yang valid / signifikan (`discount >= 10%`).
-  - **Client-Side Pagination Terintegrasi:** Menambahkan dukungan sistem *pagination* (10 produk per halaman, didorong oleh parameter URL) untuk menavigasi etalase penawaran dengan bersih tanpa pemuatan vertikal tiada akhir.
-- [x] **Halaman Detail Produk (`ProductPage.tsx`):**
-  - **Sinkronisasi State Kuantitas Cerdas:** Menerapkan logika reaktif di mana menekan tombol 'Plus' pada produk yang belum ada di keranjang akan langsung mendaftarkan dan menjumlahkan item tersebut tanpa mengharuskan pengguna menekan tombol "Add to Cart" secara manual lagi.
-  - **Penyetelan Ulang Otomatis (Auto-Reset):** Saat pengguna mengurangi kuantitas dengan tombol 'Minus' hingga item sepenuhnya terhapus dari keranjang, status nilai input sementara (`localQuantity`) akan otomatis direset menjadi nilai asalnya (`1`).
-  - **Rekomendasi Produk Cerdas:** Menampilkan seksi 'Related Products' secara dinamis dengan mengimplementasikan filter relasional berbasis kesamaan kategori (*category-matching*). Algoritma dengan pintar mengecualikan produk yang sedang aktif, dan membatasi rekomendasi maksimal hingga 5 item.
-- [x] **Halaman Pelacakan Pesanan (`OrderTracking.tsx`):** Implementasi penuh halaman real-time order tracking. Fitur yang tersedia:
-  - **Header Dinamis:** Menampilkan Order ID (8 karakter terakhir), tanggal pembuatan, dan badge status pesanan dengan warna berbeda (hijau/merah/oranye).
-  - **Integrasi Komponen Khusus (`src/components/OrderTracking/`):** Halaman ini merakit tiga sub-komponen modular: `<OrderOTP />` (kartu kode verifikasi serah terima), `<LiveMap />` (peta interaktif Leaflet), dan `<OrderTimeLine />` (riwayat progres status pesanan).
-  - **Kartu Delivery Partner:** Menampilkan avatar inisial nama, nama kurir, dan tipe kendaraan. Dilengkapi tombol **Telepon Langsung** (`<a href="tel:...">`) yang membuka aplikasi telepon secara langsung saat ditekan.
-  - **Kolom Kanan — Delivery Address:** Kartu alamat pengiriman lengkap dengan label, jalan, kota, provinsi, dan kode pos.
-  - **Kolom Kanan — Item & Ringkasan Harga:** Daftar semua barang yang dipesan dengan gambar, nama, kuantitas, dan harga per item. Diikuti ringkasan biaya dengan `border-t` yang memuat Subtotal, Delivery Fee (gratis atau berbayar), Pajak (Tax), dan Grand Total.
-  - **Perbaikan Z-Index (`LiveMap.tsx`):** Wrapper peta diberi kelas `relative z-0` untuk menciptakan *stacking context* baru, mencegah layer internal Leaflet (z-index ~400) dari menembus dan menimpa `Navbar` (z-50).
-  - **Layout Responsif 2-Kolom:** Menggunakan grid `lg:grid-cols-3` — sisi kiri (`lg:col-span-2`) untuk peta dan timeline, sisi kanan untuk detail pesanan.
-- [x] **Halaman Hasil Pencarian (`SearchResults.tsx`):** Implementasi penuh halaman hasil pencarian produk. Fitur yang tersedia:
-  - **Filter Real-Time:** Menggunakan `useSearchParams` untuk membaca parameter `?q=` dari URL. Setiap perubahan query secara reaktif memfilter `dummyProducts` berdasarkan kecocokan nama produk (`name.toLowerCase().includes(query)`).
-  - **Breadcrumb:** Navigasi `Home / Search Results` menggunakan ikon `HomeIcon` dan `Link`.
-  - **Header Dinamis:** Menampilkan teks `Results for "[query]"` dan jumlah item yang ditemukan, dengan status `"Searching..."` saat loading aktif.
-  - **Grid Produk:** Layout responsif `grid-cols-2 sm:grid-cols-3 lg:grid-cols-4` menggunakan komponen `<ProductCard />`.
-  - **Empty State:** Tampilan khusus saat tidak ada produk yang cocok, dengan ikon besar, pesan deskriptif, dan tombol "Browse All Products".
-- [x] **Halaman Buku Alamat (`Addresses.tsx`) & Komponen Pendukung:** Implementasi penuh halaman manajemen alamat. Fitur yang tersedia:
-  - **State Manajemen:** Menyimpan `addresses`, `loading`, `showForm`, `editingId`, dan object `form` (label, address, city, state, zip, isDefault).
-  - **Fungsi `onEditHandler`:** Mengisi ulang state `form` dengan data alamat yang diklik, lalu menampilkan modal form dalam mode edit.
-  - **Fungsi `resetForm`:** Mengosongkan semua state form dan menyembunyikan modal, baik setelah submit maupun saat pengguna menutup modal.
-  - **Empty State & Loading:** Tampilan khusus saat daftar kosong (`MapPinIcon`) dan komponen `<Loading />` selama pengambilan data.
-  - **`AddressCard.tsx` (Komponen Baru):** Kartu alamat reusable yang menampilkan ikon pin, label alamat, badge "Default" (`CheckIcon`), serta dua tombol aksi — Edit (`PencilIcon`) yang memanggil `onEditHandler`, dan Delete (`Trash2Icon`) yang memanggil `handleDelete`.
-  - **`AddressForm.tsx` (Komponen Baru):** Modal form overlay (`fixed inset-0 z-50`) dengan animasi `animate-fade-in` untuk menambah atau mengedit alamat. Input field mencakup: Label, Street Address, City, State, ZIP Code, dan checkbox "Set as default". Header modal berubah secara dinamis antara "Add New Address" dan "Edit Address" berdasarkan state `editingId`. Modal dapat ditutup via tombol `XIcon` atau klik overlay.
-- [x] **Halaman Checkout Multi-Step (`Checkout.tsx`) & Komponen Pendukung:** Implementasi penuh halaman pembayaran dengan alur 3 langkah. Fitur yang tersedia:
-  - **Navigasi Step:** Tiga tombol langkah (`Address` → `Payment` → `Review`) dengan indikator aktif (`bg-app-green text-white`) dan ikon masing-masing (`MapPinIcon`, `CreditCardIcon`, `CheckIcon`).
-  - **Kalkulasi Harga Real-Time:** `deliveryFee` dihitung otomatis (gratis jika subtotal ≥ $20, `$1.99` jika kurang). `tax` dihitung sebesar 8% dari subtotal. `total` adalah penjumlahan ketiganya.
-  - **Pre-fill Alamat Default:** `useState` digunakan untuk mengisi state `address` dengan alamat default (`isDefault: true`) dari data pengguna saat komponen pertama kali di-render.
-  - **Empty Cart Guard:** Jika `items.length === 0`, halaman langsung menampilkan halaman kosong dengan tombol "Browse Products" (tidak ada akses langsung ke form checkout).
-  - **Sidebar Order Summary (Sticky):** Panel ringkasan pesanan `sticky top-24` di kolom kanan, menampilkan Subtotal, Delivery, Tax, dan Grand Total secara real-time.
-  - **`CheckoutAddress.tsx`:** Sub-komponen step 1 untuk memilih atau mengisi alamat pengiriman.
-  - **`CheckoutPayment.tsx`:** Sub-komponen step 2 untuk memilih metode pembayaran (card/cash).
-  - **`CheckoutReview.tsx`:** Sub-komponen step 3 untuk merangkum dan mengkonfirmasi pesanan sebelum ditempatkan.
-- [x] **Komponen Peta & Geocoding:** Integrasi Leaflet di `Addresses.tsx` untuk menentukan pin lokasi pengantaran baru.
-
-### Phase 4: Manajemen State & Aliran Data (State Management) 🟢 (COMPLETED)
-- [x] **Auth Context & Session Management (`AuthContext.tsx`):**
-  - Menyimpan data sesi login pengguna (`User` interface) secara global di seluruh aplikasi React.
-  - Alur registrasi (`/api/auth/register`), login (`/api/auth/login`), dan logout otomatis dengan persistensi token dan user data di `localStorage`.
-  - Integrasi Axios Interceptor (`api.ts`) untuk otomatis menyisipkan *JWT Bearer token* di header otorisasi setiap HTTP request dan mendeteksi token kedaluwarsa (HTTP 401).
-- [x] **Cart Context (`CartContext.tsx`):** Implementasi penuh menggunakan `createContext` + `useState` + `useEffect`. Fitur yang tersedia:
-  - `addToCart(product, quantity?)` — menambahkan produk ke keranjang; jika sudah ada, quantity di-increment. Sidebar otomatis terbuka setiap kali item ditambahkan.
-  - `removeFromCart(productId)` — menghapus item dari keranjang.
-  - `updateQuantity(productId, quantity)` — mengubah jumlah item; jika quantity ≤ 0, item dihapus otomatis.
-  - `clearCart()` — mengosongkan seluruh keranjang dan menutup sidebar.
-  - `cartCount` & `cartTotal` — nilai turunan reaktif (derived state) untuk jumlah item dan total harga.
-  - `isCartOpen` / `setIsCartOpen` — kontrol visibilitas CartSidebar.
-  - **Persistensi:** State keranjang disimpan ke `localStorage` (`app_cart`) via `useEffect` sehingga keranjang bertahan saat refresh.
-  - **Integrasi Global:** `CartProvider` membungkus `<App />` di `main.tsx`, menjadikan context tersedia di seluruh aplikasi.
-  - Hook publik `useCart()` diekspos dengan guard error jika digunakan di luar `CartProvider`.
-- [x] **Order Context:** Logika pembuatan order baru, riwayat order, dan tracking status order.
-- [x] **Integrasi API Backend Produk:**
-  - Migrasi halaman katalog utama (`Products.tsx`) dari dummy assets ke API backend `/api/products` dengan filtering dinamis (kategori, organic, min-max price, sort).
-  - Integrasi grid produk terpopuler (`PopularProducts.tsx`) menggunakan fetch data API backend diurutkan berdasarkan rating terbaik (`sort=rating`).
-
-### Phase 4.5: Backend Server Development (Node.js, Express, Prisma, Postgres) 🟢 (COMPLETED)
-- [x] **Inisialisasi Server & Boilerplate:**
-  - Setup Express server dengan TypeScript (`tsx`, `ts-node`, `nodemon`) dan ESLint.
-  - Integrasi Neon PostgreSQL Server menggunakan Prisma ORM dengan konfigurasi `@prisma/adapter-neon` untuk koneksi serverless yang stabil.
-- [x] **Modul Autentikasi (`authRouter` & `authController`):**
-  - Endpoint Registrasi (`/api/auth/register`) & Login (`/api/auth/login`) dengan enkripsi password menggunakan `bcrypt`.
-  - Pembuatan JWT Token (`jwt.sign`) dengan masa aktif 30 hari.
-  - Deteksi status administrator secara otomatis menggunakan pencocokan email dari variabel lingkungan `ADMIN_EMAILS`.
-- [x] **Modul Produk & CRUD (`productRouter` & `productController`):**
-  - Endpoint publik untuk mengambil katalog produk (`GET /api/products`) dengan filter dinamis (Kategori, Query pencarian, Rentang harga, Sorting).
-  - Endpoint publik untuk detail produk (`GET /api/products/:id`) dan Flash Deals (`GET /api/products/flash-deals`).
-  - Proteksi rute administrasi menggunakan middleware `auth` dan `admin` untuk operasi pembuatan (`POST /`), pembaruan (`PUT /:id`), dan penghapusan (`DELETE /:id`) produk.
-- [x] **Modul Unggah Gambar (`uploadRouter`):**
-  - Endpoint `/api/upload` dengan middleware `auth` untuk membatasi pengunggahan hanya bagi pengguna terautentikasi.
-  - Integrasi pustaka `multer` untuk mengelola *multipart/form-data* di dalam memory (`multer.memoryStorage()`).
-  - Integrasi Cloudinary SDK untuk mengunggah gambar ke cloud (`cloudinary.uploader.upload`) menggunakan format data URI base64.
-- [x] **Modul Manajemen Pesanan (`orderRouter` & `orderController`):**
-  - Endpoint Pembuatan Order (`POST /api/orders`) dengan verifikasi harga asli database, pengecekan stok produk, kalkulasi pajak/biaya kirim otomatis, serta auto-decrement stok setelah berhasil.
-  - Endpoint User Order (`GET /api/orders`) untuk melihat riwayat pesanan dengan filter status.
-  - Endpoint Detail Order (`GET /api/orders/:id`) dan Lokasi Kurir (`GET /api/orders/:id/location`).
-  - Endpoint Khusus Admin (`GET /api/orders/all` & `PUT /api/orders/:id/status`) dengan update log riwayat status pesanan.
-- [x] **Integrasi Background Jobs & Workflow (Inngest & Brevo):**
-  - Integrasi **Inngest Engine** (`/api/inngest`) untuk memproses event asinkronus secara andal dan terjadwal.
-  - **Notifikasi Stok Menipis (`Low Stock Alert`):** Mendeteksi event `inventory/stock.updated` dan mengirimkan email peringatan ke administrator ketika stok produk di bawah 10 unit.
-  - **Promosi Payday Bulanan (`Monthly Offers`):** Tugas cron terjadwal (`0 10 1 * *`) setiap tanggal 1 jam 10:00 untuk mengirimkan email berisi 6 produk promo terpopuler kepada semua pengguna terdaftar dalam mode batching (10 user per batch).
-  - **Penetapan Kurir Otomatis (`Auto-Assign Rider`):** Memantau event `order/placed`, menunggu selama 5 menit (`step.sleep`), lalu secara otomatis menetapkan kurir aktif yang tidak sibuk serta memicu kode OTP serah terima unik 6-digit.
-  - Integrasi **Nodemailer Brevo SMTP Relay** (`smtp-relay.brevo.com`) dengan template email HTML modern dan responsif.
-- [x] **Real-Time Courier Tracking Server (Socket.io):**
-  - Integrasi Node.js HTTP server dengan **Socket.io** server untuk komunikasi full-duplex dua arah.
-  - Implementasi mekanisme room dinamis (`order:{orderId}`) untuk mengisolasi data koordinat pelacakan pesanan.
-  - Penyaluran data instan (`receive-live-location`) dari kurir ke pelanggan bersangkutan secara real-time dipadukan penyimpanan data asinkronus ke PostgreSQL menggunakan Prisma.
-- [x] **Modul Router & Controller Delivery Partner (`deliveryPartnerRouter`):**
-  - Penyambungan rute `/api/delivery` ke server Express utama.
-  - Implementasi rute login khusus kurir, melihat penugasan aktif/selesai, detail pengiriman, update status pengantaran, pembatalan, pengisian kode OTP verifikasi, serta backup location update berbasis HTTP fallback.
-  - Proteksi penuh menggunakan middleware autentikasi `deliveryAuth`.
-
-### Phase 5: Sentuhan Premium, Animasi & Launching 🟢 (COMPLETED)
-- [x] Integrasi animasi transisi antar halaman (Page Transitions).
-- [x] UI Polish: Glassmorphism untuk modal, dynamic skeleton loader saat memuat data produk, efek hover transform.
-- [x] Validasi responsivitas mobile-first lengkap.
-- [x] Uji coba aliran checkout akhir dan integrasi notifikasi sukses lewat `react-hot-toast`.
-
-### 📝 TODO & Future Integrations / Improvements
-- [x] **Integrasi API Frontend & Backend secara Menyeluruh:** Hubungkan React client agar mengonsumsi REST API dari server Express untuk buku alamat, manajemen keranjang, dan riwayat order.
-- [x] **Validasi Skema Input (Backend):** Terapkan pustaka validasi skema seperti `Zod` pada request body di endpoint Registrasi, Login, CRUD Product, dan Checkout untuk mencegah data corrupt dan SQL injection.
-- [x] **Penanganan Error Terpusat & Logging:** Tingkatkan middleware error handling di backend agar dapat menangkap error spesifik Prisma dan menambahkan logging library seperti `winston` atau `morgan` untuk analisis error produksi.
-- [x] **Simulasi OTP Delivery Confirmation:** Bangun fitur simulasi serah terima menggunakan modal input. Jika kode OTP yang dimasukkan cocok dengan `order.deliveryOtp`, status pesanan berubah menjadi `"Delivered"` secara lokal — sebagai representasi dari alur validasi kurir di dunia nyata.
-- [x] **Integrasi Peta Leaflet di `Addresses.tsx`:** Tambahkan fitur *pick location on map* saat pengguna menambahkan atau mengedit alamat baru.
-- [x] **Integrasi Ulasan Produk Dinamis:** Saat ini antarmuka ulasan pelanggan (Customer Reviews) sudah diimplementasikan (via `DummyReviewsSection.tsx`), namun masih menggunakan *mock data* yang di-*generate* secara statis. Komponen ini akan diperbarui untuk mendukung sistem ulasan yang sepenuhnya dinamis (*real-time* rendering dan form *submit* ulasan) segera setelah integrasi dengan layanan *Backend* dan *Database* diselesaikan.
-- [ ] **Global Search Autocomplete:** Membangun *dropdown* saran pencarian dinamis (*debounced*) pada *search bar* utama untuk meningkatkan interaktivitas penemuan produk.
-- [ ] **Fitur Wishlist (Produk Favorit):** Mengizinkan pengguna untuk menyimpan produk yang diminati (selain dari keranjang belanja), lengkap dengan sinkronisasi ke profil dan tampilan halamannya tersendiri.
-- [x] **Payment Gateway Integration (Stripe):** Menghubungkan proses pembayaran pada halaman `Checkout.tsx` dengan Stripe Checkout Session dan menangani status pembayaran via Stripe Webhook (`api/stripe`).
-- [ ] **Progressive Web App (PWA):** Mengimplementasikan konfigurasi *Service Worker* dan *Web Manifest* sehingga aplikasi GroceShop dapat diinstal (installable) pada *smartphone* atau *desktop* layaknya aplikasi asli, serta memiliki mode *offline fallback*.
-- [ ] **Dark Mode Toggle:** Menambahkan utilitas pengubah tema (*light/dark mode*) secara utuh dengan memaksimalkan variabel warna Tailwind CSS v4.
+- 🎯 **Flash Deals** - Halaman promo dengan filter algoritmik (diskon ≥10%)
+- 📧 **Email Notifications** - Low stock alert, promo bulanan, order updates
+- 🔄 **Auto-Refresh** - Dashboard kurir update otomatis tanpa reload
+- 🔐 **Role-Based Access** - User, Admin, Delivery Partner
+- 🛡️ **Verified Reviews** - Review hanya dari pembeli yang sudah diverifikasi via order history
+- 🌐 **Multi-language (EN/ID)** - Dukungan bahasa Inggris & Indonesia dengan switch instan
+- 💰 **IDR (Rupiah) Pricing** - Semua harga ditampilkan dalam Rupiah dengan format Rp X.XXX
 
 ---
 
-## 📊 Alur & Arsitektur Aplikasi (App Flow & Architecture)
+## 🛠️ Tech Stack
 
-Berikut adalah diagram alur navigasi, perutean (routing), dan perlindungan halaman (*route guarding*) di GroceShop menggunakan Mermaid.js:
+### **Frontend**
+
+| Technology       | Version | Purpose                 |
+| ---------------- | ------- | ----------------------- |
+| React            | 19.2.6  | UI Framework            |
+| TypeScript       | 6.0     | Type Safety             |
+| Vite             | 8.0     | Build Tool              |
+| Tailwind CSS     | 4.3.0   | Styling                 |
+| React Router     | 7.15.1  | Routing                 |
+| i18next          | 25.0.0  | Internationalization    |
+| react-i18next    | 15.6.0  | React i18n integration  |
+| Axios            | 1.17.0  | HTTP Client             |
+| Socket.io Client | 4.8.3   | Real-time Communication |
+| React Leaflet    | 5.0.0   | Maps Integration        |
+| React Hot Toast  | 2.6.0   | Notifications           |
+| Lucide React     | 1.16.0  | Icons                   |
+
+### **Backend**
+
+| Technology        | Version    | Purpose            |
+| ----------------- | ---------- | ------------------ |
+| Node.js           | Latest     | Runtime            |
+| Express           | 5.2.1      | Web Framework      |
+| TypeScript        | 6.0.3      | Type Safety        |
+| Prisma            | 7.8.0      | ORM                |
+| PostgreSQL (Neon) | Serverless | Database           |
+| Socket.io         | 4.8.3      | WebSocket Server   |
+| Stripe            | 22.2.0     | Payment Processing |
+| Inngest           | 4.5.0      | Background Jobs    |
+| Nodemailer        | 8.0.10     | Email Service      |
+| Cloudinary        | 2.10.0     | Image Storage      |
+| JWT               | 9.0.3      | Authentication     |
+| Bcrypt            | 6.0.0      | Password Hashing   |
+
+---
+
+## 🏗️ Arsitektur Sistem
 
 ```mermaid
-graph TD
-    %% Styling
-    classDef public fill:#e6f4ea,stroke:#137333,stroke-width:2px,color:#137333;
-    classDef protected fill:#fef7e0,stroke:#b06000,stroke-width:2px,color:#b06000;
-    classDef layout fill:#e8f0fe,stroke:#1a73e8,stroke-width:2px,color:#1a73e8;
-    classDef guard fill:#fad2e1,stroke:#bc3a6a,stroke-width:2px,color:#bc3a6a;
-    classDef root fill:#f1f3f4,stroke:#3c4043,stroke-width:2px,color:#3c4043;
-    classDef admin fill:#f3e8ff,stroke:#7c3aed,stroke-width:2px,color:#7c3aed;
-    classDef delivery fill:#fff1f2,stroke:#e11d48,stroke-width:2px,color:#e11d48;
+graph TB
+    %% Client Layer
+    subgraph "🖥️ Frontend (React + Vite)"
+        A[Customer App] --> B[Admin Dashboard]
+        A --> C[Delivery Portal]
+    end
 
-    %% Elements
-    A["main.tsx: BrowserRouter"] --> B["App.tsx: Routes Container"]
-    B --> C{"Pilih Rute"}
-    
-    %% Public Routes Layout (AppLayout)
-    C -->|Rute Utama /| L_Layout["AppLayout.tsx - Main Layout Wrapper"]
-    
-    %% AppLayout Components
-    L_Layout --> L_Banner["Banner.tsx - Promosi"]
-    L_Layout --> L_Navbar["Navbar.tsx - Header dan Search"]
-    L_Layout --> L_Outlet["Outlet - Content Area"]
-    L_Layout --> L_Footer["Footer - Informasi"]
-    
-    %% Public Sub-routes
-    L_Outlet --> P_Home["Home.tsx - Beranda"]
-    L_Outlet --> P_Catalog["Products.tsx - Katalog Grocery"]
-    L_Outlet --> P_Detail["ProductPage.tsx - Detail Produk"]
-    L_Outlet --> P_Search["SearchResults.tsx - Cari"]
-    L_Outlet --> P_Deals["FlashDeals.tsx - Penawaran Kilat"]
-    
-    %% Guarded Paths
-    L_Outlet --> G_Guard["ProtectedRoute.tsx - Route Guard"]
-    G_Guard -->|Belum Login| P_Login["Login.tsx - Sign In / Sign Up"]
-    G_Guard -->|Sudah Login| PR_Group["Akses Halaman Terproteksi"]
-    
-    %% Protected Routes
-    PR_Group --> PR_Checkout["Checkout.tsx - Pembayaran"]
-    PR_Group --> PR_Orders["MyOrders.tsx - Riwayat Belanja"]
-    PR_Group --> PR_Track["OrderTracking.tsx - Peta dan Kurir"]
-    PR_Group --> PR_Addr["Addresses.tsx - Buku Alamat"]
-    
-    %% Standalone Routes
-    C -->|Rute /login| P_Login
+    %% API Layer
+    subgraph "⚡ Backend (Node.js + Express)"
+        D[REST API] --> E[Socket.io Server]
+        D --> F[Stripe Webhook]
+        D --> G[Inngest Functions]
+    end
 
-    %% Admin Routes
-    C -->|Rute /admin| A_Layout["AdminLayout.tsx - Admin Layout"]
-    A_Layout --> A_Dash["AdminDashboard.tsx"]
-    A_Layout --> A_Prod["AdminProducts.tsx"]
-    A_Layout --> A_ProdForm["AdminProductForm.tsx - New/Edit"]
-    A_Layout --> A_Ord["AdminOrders.tsx"]
-    A_Layout --> A_DP["AdminDeliveryPartners.tsx"]
+    %% Data Layer
+    subgraph "💾 Data & Storage"
+        H[(PostgreSQL - Neon)]
+        I[Cloudinary]
+        J[localStorage]
+    end
 
-    %% Delivery Routes
-    C -->|Rute /delivery/login| D_Login["DeliveryLogin.tsx - Kurir Login"]
-    C -->|Rute /delivery| D_Layout["DeliveryLayout.tsx - Kurir Layout"]
-    D_Layout --> D_Dash["DeliveryDashboard.tsx - Daftar Order Kurir"]
+    %% External Services
+    subgraph "🔗 External Services"
+        K[Stripe Payment]
+        L[Brevo Email]
+        M[Inngest Jobs]
+    end
 
-    %% Class Assignments
-    class A,B,C root;
-    class L_Layout,L_Banner,L_Navbar,L_Outlet,L_Footer layout;
-    class P_Home,P_Catalog,P_Detail,P_Search,P_Deals,P_Login public;
-    class G_Guard guard;
-    class PR_Group,PR_Checkout,PR_Orders,PR_Track,PR_Addr protected;
-    class A_Layout,A_Dash,A_Prod,A_ProdForm,A_Ord,A_DP admin;
-    class D_Login,D_Layout,D_Dash delivery;
+    A --> D
+    B --> D
+    C --> E
+    D --> H
+    E --> H
+    G --> H
+    F --> D
+    D --> I
+    A --> J
+    G --> L
+    G --> M
+    D --> K
+
+    classDef client fill:#e6f4ea,stroke:#137333,stroke-width:2px
+    classDef server fill:#fef7e0,stroke:#b06000,stroke-width:2px
+    classDef data fill:#e8f0fe,stroke:#1a73e8,stroke-width:2px
+    classDef external fill:#f3e8ff,stroke:#7c3aed,stroke-width:2px
+
+    class A,B,C client
+    class D,E,F,G server
+    class H,I,J data
+    class K,L,M external
 ```
 
-### 💡 Deskripsi Alur Aplikasi
-1. **Root Wrapper:** Aplikasi dibungkus `<BrowserRouter>` pada `main.tsx` untuk menyediakan konteks navigasi global bagi `<App />`.
-2. **Layouting Global (`AppLayout`):** Rute publik berada di bawah struktur tata letak induk `AppLayout.tsx`. Ini memastikan komponen seperti `Banner` (promosi atas), `Navbar` (bilah menu, bar pencarian, & tombol keranjang), dan `Footer` tetap terlihat secara konsisten di semua halaman publik dan transaksi.
-3. **Penyaringan Rute Terproteksi (`ProtectedRoute`):** Halaman transaksional yang sensitif (seperti keranjang pembayaran, riwayat transaksi, pengaturan alamat, dan peta tracking) dilindungi oleh pembungkus rute `ProtectedRoute.tsx`. Jika sesi pengguna tidak terdeteksi, rute secara otomatis akan mengalihkan pengguna ke halaman `/login`.
-4. **Alur Otentikasi Simulatif (`Login.tsx`):** Menawarkan formulir Sign In dan Sign Up interaktif lengkap dengan penanda loading kustom. Setelah login berhasil, pengguna akan segera dilemparkan kembali ke beranda `/` dalam status terautentikasi.
+### **Alur Data Real-Time Delivery Tracking**
+
+```mermaid
+sequenceDiagram
+    participant C as Customer
+    participant FE as Frontend
+    participant Socket as Socket.io
+    participant BE as Backend
+    participant DB as Database
+    participant D as Delivery Partner
+
+    D->>Socket: send-live-location (lat, lng, orderId)
+    Socket->>DB: Update liveLocation
+    Socket->>FE: receive-live-location
+    FE->>C: Update peta real-time
+
+    D->>Socket: Update status (Out for Delivery)
+    Socket->>BE: Trigger auto-track
+    BE->>DB: Save status
+    Socket->>FE: Status update
+    FE->>C: Show tracking timeline
+```
 
 ---
 
-## 🎨 Panduan Desain Sistem & Tema Kustom
+## 🚀 Quick Start
 
-Desain GroceShop menggunakan pendekatan natural organik dengan perpaduan warna-warna berikut yang telah didefinisikan pada `src/index.css`:
+### **Prerequisites**
 
-| Token CSS | Kode Warna | Penggunaan Utama |
-| :--- | :--- | :--- |
-| `--color-app-green` | `#1b3022` | Warna dasar brand (Forest Dark), Teks utama, Header dominan |
-| `--color-app-green-light` | `#2d4a35` | Tombol utama, hover state, badge natural |
-| `--color-app-green-lighter`| `#3d6b4a` | Border aktif, scrollbar thumb, aksen dedaunan |
-| `--color-app-orange` | `#f97316` | Warna aksen (Flash sale, diskon, tombol pemicu tindakan) |
-| `--color-app-cream` | `#faf7f2` | Background aplikasi utama (hangat, lembut di mata) |
-| `--color-app-cream-dark` | `#f0ebe3` | Background card, form inputs, pemisah section |
+- Node.js 18+
+- npm atau pnpm
+- PostgreSQL database (atau Neon Serverless)
+- Stripe account (untuk payment)
+- Cloudinary account (untuk image storage)
 
-### ✏️ Tipografi Premium
-* **Sans Font:** `Outfit`, sans-serif (Sangat bersih untuk teks tubuh, harga, form, dan menu).
-* **Serif Font:** `DM Serif Display`, serif (Sangat elegan untuk judul utama, banner promo, dan nama brand).
+### **Installation**
+
+1. **Clone repository**
+
+```bash
+git clone https://github.com/meandrewaprianto/GroceShop.git
+cd GroceShop
+```
+
+2. **Setup Frontend**
+
+```bash
+cd client
+npm install
+cp .env.example .env  # Sesuaikan environment variables
+npm run dev
+# Frontend berjalan di http://localhost:5173
+```
+
+3. **Setup Backend**
+
+```bash
+cd server
+npm install
+cp .env.example .env  # Sesuaikan environment variables
+npm run server
+# Backend berjalan di http://localhost:3000
+```
+
+4. **Seed Database (Optional)**
+
+```bash
+cd server
+npm run seed
+```
 
 ---
 
-## 📂 Struktur Folder Proyek Saat Ini
+## 📡 API Documentation
 
-```text
+### **Authentication Endpoints**
+
+| Method | Endpoint             | Description        | Auth Required |
+| ------ | -------------------- | ------------------ | ------------- |
+| POST   | `/api/auth/register` | Register user baru | ❌            |
+| POST   | `/api/auth/login`    | Login user         | ❌            |
+| GET    | `/api/auth/me`       | Get current user   | ✅            |
+
+### **Product Endpoints**
+
+| Method | Endpoint                   | Description                          | Auth Required |
+| ------ | -------------------------- | ------------------------------------ | ------------- |
+| GET    | `/api/products/categories` | Get all product categories (dynamic) | ❌            |
+| GET    | `/api/products/search`     | Search autocomplete (suggestions)    | ❌            |
+| GET    | `/api/products`            | Get all products (dengan filter)     | ❌            |
+| GET    | `/api/products/:id`        | Get product detail                   | ❌            |
+| POST   | `/api/products`            | Create product                       | ✅ Admin      |
+| PUT    | `/api/products/:id`        | Update product                       | ✅ Admin      |
+| DELETE | `/api/products/:id`        | Delete product                       | ✅ Admin      |
+
+### **Order Endpoints**
+
+| Method | Endpoint                | Description      | Auth Required |
+| ------ | ----------------------- | ---------------- | ------------- |
+| POST   | `/api/orders`           | Create new order | ✅            |
+| GET    | `/api/orders`           | Get user orders  | ✅            |
+| GET    | `/api/orders/:id`       | Get order detail | ✅            |
+| GET    | `/api/orders/admin/all` | Get all orders   | ✅ Admin      |
+
+### **Address Endpoints**
+
+| Method | Endpoint             | Description        | Auth Required |
+| ------ | -------------------- | ------------------ | ------------- |
+| GET    | `/api/addresses`     | Get user addresses | ✅            |
+| POST   | `/api/addresses`     | Create address     | ✅            |
+| PUT    | `/api/addresses/:id` | Update address     | ✅            |
+| DELETE | `/api/addresses/:id` | Delete address     | ✅            |
+
+### **Review Endpoints**
+
+| Method | Endpoint                   | Description                   | Auth Required      |
+| ------ | -------------------------- | ----------------------------- | ------------------ |
+| GET    | `/api/reviews/product/:id` | Get all reviews for a product | ❌ (optional auth) |
+| POST   | `/api/reviews`             | Create a new review           | ✅ (must be buyer) |
+| PUT    | `/api/reviews/:id`         | Update own review             | ✅                 |
+| DELETE | `/api/reviews/:id`         | Delete own review             | ✅                 |
+| POST   | `/api/reviews/:id/helpful` | Mark review as helpful        | ✅                 |
+
+### **Admin Endpoints**
+
+| Method | Endpoint                       | Description               | Auth Required |
+| ------ | ------------------------------ | ------------------------- | ------------- |
+| GET    | `/api/admin/stats`             | Get dashboard statistics  | ✅ Admin      |
+| GET    | `/api/admin/delivery-partners` | Get all delivery partners | ✅ Admin      |
+| POST   | `/api/admin/delivery-partners` | Create delivery partner   | ✅ Admin      |
+| PUT    | `/api/admin/orders/:id/assign` | Assign delivery partner   | ✅ Admin      |
+
+### **Delivery Endpoints**
+
+| Method | Endpoint                          | Description            | Auth Required |
+| ------ | --------------------------------- | ---------------------- | ------------- |
+| POST   | `/api/delivery/login`             | Delivery partner login | ❌            |
+| GET    | `/api/delivery/orders`            | Get assigned orders    | ✅ Delivery   |
+| PUT    | `/api/delivery/orders/:id/status` | Update order status    | ✅ Delivery   |
+| POST   | `/api/delivery/orders/:id/otp`    | Verify OTP             | ✅ Delivery   |
+
+### **WebSocket Events**
+
+| Event                   | Direction       | Description                             |
+| ----------------------- | --------------- | --------------------------------------- |
+| `join-order-room`       | Client → Server | Customer join tracking room             |
+| `join-partner-room`     | Client → Server | Delivery partner join notification room |
+| `send-live-location`    | Client → Server | Delivery partner send GPS location      |
+| `receive-live-location` | Server → Client | Customer receive live location          |
+| `order-assigned`        | Server → Client | Notify new order assignment             |
+
+---
+
+## 💾 Database Schema
+
+```prisma
+model User {
+    id        String    @id @default(uuid())
+    name      String
+    email     String    @unique
+    password  String
+    phone     String?   @default("")
+    avatar    String?   @default("")
+    addresses Address[]
+    orders    Order[]
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+}
+
+model Address {
+    id        String   @id @default(uuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    label     String
+    address   String
+    city      String
+    state     String
+    zip       String
+    isDefault Boolean  @default(false)
+    lat       Float
+    lng       Float
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Product {
+    id            String   @id @default(uuid())
+    name          String
+    description   String?  @default("")
+    price         Float
+    originalPrice Float?
+    image         String
+    category      String
+    unit          String?  @default("piece")
+    stock         Int?     @default(0)
+    isOrganic     Boolean? @default(false)
+    rating        Float?   @default(0)
+    reviewCount   Int?     @default(0)
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+}
+
+model Order {
+    id              String @id @default(uuid())
+    userId          String
+    user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    items           Json
+    shippingAddress Json
+    paymentMethod   String @default("card")
+    subtotal        Float
+    deliveryFee     Float? @default(0)
+    tax             Float? @default(0)
+    total           Float
+    status          String @default("Placed")
+    statusHistory   Json
+
+    deliveryPartnerId String?
+    deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id], onDelete: SetNull)
+    deliveryOtp       String?          @default("")
+    liveLocation      Json?
+    isPaid            Boolean?         @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model DeliveryPartner {
+    id          String   @id @default(uuid())
+    name        String
+    email       String   @unique
+    password    String
+    phone       String
+    avatar      String?  @default("")
+    vehicleType String?  @default("bike")
+    isActive    Boolean? @default(true)
+    orders      Order[]
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}
+```
+
+---
+
+## 🎨 Design System
+
+### **Color Palette**
+
+| Token CSS                   | Kode Warna | Penggunaan Utama                            |
+| --------------------------- | ---------- | ------------------------------------------- |
+| `--color-app-green`         | `#1b3022`  | Warna dasar brand (Forest Dark), Teks utama |
+| `--color-app-green-light`   | `#2d4a35`  | Tombol utama, hover state                   |
+| `--color-app-green-lighter` | `#3d6b4a`  | Border aktif, scrollbar thumb               |
+| `--color-app-orange`        | `#f97316`  | Warna aksen (Flash sale, diskon, CTA)       |
+| `--color-app-cream`         | `#faf7f2`  | Background aplikasi utama                   |
+| `--color-app-cream-dark`    | `#f0ebe3`  | Background card, form inputs                |
+
+### **Typography**
+
+| Font Family                  | Usage                                |
+| ---------------------------- | ------------------------------------ |
+| **Outfit** (Sans-serif)      | Body text, prices, forms, menu items |
+| **DM Serif Display** (Serif) | Headings, promo banners, brand name  |
+
+### **Component Library**
+
+- **Buttons** - Primary, secondary, outline variants
+- **Cards** - Product cards, order cards with hover effects
+- **Modals** - Glassmorphism effect with backdrop blur
+- **Forms** - Styled inputs with focus states
+- **Badges** - Status indicators, category tags
+- **Loaders** - Skeleton loaders, spinners
+
+---
+
+## 🗺️ Project Roadmap
+
+### ✅ **Phase 1: Foundation (COMPLETED)**
+
+- Project initialization with Vite + React + TypeScript
+- Tailwind CSS v4 configuration
+- Design system implementation
+- Core dependencies installation
+- TypeScript interfaces definition
+
+### ✅ **Phase 2: Architecture & Routing (COMPLETED)**
+
+- Layout components (AppLayout, AdminLayout, DeliveryLayout)
+- 10+ page modules implementation
+- Protected routes with guards
+- Real-time notifications setup
+
+### ✅ **Phase 3: UI Components (COMPLETED)**
+
+- Reusable component library
+- Home page components
+- Product catalog with filters
+- Cart sidebar with animations
+- Checkout multi-step flow
+
+### ✅ **Phase 4: State Management (COMPLETED)**
+
+- Auth Context with JWT persistence
+- Cart Context with localStorage sync
+- API integration with Axios
+- Error handling & loading states
+
+### ✅ **Phase 5: Backend Development (COMPLETED)**
+
+- Express server with TypeScript
+- Prisma ORM + Neon PostgreSQL
+- Authentication & authorization
+- Product CRUD operations
+- Order management system
+- Background jobs (Inngest)
+- Real-time tracking (Socket.io)
+- Stripe payment integration
+
+### ✅ **Phase 6: Delivery System (COMPLETED)**
+
+- Delivery partner authentication
+- Auto-assignment system
+- OTP verification
+- GPS location sharing
+- Auto-refresh dashboard
+- COD payment handling
+
+### 🚧 **Future Enhancements**
+
+- [x] **Global Search Autocomplete** - Dropdown saran pencarian dinamis dengan debounce & keyboard navigation
+- [x] **Implementation** - Rating & review system dengan purchase verification
+- [x] **Multi-language Support (EN/ID)** - i18n implementation dengan react-i18next
+- [x] **IDR Currency Conversion** - Semua harga dikonversi ke Rupiah (Rp)
+- [x] **Dynamic Categories** - Kategori diambil langsung dari database, tidak hardcoded
+- [ ] **Wishlist System** - Simpan produk favorit
+- [x] **Progressive Web App (PWA)** - Installable app experience with offline caching
+- [x] **Dark Mode Toggle** - Light/dark theme switcher with CSS variables
+- [ ] **Analytics Dashboard** - Advanced reporting
+- [ ] **Push Notifications** - Browser notifications
+
+---
+
+## 📂 Folder Structure
+
+```
 GroceShop/
-├── client/                     # Frontend Application (React + Vite)
-│   ├── public/                 # Static assets (images, icons)
-│   ├── src/
-│   │   ├── assets/             # Gambar & Ilustrasi & Mock Data (assets.ts)
-│   │   ├── components/         # Reusable UI Components & Route Guards
-│   │   │   ├── Checkout/          # Sub-komponen Halaman Checkout
-│   │   │   │   ├── CheckoutAddress.tsx  # Step 1: Pilih Alamat Pengiriman
-│   │   │   │   ├── CheckoutPayment.tsx  # Step 2: Pilih Metode Pembayaran
-│   │   │   │   └── CheckoutReview.tsx   # Step 3: Review & Konfirmasi Order
-│   │   │   ├── Home/              # Sub-komponen Khusus Halaman Utama (Home)
-│   │   │   │   ├── AppPromoBanner.tsx # Banner Promo Unduh Aplikasi (App Store & Play)
-│   │   │   │   ├── Features.tsx   # Seksi Fitur Layanan Unggulan
-│   │   │   │   ├── Hero.tsx       # Seksi Banner Hero Selamat Datang & CTA
-│   │   │   │   ├── HomeCategories.tsx # Kategori Produk Horizontal Scrollable
-│   │   │   │   ├── NewsLetter.tsx # Formulir Berlangganan Newsletter
-│   │   │   │   └── PopularProducts.tsx # Grid Produk Terpopuler Musim Ini
-│   │   │   ├── OrderTracking/     # Sub-komponen Halaman Pelacakan Pesanan
-│   │   │   │   ├── LiveMap.tsx    # Peta Interaktif Leaflet (Tracking Real-Time)
-│   │   │   │   ├── OrderOTP.tsx   # Kartu Kode OTP Verifikasi Serah Terima
-│   │   │   │   └── OrderTimeLine.tsx # Riwayat Progres Status Pesanan
-│   │   │   ├── AddressCard.tsx    # Kartu Alamat (Edit & Delete)
-│   │   │   ├── AddressForm.tsx    # Modal Form Tambah / Edit Alamat
-│   │   │   ├── Banner.tsx         # Banner Promosi Interaktif Kustom
-│   │   │   ├── CartSidebar.tsx    # Sidebar Keranjang Belanja
-│   │   │   ├── FilterPanel.tsx    # Panel Filter Produk (Katalog)
-│   │   │   ├── Footer.tsx         # Footer Global Premium (Brand, Links, Kontak)
-│   │   │   ├── Loading.tsx        # Komponen Spinner Loading Global
-│   │   │   ├── Navbar.tsx         # Bilah Navigasi Utama & Dropdown Profil
-│   │   │   ├── ProductCard.tsx    # Kartu Produk Reusable & Fungsional
-│   │   │   └── ProtectedRoute.tsx # Komponen Pelindung Rute Terproteksi
-│   │   ├── context/            # React Context (Cart, Auth, Order)
-│   │   │   └── CartContext.tsx    # Cart State Global (Persistensi localStorage)
-│   │   ├── pages/              # Halaman Aplikasi
-│   │   │   ├── admin/             # Halaman Panel Administrator
-│   │   │   │   ├── AdminLayout.tsx      # Layout Khusus Admin (Sidebar)
-│   │   │   │   ├── AdminDashboard.tsx   # Ringkasan & Statistik
-│   │   │   │   ├── AdminProducts.tsx    # Manajemen Produk (List)
-│   │   │   │   ├── AdminProductForm.tsx # Form Tambah / Edit Produk
-│   │   │   │   ├── AdminOrders.tsx      # Manajemen Pesanan
-│   │   │   │   └── AdminDeliveryPartners.tsx # Manajemen Mitra Kurir
-│   │   │   ├── delivery/          # Halaman Aplikasi Kurir
-│   │   │   │   ├── DeliveryLogin.tsx    # Login Khusus Kurir
-│   │   │   │   ├── DeliveryLayout.tsx   # Layout Kurir (Header/Nav)
-│   │   │   │   └── DeliveryDashboard.tsx # Dashboard Daftar Order Kurir
-│   │   │   ├── Addresses.tsx      # Buku Alamat Pengguna
-│   │   │   ├── AppLayout.tsx      # Layout Utama (Banner + Navbar + Footer)
-│   │   │   ├── Checkout.tsx       # Halaman Checkout Multi-Step
-│   │   │   ├── FlashDeals.tsx     # Halaman Penawaran Kilat
-│   │   │   ├── Home.tsx           # Beranda Utama
-│   │   │   ├── Login.tsx          # Halaman Sign In / Sign Up
-│   │   │   ├── MyOrders.tsx       # Riwayat Pesanan Pengguna
-│   │   │   ├── OrderTracking.tsx  # Pelacakan Pesanan Real-Time
-│   │   │   ├── ProductPage.tsx    # Detail Produk
-│   │   │   ├── Products.tsx       # Katalog Produk
-│   │   │   └── SearchResults.tsx  # Halaman Hasil Pencarian
-│   │   ├── types/              # Deklarasi Type TypeScript
-│   │   │   └── index.ts        # Interface User, Product, Order, Address, dll.
-│   │   ├── App.tsx             # Root Component (Sistem Routing Lengkap)
-│   │   ├── index.css           # Konfigurasi Tailwind v4 & Animasi CSS
-│   │   └── main.tsx            # Entry Point Aplikasi
-│   ├── package.json            # Daftar dependensi & script proyek
-│   └── vite.config.ts          # Integrasi React & Tailwind di Vite
-└── README.md                   # File dokumentasi & roadmap utama ini
+├── client/                          # Frontend Application (React + Vite)
+│   ├── public/                      # Static assets
+│   └── src/
+│       ├── assets/                  # Images, illustrations & mock data
+│       ├── components/              # Reusable UI components
+│       │   ├── Checkout/            # Checkout flow components
+│       │   ├── Delivery/            # Delivery tracking components
+│       │   ├── Home/                # Home page components
+│       │   ├── OrderTracking/       # Order tracking components
+│       │   ├── AddressCard.tsx
+│       │   ├── AddressForm.tsx
+│       │   ├── Banner.tsx
+│       │   ├── CartSidebar.tsx
+│       │   ├── FilterPanel.tsx
+│       │   ├── Footer.tsx
+│       │   ├── Loading.tsx
+│       │   ├── Navbar.tsx
+│       │   ├── ProductCard.tsx
+│       │   └── ProtectedRoute.tsx
+│       ├── config/
+│       │   └── api.ts               # Axios instance + JWT interceptor
+│       ├── context/
+│       │   ├── AuthContext.tsx      # Global auth state
+│       │   └── CartContext.tsx      # Cart state + localStorage
+│       ├── pages/
+│       │   ├── admin/               # Admin panel pages
+│       │   ├── delivery/            # Delivery partner pages
+│       │   ├── Addresses.tsx
+│       │   ├── AppLayout.tsx
+│       │   ├── Checkout.tsx
+│       │   ├── FlashDeals.tsx
+│       │   ├── Home.tsx
+│       │   ├── Login.tsx
+│       │   ├── MyOrders.tsx
+│       │   ├── OrderTracking.tsx
+│       │   ├── ProductPage.tsx
+│       │   ├── Products.tsx
+│       │   └── SearchResults.tsx
+│       ├── types/
+│       │   └── index.ts             # TypeScript interfaces
+│       ├── App.tsx                  # Main app component
+│       ├── index.css                # Global styles + design system
+│       └── main.tsx                 # App entry point
+│
+└── server/                          # Backend Application (Node.js + Express)
+    ├── config/
+    │   ├── cloudinary.ts            # Cloudinary configuration
+    │   ├── nodemailer.ts            # Email service configuration
+    │   └── prisma.ts                # Prisma + Neon client setup
+    ├── controllers/
+    │   ├── adminController.ts       # Admin operations
+    │   ├── authController.ts        # Authentication
+    │   ├── deliveryController.ts    # Delivery partner operations
+    │   ├── orderController.ts       # Order management
+    │   ├── productController.ts     # Product CRUD
+    │   ├── addressController.ts     # Address management
+    │   ├── reviewController.ts      # Product reviews & ratings
+    │   └── webhooks.ts              # Stripe webhook handler
+    ├── inngest/                     # Background jobs
+    │   ├── functions/
+    │   │   ├── lowStockAlert.ts     # Low stock email alerts
+    │   │   ├── monthlyOffers.ts     # Monthly promo emails
+    │   │   └── autoAssignRider.ts   # Auto-assign delivery
+    │   └── index.ts
+    ├── middleware/
+    │   ├── auth.ts                  # JWT user authentication + optionalAuth
+    │   ├── admin.ts                 # Admin role guard
+    │   └── deliveryAuth.ts          # Delivery partner JWT
+    ├── prisma/
+    │   └── schema.prisma            # Database schema
+    ├── routes/
+    │   ├── authRoutes.ts
+    │   ├── productRoutes.ts
+    │   ├── orderRoute.ts
+    │   ├── addressRoute.ts
+    │   ├── reviewRoutes.ts
+    │   ├── adminRoute.ts
+    │   ├── deliveryPartnerRoute.ts
+    │   └── uploadRoutes.ts
+    ├── generated/                   # Generated Prisma client
+    ├── server.ts                    # Express + Socket.io entry
+    ├── seed.ts                      # Database seeding
+    └── package.json
 ```
 
 ---
 
-## ⚙️ Cara Menjalankan Proyek Secara Lokal
+## ⚙️ Environment Setup
 
-1. Masuk ke dalam direktori aplikasi frontend:
-   ```bash
-   cd client
-   ```
-2. Instal semua paket dependensi (jika baru di-clone):
-   ```bash
-   npm install
-   ```
-3. Jalankan server pengembangan lokal:
-   ```bash
-   npm run dev
-   ```
-4. Buka peramban (browser) dan akses alamat yang tertera di terminal (biasanya `http://localhost:5173`).
+### **Client Environment Variables** (`client/.env`)
+
+```env
+VITE_BASE_URL=http://localhost:3000/api
+VITE_API_URL=http://localhost:3000
+VITE_CURRENCY_SYMBOL=$
+```
+
+### **Server Environment Variables** (`server/.env`)
+
+```env
+# Database
+DATABASE_URL=postgresql://username:password@host:5432/dbname
+
+# Authentication
+JWT_SECRET=your_super_secret_jwt_key_here
+
+# Admin Configuration
+ADMIN_EMAILS=admin@example.com,admin2@example.com
+
+# Cloudinary (Image Storage)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# Stripe (Payment)
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Email Service (Brevo)
+BREVO_API_KEY=your_brevo_api_key
+BREVO_SENDER_EMAIL=noreply@yourdomain.com
+
+# Application URLs
+CLIENT_URL=http://localhost:5173
+PORT=3000
+
+# Inngest (Background Jobs)
+INNGEST_SIGNING_KEY=your_inngest_signing_key
+INNGEST_EVENT_KEY=your_inngest_event_key
+```
+
+### **Getting API Keys**
+
+1. **Neon PostgreSQL**: Sign up at [neon.tech](https://neon.tech)
+2. **Cloudinary**: Sign up at [cloudinary.com](https://cloudinary.com)
+3. **Stripe**: Sign up at [stripe.com](https://stripe.com)
+4. **Brevo**: Sign up at [brevo.com](https://brevo.com)
+5. **Inngest**: Sign up at [inngest.com](https://inngest.com)
+
+---
+
+## 🧪 Testing
+
+> **Note:** Testing suite masih dalam pengembangan. Rencana implementasi:
+>
+> - Unit tests dengan Vitest
+> - Component tests dengan React Testing Library
+> - E2E tests with Playwright
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+Please make sure to update tests as appropriate and follow the code style guidelines.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Credits
+
+- **GreatStack** - YouTube channel yang memberikan inspirasi dan tutorial dasar
+- **Vercel** - Hosting platform untuk deployment
+- **Neon** - Serverless PostgreSQL database
+- **Cloudinary** - Image storage & optimization
+- **Stripe** - Payment processing
+- **Brevo** - Email service provider
+- **Inngest** - Background job scheduling
+
+### **Open Source Libraries**
+
+- React, TypeScript, Vite, Tailwind CSS
+- Express, Prisma, Socket.io
+- Leaflet, React Hot Toast, Lucide Icons
+
+---
+
+<div align="center">
+
+**Made with ❤️ by Andrew Aprianto**
+
+[🌟 Star this repo](https://github.com/meandrewaprianto/GroceShop) • [🐛 Report Issue](https://github.com/meandrewaprianto/GroceShop/issues) • [💬 Discussions](https://github.com/meandrewaprianto/GroceShop/discussions)
+
+</div>

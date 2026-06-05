@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom"
-import { categoriesData } from "../../assets/assets"
+import { useCategories } from "../../hooks/useCategories"
 
 const HomeCategories = () => {
+    const { categories } = useCategories();
+
     return (
         <section className="py-16">
             <div className="max-w-7xl mx-auto">
@@ -10,16 +12,20 @@ const HomeCategories = () => {
                     <p className="text-sm text-app-text-light mt-1">Find exactly what you need using</p>
                 </div>
                 <div className="flex items-center mt-8 overflow-x-scroll no-scrollbar">
-                    {categoriesData.map((cat) => (
+                    {categories.map((cat) => (
                         <Link key={cat.slug} to={`/products?category=${cat.slug}`} onClick={() => window.scrollTo(0, 0)} className="group flex flex-col items-center gap-3 p-4">
                             <div className="size-18 sm:size-26 sm:p-2 rounded-2xl overflow-hidden bg-orange-100 group-hover:ring-2 ring-orange-300/75 transition-all">
-                                <img src={cat.image} alt={cat.name} className="w-full h-full object-contain rounded-full transition-all" />
+                                {cat.image ? (
+                                    <img src={cat.image} alt={cat.name} className="w-full h-full object-contain rounded-full transition-all" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-xs text-zinc-400 font-semibold uppercase">
+                                        {cat.name.slice(0, 2)}
+                                    </div>
+                                )}
                             </div>
                             <span className="text-xs font-medium text-zinc-600 text-center leading-tight">{cat.name}</span>
-
                         </Link>
                     ))}
-
                 </div>
             </div>
         </section>

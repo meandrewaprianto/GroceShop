@@ -1,6 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=DM+Serif+Display:ital@0;1&display=swap");
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
     --color-app-green: #1b3022;
     --color-app-green-light: #2d4a35;
@@ -20,15 +22,84 @@
     --font-serif: "DM Serif Display", serif;
 }
 
+/* ─── Light Mode (default) ─── */
+:root {
+    --bg-primary: #faf7f2;
+    --bg-secondary: #f0ebe3;
+}
+
+/* ─── Dark Mode Overrides ─── */
+.dark {
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-elevated: #1a2332;
+
+    /* Softened zinc palette — no harsh contrast */
+    --color-zinc-50: #1f2937;
+    --color-zinc-100: #2a3548;
+    --color-zinc-200: #3a4659;
+    --color-zinc-300: #525e71;
+    --color-zinc-400: #8b94a7;
+    --color-zinc-500: #b0b9c8;
+    --color-zinc-600: #d1d7e2;
+    --color-zinc-700: #e5e9ef;
+    --color-zinc-800: #eef1f5;
+    --color-zinc-900: #f3f5f8;
+    --color-orange-50: #1f2937;
+    --color-orange-100: #2a3548;
+
+    /* Override our custom app colors for dark mode */
+    --color-app-green: #4ade80;
+    --color-app-green-light: #22c55e;
+    --color-app-green-lighter: #16a34a;
+    --color-app-cream: #1f2937;
+    --color-app-cream-dark: #2a3548;
+    --color-app-text: #e5e9ef;
+    --color-app-text-light: #8b94a7;
+    --color-app-border: #3a4659;
+}
+
+/* ─── Dark Mode Surface Fixes ─── */
+.dark nav {
+    /* background-color: var(--bg-primary) !important; */
+    border-color: var(--color-app-border) !important;
+}
+
+.dark aside .bg-white,
+.dark .bg-white {
+    background-color: var(--bg-elevated) !important;
+    border-color: var(--color-app-border) !important;
+}
+
+.dark .bg-white\/50 {
+    background-color: color-mix(in srgb, var(--bg-elevated) 80%, transparent) !important;
+}
+
+.dark .bg-white\/10 {
+    background-color: color-mix(in srgb, var(--bg-elevated) 30%, transparent) !important;
+}
+
+.dark footer {
+    background-color: var(--bg-primary) !important;
+    border-top: 1px solid var(--color-app-border) !important;
+}
+
+.dark .shadow-lg,
+.dark .shadow-xl,
+.dark .shadow-2xl {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
 body {
     font-family: var(--font-sans);
     color: var(--color-app-text);
-    background-color: var(--color-app-cream);
+    background-color: var(--bg-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Scrollbar */
+/* ─── Scrollbar ─── */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -36,6 +107,11 @@ body {
 
 ::-webkit-scrollbar-track {
     background: var(--color-app-cream);
+    transition: background 0.3s ease;
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -43,35 +119,55 @@ body {
     border-radius: 3px;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
 
-/* Smooth transitions globally */
+/* ─── Smooth Transitions ─── */
+html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 a,
 button {
     transition: all 0.2s ease;
     cursor: pointer;
 }
+
 input:focus {
     outline: none;
 }
 
+/* ─── Utils ─── */
 .flex-center {
     @apply flex items-center justify-center;
 }
 
 .dropdown-link {
-    @apply flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-500 hover:bg-orange-50/80 hover:text-zinc-900 transition-colors;
+    @apply flex items-center gap-3 px-4 py-2.5 text-sm transition-colors;
+    color: var(--color-app-text-light);
 }
 
-/* Animations */
+.dropdown-link:hover {
+    background-color: color-mix(in srgb, var(--color-app-orange) 10%, transparent);
+    color: var(--color-app-text);
+}
+
+.dark .dropdown-link:hover {
+    background-color: var(--bg-secondary);
+    color: var(--color-app-text);
+}
+
+/* ─── Animations ─── */
 @keyframes fadeIn {
     from {
         opacity: 0;
         transform: translateY(10px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -83,7 +179,6 @@ input:focus {
         opacity: 0;
         transform: translateX(100%);
     }
-
     to {
         opacity: 1;
         transform: translateX(0);
@@ -95,7 +190,6 @@ input:focus {
         opacity: 0;
         transform: translateY(20px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -107,7 +201,6 @@ input:focus {
     100% {
         opacity: 1;
     }
-
     50% {
         opacity: 0.7;
     }

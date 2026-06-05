@@ -3,6 +3,7 @@ import Banner from "../components/Banner"
 import Navbar from "../components/Navbar"
 import Footer from "../components/Footer"
 import CartSidebar from "../components/CartSidebar"
+import InstallPWA from "../components/InstallPWA"
 
 const AppLayout = () => {
     return (
@@ -14,6 +15,7 @@ const AppLayout = () => {
             </main>
             <Footer />
             <CartSidebar />
+            <InstallPWA />
         </>
     )
 }

@@ -1,0 +1,88 @@
+{
+    "nav": {
+        "home": "Home",
+        "products": "Products",
+        "deals": "Deals",
+        "search": "Search for groceries...",
+        "signIn": "Sign In",
+        "myOrders": "My Orders",
+        "addresses": "Addresses",
+        "adminPanel": "Admin Panel",
+        "logout": "Logout"
+    },
+    "cart": {
+        "title": "Shopping Cart",
+        "empty": "Your cart is empty",
+        "subtotal": "Subtotal",
+        "delivery": "Delivery",
+        "free": "Free",
+        "freeDelivery": "Free delivery on orders over Rp 100.000!",
+        "checkout": "Checkout",
+        "total": "Total"
+    },
+    "product": {
+        "addToCart": "Add to Cart",
+        "inCart": "In Cart",
+        "outOfStock": "Out of Stock",
+        "organic": "Organic",
+        "youSave": "You save",
+        "category": "Category"
+    },
+    "reviews": {
+        "title": "Customer Reviews",
+        "noReviews": "No reviews yet. Be the first to review this product!",
+        "writeReview": "Write a Review",
+        "yourRating": "Your Rating",
+        "yourReview": "Your Review",
+        "submitReview": "Submit Review",
+        "submitting": "Submitting...",
+        "saveChanges": "Save Changes",
+        "cancel": "Cancel",
+        "helpful": "Helpful",
+        "edit": "Edit",
+        "delete": "Delete",
+        "reviewSubmitted": "Review submitted successfully!",
+        "reviewUpdated": "Review updated successfully!",
+        "reviewDeleted": "Review deleted successfully!",
+        "loginToReview": "Please login to write a review.",
+        "loginToMark": "Please login to mark reviews as helpful",
+        "selectRating": "Please select a rating",
+        "alreadyReviewed": "You have already reviewed this product"
+    },
+    "search": {
+        "resultsFor": "Results for",
+        "searching": "Searching...",
+        "itemsFound": "items found",
+        "noResults": "No products found"
+    },
+    "checkout": {
+        "title": "Checkout",
+        "address": "Address",
+        "payment": "Payment",
+        "review": "Review",
+        "placeOrder": "Place Order",
+        "placingOrder": "Placing Order...",
+        "orderPlaced": "Order placed successfully!"
+    },
+    "orders": {
+        "title": "My Orders",
+        "allOrders": "All Orders",
+        "trackOrder": "Track Order",
+        "delivery": "Delivery",
+        "status": "Status"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "yes": "Yes",
+        "no": "No",
+        "save": "Save",
+        "delete": "Delete",
+        "items": "items"
+    },
+    "delivery": {
+        "freeDelivery": "Free delivery on orders above Rp 100.000"
+    }
+}

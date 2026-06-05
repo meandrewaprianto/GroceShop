@@ -94,9 +94,14 @@ export const completeDelivery = async (req: Request, res: Response) => {
 
     history.push({ status: "Delivered", note: "Delivered by partner", timestamp: new Date() });
 
+    // For COD orders, mark as paid when delivery is completed (payment collected at door)
+    // Frontend sends "cash", kept "cod" as fallback for consistency
+    const isCOD = order.paymentMethod === "cash" || order.paymentMethod === "cod";
+    const isPaidUpdate = isCOD ? { isPaid: true } : {};
+
     const updatedOrder = await prisma.order.update({
         where: { id: order.id },
-        data: { status: "Delivered", statusHistory: history, deliveryOtp: "" }
+        data: { status: "Delivered", statusHistory: history, deliveryOtp: "", ...isPaidUpdate }
     })
 
     const io = req.app.get("io");

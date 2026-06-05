@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom"
 import type { Product } from "../types";
-import { categoriesData } from "../assets/assets";
+import { useCategories } from "../hooks/useCategories";
 import { ChevronDown, Home, SlidersHorizontal, XIcon } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import Loading from "../components/Loading";
@@ -93,7 +93,8 @@ const Products = () => {
 
     const clearFilters = () => setSearchParams({});
 
-    const activateCategory = categoriesData.find((c) => c.slug === category);
+    const { categories } = useCategories();
+    const activateCategory = categories.find((c) => c.slug === category);
     const hasFilters = category || organic || minPrice || maxPrice;
 
     useEffect(() => {
@@ -103,9 +104,9 @@ const Products = () => {
 
     return (
         <div className="min-h-screen bg-app-cream">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Breadcrumb */}
-                <nav className="flex items-center gap-2 text-sm text-app-text-light mb-6">
+                <nav className="flex items-center gap-2 text-sm text-app-text-light mb-4">
                     <Link to='/' className="hover:text-app-green transition-colors">
                         <Home className="size-4" />
                     </Link>
@@ -116,8 +117,8 @@ const Products = () => {
                 <div className="flex gap-8 xl:gap-10">
                     {/* Sidebar - Desktop */}
                     <aside className="hidden lg:block w-64 shrink-0">
-                        <div className="bg-white rounded-2xl p-4 stickty top-24">
-                            <FilterPanel categories={categoriesData} category={category} organic={organic} minPrice={minPrice} maxPrice={maxPrice} updateFilter={updateFilter} clearFilters={clearFilters} hasFilters={hasFilters} />
+                        <div className="bg-white rounded-2xl p-5 stickty top-24">
+                            <FilterPanel categories={categories} category={category} organic={organic} minPrice={minPrice} maxPrice={maxPrice} updateFilter={updateFilter} clearFilters={clearFilters} hasFilters={hasFilters} />
                         </div>
                     </aside>
 
@@ -160,7 +161,7 @@ const Products = () => {
                                 <button onClick={clearFilters} className="px-5 py-2 text-sm font-medium bg-app-green text-white rounded-xl hover:bg-app-green-light transition-colors">Clear Filters</button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 xl:gap-8">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 xl:gap-8">
                                 {products.map((product) => product.stock > 0 && (
                                     <ProductCard key={product.id} product={product} />
                                 ))}
@@ -197,7 +198,7 @@ const Products = () => {
                         </div>
 
                         <div className="p-4">
-                            <FilterPanel categories={categoriesData} category={category} organic={organic} minPrice={minPrice} maxPrice={maxPrice} updateFilter={updateFilter} clearFilters={clearFilters} hasFilters={hasFilters} />
+                            <FilterPanel categories={categories} category={category} organic={organic} minPrice={minPrice} maxPrice={maxPrice} updateFilter={updateFilter} clearFilters={clearFilters} hasFilters={hasFilters} />
                         </div>
                     </div>
                 </>

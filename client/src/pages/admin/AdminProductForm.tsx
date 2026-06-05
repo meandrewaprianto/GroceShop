@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon } from "lucide-react";
-import { categoriesData } from "../../assets/assets";
+import { useCategories } from "../../hooks/useCategories";
 import Loading from "../../components/Loading";
 import api from "../../config/api";
 import toast from "react-hot-toast";
@@ -10,6 +10,7 @@ export default function AdminProductForm() {
     const { id } = useParams();
     const isEdit = Boolean(id);
     const navigate = useNavigate();
+    const { categories } = useCategories();
 
     const [loading, setLoading] = useState(isEdit);
     const [saving, setSaving] = useState(false);
@@ -122,7 +123,7 @@ export default function AdminProductForm() {
                                 <label className="block text-sm font-medium text-zinc-700 mb-2">Category</label>
                                 <select required value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 focus:border-app-green focus:ring-1 focus:ring-app-green outline-none transition-all bg-white">
                                     <option value="">Select a category</option>
-                                    {categoriesData.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
+                                    {categories.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
                                 </select>
                             </div>
                             <div>

@@ -87,3 +87,32 @@ export interface Order {
     isPaid: boolean;
     createdAt: string;
 }
+
+export interface Review {
+    id: string;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        avatar: string;
+    };
+    rating: number;
+    comment: string;
+    helpful: number;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ReviewPagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+export interface ReviewResponse {
+    reviews: Review[];
+    pagination: ReviewPagination;
+    breakdown: number[];
+    hasPurchased?: boolean;
+}

@@ -1,0 +1,88 @@
+{
+    "nav": {
+        "home": "Beranda",
+        "products": "Produk",
+        "deals": "Promo",
+        "search": "Cari bahan makanan...",
+        "signIn": "Masuk",
+        "myOrders": "Pesanan Saya",
+        "addresses": "Alamat",
+        "adminPanel": "Panel Admin",
+        "logout": "Keluar"
+    },
+    "cart": {
+        "title": "Keranjang Belanja",
+        "empty": "Keranjang Anda kosong",
+        "subtotal": "Subtotal",
+        "delivery": "Pengiriman",
+        "free": "Gratis",
+        "freeDelivery": "Gratis ongkir untuk pesanan di atas Rp 100.000!",
+        "checkout": "Checkout",
+        "total": "Total"
+    },
+    "product": {
+        "addToCart": "Tambah ke Keranjang",
+        "inCart": "Di Keranjang",
+        "outOfStock": "Stok Habis",
+        "organic": "Organik",
+        "youSave": "Anda hemat",
+        "category": "Kategori"
+    },
+    "reviews": {
+        "title": "Ulasan Pelanggan",
+        "noReviews": "Belum ada ulasan. Jadilah yang pertama memberi ulasan!",
+        "writeReview": "Tulis Ulasan",
+        "yourRating": "Penilaian Anda",
+        "yourReview": "Ulasan Anda",
+        "submitReview": "Kirim Ulasan",
+        "submitting": "Mengirim...",
+        "saveChanges": "Simpan Perubahan",
+        "cancel": "Batal",
+        "helpful": "Bermanfaat",
+        "edit": "Ubah",
+        "delete": "Hapus",
+        "reviewSubmitted": "Ulasan berhasil dikirim!",
+        "reviewUpdated": "Ulasan berhasil diperbarui!",
+        "reviewDeleted": "Ulasan berhasil dihapus!",
+        "loginToReview": "Silakan login untuk menulis ulasan.",
+        "loginToMark": "Silakan login untuk menandai ulasan bermanfaat",
+        "selectRating": "Silakan pilih penilaian",
+        "alreadyReviewed": "Anda sudah pernah memberi ulasan produk ini"
+    },
+    "search": {
+        "resultsFor": "Hasil untuk",
+        "searching": "Mencari...",
+        "itemsFound": "item ditemukan",
+        "noResults": "Tidak ada produk ditemukan"
+    },
+    "checkout": {
+        "title": "Checkout",
+        "address": "Alamat",
+        "payment": "Pembayaran",
+        "review": "Review",
+        "placeOrder": "Buat Pesanan",
+        "placingOrder": "Membuat Pesanan...",
+        "orderPlaced": "Pesanan berhasil dibuat!"
+    },
+    "orders": {
+        "title": "Pesanan Saya",
+        "allOrders": "Semua Pesanan",
+        "trackOrder": "Lacak Pesanan",
+        "delivery": "Pengiriman",
+        "status": "Status"
+    },
+    "common": {
+        "loading": "Memuat...",
+        "error": "Terjadi kesalahan",
+        "confirm": "Konfirmasi",
+        "cancel": "Batal",
+        "yes": "Ya",
+        "no": "Tidak",
+        "save": "Simpan",
+        "delete": "Hapus",
+        "items": "item"
+    },
+    "delivery": {
+        "freeDelivery": "Gratis ongkir untuk pesanan di atas Rp 100.000"
+    }
+}
