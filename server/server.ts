@@ -15,8 +15,10 @@ import deliveryPartnerRouter from "./routes/deliveryPartnerRoute.js";
 import http from "http";
 import { Server } from "socket.io";
 import { prisma } from "./config/prisma.js";
+import { stripeWebhook } from "./controllers/webhooks.js";
 
 const app = express();
+app.post("/api/stripe", express.raw({ type: 'application/json'}), stripeWebhook)
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
