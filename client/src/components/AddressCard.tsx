@@ -22,8 +22,10 @@ const AddressCard = ({ addr, onEditHandler, setAddresses }: AddressCardProps) =>
             setAddresses(data.addresses);
             updateUser({ addresses: data.addresses });
             toast.success("Address deleted");
-        } catch (error) {
-            toast.error(error.response?.data?.message || error?.message);
+        } catch (error: unknown) {
+            if(error instanceof Error) {
+                toast.error(error.message);
+            }
         }
     };
     return (
