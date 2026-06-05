@@ -90,8 +90,10 @@ const Addresses = () => {
                 toast.success("Address Created!");
             }
             resetForm();
-        } catch (error) {
-            toast.error(error.response?.data?.message || error.message || "Failed");
+        } catch (error: unknown) {
+            if(error instanceof Error) {
+                toast.error(error.message);
+            }
         }
     }
 
@@ -108,11 +110,15 @@ const Addresses = () => {
         setShowForm(true);
     }
 
+
+
     useEffect(() => {
         api.get('/addresses').then(({ data }) => {
             setAddresses(data.addresses);
-        }).catch((error) => {
-            toast.error(error.response?.data?.message || error?.message)
+        }).catch((error: unknown) => {
+             if(error instanceof Error) {
+                toast.error(error.message);
+            }
         }).finally(() => {
             setLoading(false);
         })
