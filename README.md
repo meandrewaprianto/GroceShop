@@ -585,9 +585,7 @@ model PushSubscription {
 
 - [ ] **Unit & E2E Testing** - Vitest + Playwright
 - [ ] **CI/CD Pipeline** - Automated testing & deployment
-- [ ] **Wishlist Sharing** - Share wishlist with friends
 - [ ] **Advanced Analytics** - Customer cohort analysis, sales forecasting
-- [ ] **Multi-vendor Support** - Support multiple sellers
 
 ---
 
