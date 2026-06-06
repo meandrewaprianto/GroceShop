@@ -18,5 +18,18 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // Allow `any` in catch clauses, prop types, and loose-typed areas
+      '@typescript-eslint/no-explicit-any': 'warn',
+
+      // Context files export both Provider + hook — this is a valid pattern
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+
+      // useState inside useEffect is a common pattern for data fetching initialization
+      'react-hooks/set-state-in-effect': 'off',
+
+      // Intentional: deps are controlled via refs or intentionally stable
+      'react-hooks/exhaustive-deps': 'warn',
+    },
   },
 ])

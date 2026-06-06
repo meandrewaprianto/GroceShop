@@ -107,8 +107,8 @@ function RevenueLineChart({ data }: { data: { date: string; revenue: number }[] 
 }
 
 function StatusDonut({ data }: { data: Record<string, number> }) {
-    const entries = Object.entries(data).filter(([_, v]) => v > 0);
-    const total = entries.reduce((sum, [_, v]) => sum + v, 0) || 1;
+    const entries = Object.entries(data).filter(([, v]) => v > 0);
+    const total = entries.reduce((sum, [, v]) => sum + v, 0) || 1;
     let cumulative = 0;
     const size = 160;
     const radius = 60;

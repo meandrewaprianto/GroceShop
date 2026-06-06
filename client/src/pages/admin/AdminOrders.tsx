@@ -29,8 +29,8 @@ export default function AdminOrders() {
         try {
             const { data } = await api.get("/admin/delivery-partners");
             setPartners(data.partners.filter((p: DeliveryPartner) => p.isActive))
-        } catch (error) {
-
+        } catch {
+            // Delivery partners failed to load — non-critical
         }
     };
 
