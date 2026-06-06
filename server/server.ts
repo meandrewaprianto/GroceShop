@@ -12,6 +12,8 @@ import addressRouter from "./routes/addressRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import deliveryPartnerRouter from "./routes/deliveryPartnerRoute.js";
 import reviewRouter from "./routes/reviewRoutes.js";
+import wishlistRouter from "./routes/wishlistRoutes.js";
+import notificationRouter from "./routes/notificationRoutes.js";
 
 import http from "http";
 import { Server } from "socket.io";
@@ -89,6 +91,8 @@ app.use('/api/addresses', addressRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/delivery', deliveryPartnerRouter);
 app.use('/api/reviews', reviewRouter);
+app.use('/api/wishlist', wishlistRouter);
+app.use('/api/notifications', notificationRouter);
 
 // Error Handling
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {

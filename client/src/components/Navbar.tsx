@@ -1,9 +1,12 @@
-import { ArrowUpRightIcon, BikeIcon, ChevronDownIcon, LogOutIcon, MapPinIcon, MenuIcon, PackageIcon, SearchIcon, ShieldIcon, ShoppingCartIcon, UserIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, BikeIcon, ChevronDownIcon, HeartIcon, LogOutIcon, MapPinIcon, MenuIcon, PackageIcon, SearchIcon, ShieldIcon, ShoppingCartIcon, UserIcon, XIcon } from "lucide-react";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { useWishlist } from "../context/WishlistContext";
+import { useNotification } from "../context/NotificationContext";
+import { BellIcon, BellOffIcon } from "lucide-react";
 import api from "../config/api";
 import LanguageSwitcher from "./LanguageSwitcher";
 import DarkModeToggle from "./DarkModeToggle";
@@ -20,6 +23,8 @@ interface Suggestion {
 
 const Navbar = () => {
     const { user, logout } = useAuth();
+    const { wishlistCount } = useWishlist();
+    const { isSubscribed, isSupported, subscribeToPush, unsubscribeFromPush } = useNotification();
     const { cartCount, setIsCartOpen } = useCart()
     const [searchQuery, setSearchQuery] = useState("");
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -203,6 +208,12 @@ const Navbar = () => {
                         {/* Language Switcher */}
                         <LanguageSwitcher />
 
+                        {/* Wishlist */}
+                        <Link to="/wishlist" className="relative p-2 rounded-xl hidden sm:block">
+                            <HeartIcon className="size-5 text-zinc-900 dark:text-slate-200" />
+                            {wishlistCount > 0 && <span className="absolute -top-1 -right-1 size-4 bg-red-500 text-white text-[10px] rounded-full flex-center">{wishlistCount}</span>}
+                        </Link>
+
                         {/* Cart */}
                         <button className="relative p-2 rounded-xl" onClick={() => setIsCartOpen(true)}>
                             <ShoppingCartIcon className="size-5 text-zinc-900 dark:text-slate-200" />
@@ -240,6 +251,7 @@ const Navbar = () => {
                                         )}
                                         <div onClick={() => setUserMenuOpen(false)}>
                                             {!user && <Link to='/login' className="dropdown-link"><UserIcon size={16} /> {t('nav.signIn')}</Link>}
+                                            {user && <Link to='/wishlist' className="dropdown-link"><HeartIcon size={16} /> {t('nav.wishlist')}</Link>}
                                             {user && <Link to='/orders' className="dropdown-link"><PackageIcon size={16} /> {t('nav.myOrders')}</Link>}
                                             {user && <Link to='/addresses' className="dropdown-link"><MapPinIcon size={16} /> {t('nav.addresses')}</Link>}
 
@@ -252,6 +264,16 @@ const Navbar = () => {
                                                 </Link>
                                             )}
 
+                                            {user && isSupported && (
+                                                <div className="border-t border-app-border pt-1">
+                                                    <button
+                                                        onClick={isSubscribed ? unsubscribeFromPush : subscribeToPush}
+                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-700 dark:text-slate-300 hover:bg-zinc-50 dark:hover:bg-gray-800 w-full transition-colors">
+                                                        {isSubscribed ? <BellOffIcon size={16} /> : <BellIcon size={16} />}
+                                                        {isSubscribed ? "Disable Notifications" : "Enable Notifications"}
+                                                    </button>
+                                                </div>
+                                            )}
                                             {user && (
                                                 <div className="border-t border-app-border pt-1">
                                                     <button

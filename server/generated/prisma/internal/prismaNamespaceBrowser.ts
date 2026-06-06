@@ -56,6 +56,8 @@ export const ModelName = {
   Product: 'Product',
   Order: 'Order',
   DeliveryPartner: 'DeliveryPartner',
+  WishlistItem: 'WishlistItem',
+  PushSubscription: 'PushSubscription',
   Review: 'Review'
 } as const
 
@@ -164,6 +166,28 @@ export const DeliveryPartnerScalarFieldEnum = {
 } as const
 
 export type DeliveryPartnerScalarFieldEnum = (typeof DeliveryPartnerScalarFieldEnum)[keyof typeof DeliveryPartnerScalarFieldEnum]
+
+
+export const WishlistItemScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  createdAt: 'createdAt'
+} as const
+
+export type WishlistItemScalarFieldEnum = (typeof WishlistItemScalarFieldEnum)[keyof typeof WishlistItemScalarFieldEnum]
+
+
+export const PushSubscriptionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  endpoint: 'endpoint',
+  p256dh: 'p256dh',
+  auth: 'auth',
+  createdAt: 'createdAt'
+} as const
+
+export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum]
 
 
 export const ReviewScalarFieldEnum = {

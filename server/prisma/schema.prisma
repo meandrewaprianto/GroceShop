@@ -8,17 +8,19 @@ datasource db {
 }
 
 model User {
-    id        String    @id @default(uuid())
-    name      String
-    email     String    @unique
-    password  String
-    phone     String?   @default("")
-    avatar    String?   @default("")
-    addresses Address[]
-    orders    Order[]
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    reviews   Review[]
+    id                String             @id @default(uuid())
+    name              String
+    email             String             @unique
+    password          String
+    phone             String?            @default("")
+    avatar            String?            @default("")
+    addresses         Address[]
+    orders            Order[]
+    wishlist          WishlistItem[]
+    pushSubscriptions PushSubscription[]
+    createdAt         DateTime           @default(now())
+    updatedAt         DateTime           @updatedAt
+    reviews           Review[]
 }
 
 model Address {
@@ -38,21 +40,22 @@ model Address {
 }
 
 model Product {
-    id            String   @id @default(uuid())
+    id            String         @id @default(uuid())
     name          String
-    description   String?  @default("")
+    description   String?        @default("")
     price         Float
     originalPrice Float?
     image         String
     category      String
-    unit          String?  @default("piece")
-    stock         Int?     @default(0)
-    isOrganic     Boolean? @default(false)
-    rating        Float?   @default(0)
-    reviewCount   Int?     @default(0)
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
+    unit          String?        @default("piece")
+    stock         Int?           @default(0)
+    isOrganic     Boolean?       @default(false)
+    rating        Float?         @default(0)
+    reviewCount   Int?           @default(0)
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
     reviews       Review[]
+    wishlistedBy  WishlistItem[]
 }
 
 model Order {
@@ -91,6 +94,27 @@ model DeliveryPartner {
     orders      Order[]
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
+}
+
+model WishlistItem {
+    id        String   @id @default(uuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    productId String
+    product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+
+    @@unique([userId, productId])
+}
+
+model PushSubscription {
+    id        String   @id @default(uuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    endpoint  String
+    p256dh    String
+    auth      String
+    createdAt DateTime @default(now())
 }
 
 model Review {

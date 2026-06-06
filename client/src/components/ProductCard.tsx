@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import type { Product } from "../types"
-import { Plus, Star } from "lucide-react";
+import { Heart, Plus, Star } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 import { formatPriceToIDR } from "../utils/formatCurrency";
 
 interface Props {
@@ -11,7 +12,9 @@ interface Props {
 const ProductCard = ({ product }: Props) => {
 
     const { addToCart } = useCart()
+    const { isWished, toggleWishlist } = useWishlist();
     const navigate = useNavigate();
+    const wished = isWished(product.id);
 
     return (
         <div className="bg-white dark:border dark:border-app-border/50 rounded-2xl overflow-hidden shadow hover:shadow-md transition-all duration-300 group animate-fade-in cursor-pointer" onClick={() => navigate(`/products/${product.id}`)}>
@@ -25,6 +28,14 @@ const ProductCard = ({ product }: Props) => {
                         <span className="px-2 py-0.5 text-[10px] font-semibold uppercase bg-app-orange text-white rounded-full">{product.discount}% OFF</span>
                     )}
                 </div>
+
+                {/* Wishlist Heart */}
+                <button
+                    onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}
+                    className="absolute top-3 right-3 size-8 rounded-full bg-white/80 backdrop-blur-sm flex-center shadow hover:bg-white transition-all active:scale-90"
+                >
+                    <Heart className={`size-4 transition-colors ${wished ? "fill-red-500 text-red-500" : "text-zinc-500"}`} />
+                </button>
             </div>
 
             {/* Info */}

@@ -67,6 +67,16 @@ export type Order = Prisma.OrderModel
  */
 export type DeliveryPartner = Prisma.DeliveryPartnerModel
 /**
+ * Model WishlistItem
+ * 
+ */
+export type WishlistItem = Prisma.WishlistItemModel
+/**
+ * Model PushSubscription
+ * 
+ */
+export type PushSubscription = Prisma.PushSubscriptionModel
+/**
  * Model Review
  * 
  */

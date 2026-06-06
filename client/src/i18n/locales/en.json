@@ -6,6 +6,7 @@
         "search": "Search for groceries...",
         "signIn": "Sign In",
         "myOrders": "My Orders",
+        "wishlist": "Wishlist",
         "addresses": "Addresses",
         "adminPanel": "Admin Panel",
         "logout": "Logout"

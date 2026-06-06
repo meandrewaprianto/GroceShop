@@ -24,8 +24,8 @@ export function usdToIdr(usdAmount: number): number {
 }
 
 /**
- * Format a USD-stored price directly to IDR display
+ * Format a price directly to IDR display (price is stored as Rupiah)
  */
-export function formatPriceToIDR(usdPrice: number): string {
-    return formatIDR(usdToIdr(usdPrice));
+export function formatPriceToIDR(price: number): string {
+    return formatIDR(price);
 }

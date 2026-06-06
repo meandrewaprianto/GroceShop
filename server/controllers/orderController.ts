@@ -163,6 +163,23 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
         io.to(`order:${updateOrder.id}`).emit("order-status-updated", { status, statusHistory: history });
     }
 
+    // Send push notification
+    const statusMessages: Record<string, string> = {
+        "Placed": "Your order has been placed!",
+        "Confirmed": "Your order has been confirmed!",
+        "Preparing": "Your order is being prepared!",
+        "Out for Delivery": "Your order is out for delivery!",
+        "Delivered": "Your order has been delivered!",
+        "Cancelled": "Your order has been cancelled.",
+    };
+    const body = statusMessages[status] || `Order status updated to ${status}`;
+    try {
+        const { sendPushNotification } = await import("./notificationController.js");
+        await sendPushNotification(updateOrder.userId, "Order Update", body, `/orders/${updateOrder.id}`);
+    } catch (err) {
+        console.error("Failed to send push notification:", err);
+    }
+
     res.json({ order: updateOrder })
 }
 
