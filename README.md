@@ -573,13 +573,22 @@ model PushSubscription {
 - [x] **Multi-language Support (EN/ID)** - i18n implementation dengan react-i18next & language switcher
 - [x] **IDR Currency Conversion** - Semua harga dikonversi ke Rupiah (Rp) dengan format IDR
 - [x] **Dynamic Categories** - Kategori diambil langsung dari database, tidak hardcoded
-- [x] **Progressive Web App (PWA)** - Installable app experience with offline caching & manifest
+- [x] **Progressive Web App (PWA)** - Installable app with Workbox caching, auto-update, green "G" icon, & update notification banner
 - [x] **Dark Mode Toggle** - Light/dark theme switcher dengan CSS variables & localStorage persistence
 - [x] **Analytics Dashboard** - Revenue line chart, status donut chart, top products, dan stat cards
 - [x] **Admin Products Pagination & Search** - 10 items/page dengan search by name/category
 - [x] **Responsive Product Cards** - Mobile-optimized price layout (no overlap dengan tombol)
 - [x] **Wishlist System** - Simpan & kelola produk favorit dengan toggle instan via dedicated Wishlist page
 - [x] **Push Notifications (Web-Push)** - Browser push notifications via VAPID protocol dengan auto-cleanup expired subscriptions
+
+### ✅ **Phase 8: Bug Fixes & Polish (COMPLETED)**
+
+- [x] **Save Button Loading State** - Added spinner animation & disabled cursor for AdminProductForm save button
+- [x] **PWA Icon Redesign** - Simple green background with white "G" letter for all PWA icons
+- [x] **PWA Auto-Update** - Service worker auto-updates when database changes; NetworkFirst strategy for API calls
+- [x] **PWA Update Notification** - Banner notification when new app version is available
+- [x] **Tax Calculation Fix** - Fixed double-conversion bug in currency formatter; client/server tax calculations now match
+- [x] **Free Delivery Threshold** - Fixed inconsistency between client ($6) and server ($20) delivery fee thresholds
 
 ### 🚧 **Future Enhancements**
 

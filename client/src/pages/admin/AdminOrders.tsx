@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { TruckIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import type { DeliveryPartner } from "../../types";
-import { formatIDR } from "../../utils/formatCurrency";
+import { formatIDRRaw } from "../../utils/formatCurrency";
 import Loading from "../../components/Loading";
 import api from "../../config/api";
 
@@ -100,7 +100,7 @@ export default function AdminOrders() {
                                             <p className="font-medium text-zinc-900">{order.user?.name || "Unknown User"}</p>
                                             <p className="text-xs text-zinc-500">{order.user?.email || "No email"}</p>
                                         </td>
-                                        <td className="px-6 py-4 font-medium">{formatIDR(order.total)}</td>
+                                        <td className="px-6 py-4 font-medium">{formatIDRRaw(order.total)}</td>
                                         <td className="px-6 py-4">
                                             {order.deliveryPartner ? (
                                                 <div className="flex items-center gap-2">

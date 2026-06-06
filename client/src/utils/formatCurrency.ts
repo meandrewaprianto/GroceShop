@@ -9,22 +9,26 @@ export function usdToIdr(usdAmount: number): number {
 }
 
 /**
- * Format a number to Indonesian Rupiah (IDR)
- * Automatically converts from USD-stored value to IDR.
- * Example: formatIDR(45) => "Rp 742.500"
- * Example: formatIDR(420) => "Rp 6.930.000"
+ * Format a number to Indonesian Rupiah (IDR).
+ * For product prices stored in USD: converts to IDR.
+ * For calculated values (tax, total, etc.) that are already in the correct
+ * display currency, use formatIDRRaw instead.
  */
 export function formatIDR(amount: number): string {
-    // If amount is already in Rupiah range (>1000 per item typical), skip conversion
-    // Otherwise convert from USD to IDR
     const converted = amount < 1000 ? usdToIdr(amount) : amount;
-
-    // Round to nearest integer
     const rounded = Math.round(converted);
-
-    // Format with thousand separators (dots)
     const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return `Rp ${formatted}`;
+}
 
+/**
+ * Format a value that is already in IDR (no conversion applied).
+ * Use this for calculated values like tax, delivery fee, and total
+ * to avoid double-conversion bugs.
+ */
+export function formatIDRRaw(idrAmount: number): string {
+    const rounded = Math.round(idrAmount);
+    const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     return `Rp ${formatted}`;
 }
 
@@ -33,4 +37,12 @@ export function formatIDR(amount: number): string {
  */
 export function formatPriceToIDR(price: number): string {
     return formatIDR(price);
+}
+
+/**
+ * Format a calculated total/fee/tax that is already in display currency.
+ * Prevents double-conversion when values are under 1000.
+ */
+export function formatPriceTotal(amount: number): string {
+    return formatIDRRaw(amount);
 }

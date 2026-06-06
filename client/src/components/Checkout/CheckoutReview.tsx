@@ -1,6 +1,6 @@
 import { CheckIcon, TruckIcon } from "lucide-react";
 import type { Address } from "../../types";
-import { formatPriceToIDR } from "../../utils/formatCurrency";
+import { formatPriceToIDR, formatPriceTotal } from "../../utils/formatCurrency";
 
 interface CheckoutReviewProps {
     address: Address;
@@ -44,7 +44,7 @@ export default function CheckoutReview({ address, items, handlePlaceOrder, loadi
             </div>
 
             <button onClick={handlePlaceOrder} disabled={loading} className="w-full py-3 bg-app-orange text-white font-semibold rounded-xl hover:bg-app-orange-dark transition-colors disabled:opacity-60 active:scale-[0.98]">
-                {loading ? "Placing Order..." : `Place Order — ${formatPriceToIDR(total)}`}
+                {loading ? "Placing Order..." : `Place Order — ${formatPriceTotal(total)}`}
             </button>
         </div>
     )

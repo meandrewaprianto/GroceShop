@@ -17,7 +17,7 @@
         "subtotal": "Subtotal",
         "delivery": "Pengiriman",
         "free": "Gratis",
-        "freeDelivery": "Gratis ongkir untuk pesanan di atas Rp 100.000!",
+        "freeDelivery": "Gratis ongkir untuk pesanan di atas Rp 330.000!",
         "checkout": "Checkout",
         "total": "Total"
     },
@@ -84,6 +84,6 @@
         "items": "item"
     },
     "delivery": {
-        "freeDelivery": "Gratis ongkir untuk pesanan di atas Rp 100.000"
+        "freeDelivery": "Gratis ongkir untuk pesanan di atas Rp 330.000"
     }
 }

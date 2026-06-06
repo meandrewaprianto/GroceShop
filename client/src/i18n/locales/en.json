@@ -17,7 +17,7 @@
         "subtotal": "Subtotal",
         "delivery": "Delivery",
         "free": "Free",
-        "freeDelivery": "Free delivery on orders over Rp 100.000!",
+        "freeDelivery": "Free delivery on orders over Rp 330.000!",
         "checkout": "Checkout",
         "total": "Total"
     },
@@ -84,6 +84,6 @@
         "items": "items"
     },
     "delivery": {
-        "freeDelivery": "Free delivery on orders above Rp 100.000"
+        "freeDelivery": "Free delivery on orders above Rp 330.000"
     }
 }

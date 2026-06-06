@@ -3,7 +3,7 @@ import type { Order } from "../types";
 import { Link, useSearchParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { statusColors } from "../assets/assets";
-import { formatIDR } from "../utils/formatCurrency";
+import { formatIDRRaw } from "../utils/formatCurrency";
 import Loading from "../components/Loading";
 import { CalendarIcon, ChevronRightIcon, PackageIcon, XIcon } from "lucide-react";
 import api from "../config/api";
@@ -118,7 +118,7 @@ const [orders, setOrders] = useState<Order[]>([]);
                                 <div className="flex justify-between items-center pt-4 mt-2 text-sm border-t border-app-border">
                                     <div className="flex items-center gap-3">
                                         <span className="text-app-text-light">{order.items.length} items</span>
-                                        <span className="font-semibold text-app-green text-base">{formatIDR(order.total)}</span>
+                                        <span className="font-semibold text-app-green text-base">{formatIDRRaw(order.total)}</span>
                                     </div>
                                     <Link to={`/orders/${order.id}`} className="px-4 py-2 bg-app-green text-white text-xs font-medium rounded-xl hover:bg-app-green-light transition-colors">
                                         Track Order

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { ArrowRightIcon, MinusIcon, PlusIcon, ShoppingBagIcon, Trash2Icon, XIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { formatPriceToIDR } from "../utils/formatCurrency";
+import { formatPriceToIDR, formatPriceTotal } from "../utils/formatCurrency";
 
 const CartSidebar = () => {
     const { t } = useTranslation();
@@ -11,7 +11,7 @@ const CartSidebar = () => {
 
     if (!isCartOpen) return null;
 
-    const FREE_DELIVERY_THRESHOLD = 6; // ~Rp 100.000 (6 * 16500)
+    const FREE_DELIVERY_THRESHOLD = 20; // Must match server (orderController.ts)
     const deliveryFee = cartTotal > FREE_DELIVERY_THRESHOLD ? 0 : 1.99
     const grandTotal = cartTotal + deliveryFee;
 
@@ -83,14 +83,14 @@ const CartSidebar = () => {
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-app-text-light">{t('cart.delivery')}</span>
-                            <span className="font-medium">{deliveryFee === 0 ? <span className="text-app-success">{t('cart.free')}</span> : formatPriceToIDR(deliveryFee)}</span>
+                            <span className="font-medium">{deliveryFee === 0 ? <span className="text-app-success">{t('cart.free')}</span> : formatPriceTotal(deliveryFee)}</span>
                         </div>
 
                         {deliveryFee > 0 && <p className="text-xs text-app-text-light text-center">{t('cart.freeDelivery')}</p>}
 
                         <div className="flex justify-between text-base font-semibold border-t border-app-border pt-3">
                             <span>{t('cart.total')}</span>
-                            <span>{formatPriceToIDR(grandTotal)}</span>
+                            <span>{formatPriceTotal(grandTotal)}</span>
                         </div>
 
                         <button

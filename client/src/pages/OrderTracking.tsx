@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { Order } from "../types";
-import { formatIDR } from "../utils/formatCurrency";
+import { formatIDR, formatIDRRaw } from "../utils/formatCurrency";
 import Loading from "../components/Loading";
 import { ArrowLeftIcon, MapPinIcon, PhoneIcon } from "lucide-react";
 import OrderOTP from "../components/OrderTracking/OrderOTP";
@@ -193,16 +193,16 @@ const OrderTracking = () => {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-app-text-light">Delivery</span>
-                                    <span>{order.deliveryFee === 0 ? "Free" : formatIDR(order.deliveryFee)}</span>
+                                    <span>{order.deliveryFee === 0 ? "Free" : formatIDRRaw(order.deliveryFee)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-app-text-light">Tax</span>
-                                    <span>{formatIDR(order.tax)} </span>
+                                    <span>{formatIDRRaw(order.tax)}</span>
                                 </div>
 
                                 <div className="flex justify-between pt-2 border-t border-app-border font-semibold text-app-green">
                                     <span>Total</span>
-                                    <span>{formatIDR(order.total)}</span>
+                                    <span>{formatIDRRaw(order.total)}</span>
                                 </div>
                             </div>
                         </div>

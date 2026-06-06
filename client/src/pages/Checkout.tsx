@@ -10,7 +10,7 @@ import CheckoutReview from "../components/Checkout/CheckoutReview";
 import api from "../config/api";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
-import { formatPriceToIDR } from "../utils/formatCurrency";
+import { formatPriceToIDR, formatPriceTotal } from "../utils/formatCurrency";
 
 const Checkout = () => {
     const navigate = useNavigate();
@@ -35,9 +35,10 @@ const Checkout = () => {
 
     const [paymentMethod, setPaymentMethod] = useState('card');
 
-    const deliveryFee = cartTotal > 6 ? 0 : 1.99;
-    const tax = cartTotal * 0.11;
-    const total = cartTotal + deliveryFee + tax;
+    // These calculations must match the server (orderController.ts)
+    const deliveryFee = cartTotal > 20 ? 0 : 1.99;
+    const tax = Math.round(cartTotal * 0.11 * 100) / 100;
+    const total = Math.round((cartTotal + deliveryFee + tax) * 100) / 100;
 
     const steps:
         { key: string; label: string; icon: typeof MapPinIcon }[] = [
@@ -156,17 +157,17 @@ const Checkout = () => {
 
                             <div className="flex justify-between">
                                 <span className="text-app-text-light">Delivery</span>
-                                <span>{deliveryFee === 0 ? <span className="text-app-success">Free</span> : formatPriceToIDR(deliveryFee)}</span>
+                                <span>{deliveryFee === 0 ? <span className="text-app-success">Free</span> : formatPriceTotal(deliveryFee)}</span>
                             </div>
 
                             <div className="flex justify-between">
                                 <span className="text-app-text-light">Tax (PPN 11%)</span>
-                                <span>{formatPriceToIDR(tax)}</span>
+                                <span>{formatPriceTotal(tax)}</span>
                             </div>
 
                             <div className="flex justify-between pt-3 border-t border-app-border text-base font-semibold">
                                 <span>Total</span>
-                                <span className="text-app-green">{formatPriceToIDR(total)}</span>
+                                <span className="text-app-green">{formatPriceTotal(total)}</span>
                             </div>
                         </div>
                     </div>

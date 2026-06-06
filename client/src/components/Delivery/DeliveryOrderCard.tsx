@@ -1,7 +1,7 @@
 import { CheckCircleIcon, ClockIcon, MapPinIcon, PhoneIcon, TruckIcon, XCircleIcon } from 'lucide-react'
 import type { Order } from '../../types'
 import { statusColors } from '../../assets/assets';
-import { formatPriceToIDR } from '../../utils/formatCurrency';
+import { formatPriceTotal } from '../../utils/formatCurrency';
 
 interface DeliveryOrderCardProps {
     order: Order;
@@ -25,7 +25,7 @@ export default function DeliveryOrderCard({ order, tab, handleUpdateStatus, setO
                         {order.status}
                     </span>
                 </div>
-                <span className="text-sm font-semibold text-zinc-900">{formatPriceToIDR(order.total)}</span>
+                <span className="text-sm font-semibold text-zinc-900">{formatPriceTotal(order.total)}</span>
             </div>
 
             {/* Body */}

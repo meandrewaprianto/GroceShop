@@ -171,9 +171,29 @@ export default function AdminProductForm() {
                             </div>
                         </div>
 
-                        <div className="pt-6 border-t border-app-border flex justify-end">
-                            <button disabled={saving} type="submit" className="px-6 py-2.5 bg-app-orange text-white font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50">
-                                {saving ? "Saving..." : "Save Product"}
+                        <div className="pt-6 border-t border-app-border flex justify-end gap-3">
+                            <Link
+                                to="/admin/products"
+                                className="px-6 py-2.5 bg-zinc-100 text-zinc-600 font-medium rounded-lg hover:bg-zinc-200 transition-colors"
+                            >
+                                Cancel
+                            </Link>
+                            <button
+                                disabled={saving}
+                                type="submit"
+                                className="px-6 py-2.5 bg-app-orange text-white font-medium rounded-lg hover:bg-orange-600 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 min-w-[140px] justify-center"
+                            >
+                                {saving ? (
+                                    <>
+                                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                        </svg>
+                                        <span>Saving...</span>
+                                    </>
+                                ) : (
+                                    "Save Product"
+                                )}
                             </button>
                         </div>
                     </form>

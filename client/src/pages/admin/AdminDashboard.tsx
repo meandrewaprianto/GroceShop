@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { PackageIcon, UsersIcon, ShoppingBagIcon, AlertTriangleIcon, DollarSignIcon, TrendingUpIcon, TruckIcon, ArrowUpIcon, MoreHorizontalIcon } from "lucide-react";
 import Loading from "../../components/Loading";
 import api from "../../config/api";
-import { formatPriceToIDR } from "../../utils/formatCurrency";
+import { formatPriceTotal } from "../../utils/formatCurrency";
 
 interface Stats {
     totalOrders: number;
@@ -172,9 +172,9 @@ export default function AdminDashboard() {
 
     const cards = stats
         ? [
-            { label: "Total Revenue", value: formatPriceToIDR(stats.totalRevenue), icon: DollarSignIcon, iconBg: "bg-green-100 text-green-600" },
+            { label: "Total Revenue", value: formatPriceTotal(stats.totalRevenue), icon: DollarSignIcon, iconBg: "bg-green-100 text-green-600" },
             { label: "Total Orders", value: stats.totalOrders.toLocaleString("id-ID"), icon: ShoppingBagIcon, iconBg: "bg-blue-100 text-blue-600" },
-            { label: "Avg Order Value", value: formatPriceToIDR(stats.avgOrderValue), icon: TrendingUpIcon, iconBg: "bg-purple-100 text-purple-600" },
+            { label: "Avg Order Value", value: formatPriceTotal(stats.avgOrderValue), icon: TrendingUpIcon, iconBg: "bg-purple-100 text-purple-600" },
             { label: "Total Users", value: stats.totalUsers.toLocaleString("id-ID"), icon: UsersIcon, iconBg: "bg-orange-100 text-orange-600" },
             { label: "Total Products", value: stats.totalProducts.toLocaleString("id-ID"), icon: PackageIcon, iconBg: "bg-cyan-100 text-cyan-600" },
             { label: "Out of Stock", value: stats.outOfStock.toLocaleString("id-ID"), icon: AlertTriangleIcon, iconBg: "bg-red-100 text-red-600" },
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="text-right">
                             <p className="text-2xl font-semibold text-zinc-900 tabular-nums">
-                                {formatPriceToIDR(stats?.dailyRevenue.reduce((s, d) => s + d.revenue, 0) || 0)}
+                                {formatPriceTotal(stats?.dailyRevenue.reduce((s, d) => s + d.revenue, 0) || 0)}
                             </p>
                             <p className="text-xs text-green-600 font-medium flex items-center gap-1 justify-end mt-0.5">
                                 <ArrowUpIcon className="size-3" /> Total this week
@@ -309,7 +309,7 @@ export default function AdminDashboard() {
                                                 <p className="font-medium text-zinc-900">{order.user?.name || "—"}</p>
                                                 <p className="text-xs text-zinc-500">{order.user?.email || ""}</p>
                                             </td>
-                                            <td className="px-5 py-3.5 font-semibold text-zinc-900 tabular-nums">{formatPriceToIDR(order.total || 0)}</td>
+                                            <td className="px-5 py-3.5 font-semibold text-zinc-900 tabular-nums">{formatPriceTotal(order.total || 0)}</td>
                                             <td className="px-5 py-3.5">
                                                 <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusBgColor[order.status] || "bg-zinc-100 text-zinc-600"}`}>
                                                     {order.status}
