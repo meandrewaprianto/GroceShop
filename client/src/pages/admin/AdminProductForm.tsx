@@ -1,10 +1,49 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { ArrowLeftIcon } from "lucide-react";
 import { useCategories } from "../../hooks/useCategories";
 import Loading from "../../components/Loading";
 import api from "../../config/api";
 import toast from "react-hot-toast";
+
+// Compress an image File in the browser using Canvas.
+// Target: max dimension 1200px, JPEG quality 0.8.
+// This keeps product images well under Vercel's 4.5 MB request body limit.
+async function compressImage(file: File, maxDimension = 1200, quality = 0.8): Promise<File> {
+    // Skip non-images and small files
+    if (!file.type.startsWith("image/")) return file;
+    if (file.size <= 500 * 1024) return file; // already under ~500KB
+
+    const imgBitmap = await createImageBitmap(file);
+    let { width, height } = imgBitmap;
+
+    if (width > maxDimension || height > maxDimension) {
+        if (width >= height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+        } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+        }
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(imgBitmap, 0, 0, width, height);
+
+    const blob: Blob | null = await new Promise((resolve) =>
+        canvas.toBlob((b) => resolve(b), "image/jpeg", quality)
+    );
+
+    if (!blob) return file;
+
+    const newName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+    return new File([blob], newName, { type: "image/jpeg" });
+}
 
 export default function AdminProductForm() {
     const { id } = useParams();
@@ -14,7 +53,11 @@ export default function AdminProductForm() {
 
     const [loading, setLoading] = useState(isEdit);
     const [saving, setSaving] = useState(false);
+    const [compressing, setCompressing] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const [originalSize, setOriginalSize] = useState<number | null>(null);
+    const [compressedSize, setCompressedSize] = useState<number | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -47,7 +90,7 @@ export default function AdminProductForm() {
                     })
                 }
             } catch (error: unknown) {
-                if(error instanceof Error) {
+                if (error instanceof Error) {
                     toast.error(error.message);
                 }
             } finally {
@@ -57,7 +100,34 @@ export default function AdminProductForm() {
         fetchData();
     }, [id, isEdit]);
 
-    const handleSubmit = async (e: React.SubmitEvent) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) {
+            setImageFile(null);
+            setOriginalSize(null);
+            setCompressedSize(null);
+            return;
+        }
+
+        setOriginalSize(file.size);
+        setCompressing(true);
+        try {
+            const compressed = await compressImage(file);
+            setImageFile(compressed);
+            setCompressedSize(compressed.size);
+            if (compressed.size < file.size) {
+                toast.success(`Image compressed: ${(file.size / 1024).toFixed(0)}KB → ${(compressed.size / 1024).toFixed(0)}KB`);
+            }
+        } catch (err) {
+            console.error("Compression failed, using original:", err);
+            setImageFile(file);
+            setCompressedSize(file.size);
+        } finally {
+            setCompressing(false);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
         try {
@@ -66,12 +136,14 @@ export default function AdminProductForm() {
             if (imageFile) {
                 const formDataUpload = new FormData();
                 formDataUpload.append("image", imageFile);
-                const { data } = await api.post("/upload", formDataUpload);
+                const { data } = await api.post("/upload", formDataUpload, {
+                    timeout: 60000, // 60s for slow Cloudinary uploads
+                });
                 finalImageUrl = data.url
             }
 
             if (!finalImageUrl) {
-                toast.error("Please upload a produc image");
+                toast.error("Please upload a product image");
                 setSaving(false);
                 return
             }
@@ -93,8 +165,13 @@ export default function AdminProductForm() {
             }
             navigate('/admin/products')
         } catch (error: unknown) {
-            if(error instanceof Error) {
+            if (axios.isAxiosError(error)) {
+                const msg = error.response?.data?.message || error.message;
+                toast.error(msg);
+            } else if (error instanceof Error) {
                 toast.error(error.message);
+            } else {
+                toast.error("Failed to save product");
             }
         } finally {
             setSaving(false)
@@ -158,7 +235,28 @@ export default function AdminProductForm() {
                                             <img src={imageFile ? URL.createObjectURL(imageFile) : formData.image} alt="Preview" className="w-full h-full object-cover" />
                                         </div>
                                     )}
-                                    <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 focus:border-app-green outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-app-orange file:text-white hover:file:bg-orange-600 cursor-pointer" />
+                                    <div className="flex-1">
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleFileChange}
+                                            className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 focus:border-app-green outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-app-orange file:text-white hover:file:bg-orange-600 cursor-pointer"
+                                        />
+                                        {compressing && (
+                                            <p className="text-xs text-zinc-500 mt-1">Compressing image...</p>
+                                        )}
+                                        {!compressing && originalSize && compressedSize && originalSize !== compressedSize && (
+                                            <p className="text-xs text-zinc-500 mt-1">
+                                                Compressed: {(originalSize / 1024).toFixed(0)}KB → {(compressedSize / 1024).toFixed(0)}KB
+                                            </p>
+                                        )}
+                                        {!compressing && compressedSize && (
+                                            <p className="text-xs text-zinc-500 mt-1">
+                                                Max upload size: 4MB (Vercel limit)
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             <div className="md:col-span-2">
@@ -179,7 +277,7 @@ export default function AdminProductForm() {
                                 Cancel
                             </Link>
                             <button
-                                disabled={saving}
+                                disabled={saving || compressing}
                                 type="submit"
                                 className="px-6 py-2.5 bg-app-orange text-white font-medium rounded-lg hover:bg-orange-600 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 min-w-[140px] justify-center"
                             >
