@@ -3,14 +3,14 @@ import type { Order } from "../types";
 import { Link, useSearchParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { statusColors } from "../assets/assets";
+import { formatIDR } from "../utils/formatCurrency";
 import Loading from "../components/Loading";
 import { CalendarIcon, ChevronRightIcon, PackageIcon, XIcon } from "lucide-react";
 import api from "../config/api";
 import toast from "react-hot-toast";
 
 const MyOrders = () => {
-    const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "$";
-    const [orders, setOrders] = useState<Order[]>([]);
+const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("all");
     const [searchParams, setSearchParams] = useSearchParams();
@@ -118,7 +118,7 @@ const MyOrders = () => {
                                 <div className="flex justify-between items-center pt-4 mt-2 text-sm border-t border-app-border">
                                     <div className="flex items-center gap-3">
                                         <span className="text-app-text-light">{order.items.length} items</span>
-                                        <span className="font-semibold text-app-green text-base">{currency}{order.total.toFixed(2)}</span>
+                                        <span className="font-semibold text-app-green text-base">{formatIDR(order.total)}</span>
                                     </div>
                                     <Link to={`/orders/${order.id}`} className="px-4 py-2 bg-app-green text-white text-xs font-medium rounded-xl hover:bg-app-green-light transition-colors">
                                         Track Order

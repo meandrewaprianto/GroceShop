@@ -1,123 +1,197 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from "react-leaflet";
-import { MapPinIcon } from "lucide-react";
+import { NavigationIcon, LocateFixedIcon } from "lucide-react";
 import { iconsForLeafpad } from "../../assets/assets";
 import L from "leaflet";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import axios from "axios";
+import type { Order } from "../../types";
 import "leaflet/dist/leaflet.css";
 
-export default function LiveMap({ order, liveLocation }: { order: any, liveLocation: any }) {
+// Create pulsing delivery marker using Leaflet divIcon
+function createPulseIcon() {
+    return L.divIcon({
+        className: "custom-delivery-marker",
+        html: `
+            <div style="position:relative;width:40px;height:40px;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;background:#f97316;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:2;"></div>
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:rgba(249,115,22,0.25);border-radius:50%;animation:pulse 2s infinite;z-index:1;"></div>
+            </div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
+        popupAnchor: [0, -20],
+    });
+}
+
+// Component to re-center map and fit bounds (declared outside parent component)
+function MapUpdater({ live, dest, route }: { live: [number, number] | null; dest: [number, number] | null; route: [number, number][] }) {
+    const map = useMap();
+    useEffect(() => {
+        if (route.length > 0) {
+            map.fitBounds(route, { padding: [60, 60] });
+        } else if (live && dest && dest[0] !== 0) {
+            map.fitBounds([live, dest], { padding: [60, 60] });
+        } else if (live) {
+            map.setView(live, 15);
+        } else if (dest) {
+            map.setView(dest, 15);
+        }
+    }, [live, dest, route, map]);
+    return null;
+}
+
+export default function LiveMap({ order, liveLocation }: { order: Order; liveLocation: { lat: number; lng: number } | null }) {
     const [routeCoords, setRouteCoords] = useState<[number, number][]>([]);
-
-    // Custom delivery truck icon
-    const truckIcon = new L.Icon({
-        iconUrl: iconsForLeafpad.truck,
-        iconSize: [36, 36],
-        iconAnchor: [18, 36],
-        popupAnchor: [0, -36],
-    });
-
-    // Destination pin icon
-    const destinationIcon = new L.Icon({
-        iconUrl: iconsForLeafpad.destination,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32],
-    });
+    const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
+    const prevHasLocation = useRef(false);
 
     const destLat = order.shippingAddress?.lat ? Number(order.shippingAddress.lat) : null;
     const destLng = order.shippingAddress?.lng ? Number(order.shippingAddress.lng) : null;
 
+    // Custom icons (memoized to prevent re-creation)
+    const pulseIcon = useMemo(() => createPulseIcon(), []);
+    const destinationIcon = useMemo(() => new L.Icon({
+        iconUrl: iconsForLeafpad.destination,
+        iconSize: [36, 36],
+        iconAnchor: [18, 36],
+        popupAnchor: [0, -36],
+    }), []);
+
+    // Reset route state when live location disappears
+    useEffect(() => {
+        const hasLocation = liveLocation && liveLocation.lat !== 0 && !!destLat && !!destLng;
+        if (!hasLocation && prevHasLocation.current) {
+            setRouteCoords([]);
+            setRouteInfo(null);
+        }
+        prevHasLocation.current = !!hasLocation;
+    }, [liveLocation?.lat, destLat, destLng]);
+
     // Fetch navigation path from OSRM (Google Maps-like routing)
     useEffect(() => {
         if (!liveLocation || liveLocation.lat === 0 || !destLat || !destLng) {
-            setRouteCoords([]);
             return;
         }
+
+        let cancelled = false;
 
         const fetchRoute = async () => {
             try {
                 const url = `https://router.project-osrm.org/route/v1/driving/${liveLocation.lng},${liveLocation.lat};${destLng},${destLat}?overview=full&geometries=geojson`;
                 const { data } = await axios.get(url);
+                if (cancelled) return;
                 if (data.routes && data.routes[0]) {
-                    // OSRM returns coordinates as [lng, lat], we map it to [lat, lng] for leaflet
-                    const coords = data.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]) as [number, number][];
+                    const route = data.routes[0];
+                    const coords = route.geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]) as [number, number][];
                     setRouteCoords(coords);
+
+                    const km = (route.distance / 1000).toFixed(1);
+                    const mins = Math.round(route.duration / 60);
+                    setRouteInfo({
+                        distance: `${km} km`,
+                        duration: `${mins} min`,
+                    });
                 } else {
                     setRouteCoords([[liveLocation.lat, liveLocation.lng], [destLat, destLng]]);
+                    setRouteInfo(null);
                 }
             } catch (error) {
+                if (cancelled) return;
                 console.error("OSRM Routing API failed, falling back to straight line:", error);
                 setRouteCoords([[liveLocation.lat, liveLocation.lng], [destLat, destLng]]);
+                setRouteInfo(null);
             }
         };
 
         fetchRoute();
-    }, [liveLocation?.lat, liveLocation?.lng, destLat, destLng]);
 
-    // Component to re-center map when location changes and fit bounds to include both driver and destination
-    function MapUpdater({ live, dest, route }: { live: [number, number] | null; dest: [number, number] | null; route: [number, number][] }) {
-        const map = useMap();
-        useEffect(() => {
-            if (route.length > 0) {
-                map.fitBounds(route, { padding: [50, 50] });
-            } else if (live && dest && dest[0] !== 0) {
-                map.fitBounds([live, dest], { padding: [50, 50] });
-            } else if (live) {
-                map.setView(live, map.getZoom());
-            } else if (dest) {
-                map.setView(dest, map.getZoom());
-            }
-        }, [live, dest, route, map]);
-        return null;
-    }
+        return () => { cancelled = true; };
+    }, [liveLocation?.lat, liveLocation?.lng, destLat, destLng]);
 
     return (
         <>
             {order.status !== "Delivered" && order.status !== "Cancelled" && (
-                <div className="relative z-0 rounded-2xl overflow-hidden border border-app-border" style={{ height: 280 }}>
-                    {liveLocation && liveLocation.lat !== 0 ? (
-                        <MapContainer center={[liveLocation.lat, liveLocation.lng]} zoom={15} style={{ height: "100%", width: "100%" }} zoomControl={false}>
-                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                            <Marker position={[liveLocation.lat, liveLocation.lng]} icon={truckIcon}>
-                                <Popup>Delivery Partner</Popup>
-                            </Marker>
-                            {destLat && destLng && (
-                                <>
-                                    <Marker position={[destLat, destLng]} icon={destinationIcon}>
-                                        <Popup>Delivery Address</Popup>
-                                    </Marker>
-                                    <Polyline
-                                        positions={routeCoords.length > 0 ? routeCoords : [[liveLocation.lat, liveLocation.lng], [destLat, destLng]]}
-                                        color="#16a34a"
-                                        dashArray="5, 10"
-                                        weight={4}
-                                    />
-                                </>
-                            )}
-                            <MapUpdater
-                                live={[liveLocation.lat, liveLocation.lng]}
-                                dest={destLat && destLng ? [destLat, destLng] : null}
-                                route={routeCoords}
-                            />
-                        </MapContainer>
-                    ) : destLat && destLng ? (
-                        <MapContainer center={[destLat, destLng]} zoom={15} style={{ height: "100%", width: "100%" }} zoomControl={false}>
-                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                            <Marker position={[destLat, destLng]} icon={destinationIcon}>
-                                <Popup>Delivery Address</Popup>
-                            </Marker>
-                        </MapContainer>
-                    ) : (
-                        <div className="h-full bg-app-green/5 flex-center">
-                            <div className="text-center">
-                                <MapPinIcon className="size-8 text-app-green/40 mx-auto mb-2" />
-                                <p className="text-sm text-app-green/50 font-medium">Waiting for delivery partner location...</p>
+                <>
+                    {/* ETA Banner - like Gojek/Grab */}
+                    {liveLocation && liveLocation.lat !== 0 && routeInfo && (
+                        <div className="bg-white rounded-2xl p-4 mb-3 border border-app-border shadow-sm">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="size-10 rounded-full bg-app-orange/10 flex items-center justify-center">
+                                        <LocateFixedIcon className="size-5 text-app-orange" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-app-text-light">Estimated arrival</p>
+                                        <p className="text-lg font-bold text-app-green">{routeInfo.duration}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-xs text-app-text-light">Distance</p>
+                                    <p className="text-sm font-semibold text-app-green">{routeInfo.distance}</p>
+                                </div>
                             </div>
                         </div>
                     )}
-                </div>
+                    <div className="relative z-0 rounded-2xl overflow-hidden border border-app-border shadow-sm" style={{ height: 320 }}>
+                        {liveLocation && liveLocation.lat !== 0 ? (
+                            <MapContainer center={[liveLocation.lat, liveLocation.lng]} zoom={15} style={{ height: "100%", width: "100%" }} zoomControl={false}>
+                                {/* CartoDB Voyager tiles - clean modern look like Google Maps */}
+                                <TileLayer
+                                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+                                />
+                                <Marker position={[liveLocation.lat, liveLocation.lng]} icon={pulseIcon}>
+                                    <Popup>Delivery Partner</Popup>
+                                </Marker>
+                                {destLat && destLng && (
+                                    <>
+                                        <Marker position={[destLat, destLng]} icon={destinationIcon}>
+                                            <Popup>Delivery Address</Popup>
+                                        </Marker>
+                                        <Polyline
+                                            positions={routeCoords.length > 0 ? routeCoords : [[liveLocation.lat, liveLocation.lng], [destLat, destLng]]}
+                                            color="#f97316"
+                                            weight={5}
+                                            opacity={0.8}
+                                        />
+                                    </>
+                                )}
+                                <MapUpdater
+                                    live={[liveLocation.lat, liveLocation.lng]}
+                                    dest={destLat && destLng ? [destLat, destLng] : null}
+                                    route={routeCoords}
+                                />
+                            </MapContainer>
+                        ) : destLat && destLng ? (
+                            <MapContainer center={[destLat, destLng]} zoom={15} style={{ height: "100%", width: "100%" }} zoomControl={false}>
+                                <TileLayer
+                                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+                                />
+                                <Marker position={[destLat, destLng]} icon={destinationIcon}>
+                                    <Popup>Delivery Address</Popup>
+                                </Marker>
+                            </MapContainer>
+                        ) : (
+                            <div className="h-full bg-gradient-to-br from-app-cream to-app-green/5 flex-center">
+                                <div className="text-center">
+                                    <div className="size-16 rounded-full bg-app-orange/10 flex items-center justify-center mx-auto mb-3 animate-pulse">
+                                        <NavigationIcon className="size-7 text-app-orange" />
+                                    </div>
+                                    <p className="text-sm text-app-green font-medium">Waiting for delivery partner location...</p>
+                                    <p className="text-xs text-app-text-light mt-1">Driver will appear on map once they start</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </>
             )}
+            <style>{`
+                @keyframes pulse {
+                    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+                    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+                }
+            `}</style>
         </>
     )
 }

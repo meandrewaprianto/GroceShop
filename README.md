@@ -56,6 +56,7 @@ Aplikasi ini didesain dengan estetika berkelas menggunakan palet warna natural (
 - 🔍 **Global Search Autocomplete** - Pencarian instan dengan dropdown saran & keyboard navigation
 - 🔍 **Smart Search & Filter** - Filter dinamis URL-driven (kategori, organik, harga, sorting)
 - 🛒 **Reactive Cart** - Keranjang real-time dengan persistensi localStorage
+- ❤️ **Wishlist System** - Simpan & kelola produk favorit dengan toggle instan
 - 💳 **Multiple Payment** - Stripe (kartu kredit) & Cash on Delivery (COD)
 - 📍 **Real-Time Tracking** - Pelacakan kurir live dengan peta interaktif
 - ⭐ **Product Reviews** - Review & rating dengan integrasi purchase verification (hanya pembeli)
@@ -72,13 +73,14 @@ Aplikasi ini didesain dengan estetika berkelas menggunakan palet warna natural (
 
 - 📲 **Auto-Assignment** - Penugasan otomatis via background jobs
 - 🔢 **OTP Verification** - Sistem OTP 6-digit untuk konfirmasi delivery
-- 🗺️ **GPS Tracking** - Berbagi lokasi real-time ke customer
+- 🗺️ **GPS Tracking** - Berbagi lokasi real-time ke customer dengan rute navigasi (OSRM) & ETA
 - 📊 **Dashboard** - Daftar tugas & status delivery
 
 ### ⚡ **Advanced Features**
 
 - 🎯 **Flash Deals** - Halaman promo dengan filter algoritmik (diskon ≥10%)
 - 📧 **Email Notifications** - Low stock alert, promo bulanan, order updates
+- 🔔 **Push Notifications** - Browser push notifications via web-push (VAPID)
 - 🔄 **Auto-Refresh** - Dashboard kurir update otomatis tanpa reload
 - 🔐 **Role-Based Access** - User, Admin, Delivery Partner
 - 🛡️ **Verified Reviews** - Review hanya dari pembeli yang sudah diverifikasi via order history
@@ -91,20 +93,20 @@ Aplikasi ini didesain dengan estetika berkelas menggunakan palet warna natural (
 
 ### **Frontend**
 
-| Technology       | Version | Purpose                 |
-| ---------------- | ------- | ----------------------- |
-| React            | 19.2.6  | UI Framework            |
-| TypeScript       | 6.0     | Type Safety             |
-| Vite             | 8.0     | Build Tool              |
-| Tailwind CSS     | 4.3.0   | Styling                 |
-| React Router     | 7.15.1  | Routing                 |
-| i18next          | 25.0.0  | Internationalization    |
-| react-i18next    | 15.6.0  | React i18n integration  |
-| Axios            | 1.17.0  | HTTP Client             |
-| Socket.io Client | 4.8.3   | Real-time Communication |
-| React Leaflet    | 5.0.0   | Maps Integration        |
-| React Hot Toast  | 2.6.0   | Notifications           |
-| Lucide React     | 1.16.0  | Icons                   |
+| Technology       | Version | Purpose                      |
+| ---------------- | ------- | ---------------------------- |
+| React            | 19.2.6  | UI Framework                 |
+| TypeScript       | 6.0     | Type Safety                  |
+| Vite             | 8.0     | Build Tool                   |
+| Tailwind CSS     | 4.3.0   | Styling                      |
+| React Router     | 7.15.1  | Routing                      |
+| i18next          | 25.0.0  | Internationalization         |
+| react-i18next    | 15.6.0  | React i18n integration       |
+| Axios            | 1.17.0  | HTTP Client                  |
+| Socket.io Client | 4.8.3   | Real-time Communication      |
+| React Leaflet    | 5.0.0   | Maps (CartoDB Voyager tiles) |
+| React Hot Toast  | 2.6.0   | Notifications                |
+| Lucide React     | 1.16.0  | Icons                        |
 
 ### **Backend**
 
@@ -122,6 +124,7 @@ Aplikasi ini didesain dengan estetika berkelas menggunakan palet warna natural (
 | Cloudinary        | 2.10.0     | Image Storage      |
 | JWT               | 9.0.3      | Authentication     |
 | Bcrypt            | 6.0.0      | Password Hashing   |
+| Web-push          | -          | Push Notifications |
 
 ---
 
@@ -303,6 +306,22 @@ npm run seed
 | DELETE | `/api/reviews/:id`         | Delete own review             | ✅                 |
 | POST   | `/api/reviews/:id/helpful` | Mark review as helpful        | ✅                 |
 
+### **Wishlist Endpoints**
+
+| Method | Endpoint                         | Description                             | Auth Required |
+| ------ | -------------------------------- | --------------------------------------- | ------------- |
+| GET    | `/api/wishlist`                  | Get all wishlist products               | ✅            |
+| POST   | `/api/wishlist/:productId`       | Toggle product in wishlist (add/remove) | ✅            |
+| GET    | `/api/wishlist/check/:productId` | Check if product is wishlisted          | ✅            |
+
+### **Notification Endpoints (Push Notifications)**
+
+| Method | Endpoint                              | Description                         | Auth Required |
+| ------ | ------------------------------------- | ----------------------------------- | ------------- |
+| GET    | `/api/notifications/vapid-public-key` | Get VAPID public key for client     | ❌            |
+| POST   | `/api/notifications/subscribe`        | Subscribe to push notifications     | ✅            |
+| POST   | `/api/notifications/unsubscribe`      | Unsubscribe from push notifications | ✅            |
+
 ### **Admin Endpoints**
 
 | Method | Endpoint                       | Description               | Auth Required |
@@ -337,16 +356,19 @@ npm run seed
 
 ```prisma
 model User {
-    id        String    @id @default(uuid())
-    name      String
-    email     String    @unique
-    password  String
-    phone     String?   @default("")
-    avatar    String?   @default("")
-    addresses Address[]
-    orders    Order[]
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
+    id                String             @id @default(uuid())
+    name              String
+    email             String             @unique
+    password          String
+    phone             String?            @default("")
+    avatar            String?            @default("")
+    addresses         Address[]
+    orders            Order[]
+    wishlist          WishlistItem[]
+    pushSubscriptions PushSubscription[]
+    reviews           Review[]
+    createdAt         DateTime           @default(now())
+    updatedAt         DateTime           @updatedAt
 }
 
 model Address {
@@ -366,20 +388,37 @@ model Address {
 }
 
 model Product {
-    id            String   @id @default(uuid())
+    id            String         @id @default(uuid())
     name          String
-    description   String?  @default("")
+    description   String?        @default("")
     price         Float
     originalPrice Float?
     image         String
     category      String
-    unit          String?  @default("piece")
-    stock         Int?     @default(0)
-    isOrganic     Boolean? @default(false)
-    rating        Float?   @default(0)
-    reviewCount   Int?     @default(0)
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
+    unit          String?        @default("piece")
+    stock         Int?           @default(0)
+    isOrganic     Boolean?       @default(false)
+    rating        Float?         @default(0)
+    reviewCount   Int?           @default(0)
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    reviews       Review[]
+    wishlistedBy  WishlistItem[]
+}
+
+model Review {
+    id        String   @id @default(uuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    productId String
+    product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+    rating    Int      // 1-5
+    comment   String?  @default("")
+    helpful   Int?     @default(0)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([userId, productId]) // User hanya bisa review sekali per produk
 }
 
 model Order {
@@ -418,6 +457,27 @@ model DeliveryPartner {
     orders      Order[]
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
+}
+
+model WishlistItem {
+    id        String   @id @default(uuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    productId String
+    product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+
+    @@unique([userId, productId])
+}
+
+model PushSubscription {
+    id        String   @id @default(uuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    endpoint  String
+    p256dh    String
+    auth      String
+    createdAt DateTime @default(now())
 }
 ```
 
@@ -518,11 +578,11 @@ model DeliveryPartner {
 - [x] **Analytics Dashboard** - Revenue line chart, status donut chart, top products, dan stat cards
 - [x] **Admin Products Pagination & Search** - 10 items/page dengan search by name/category
 - [x] **Responsive Product Cards** - Mobile-optimized price layout (no overlap dengan tombol)
+- [x] **Wishlist System** - Simpan & kelola produk favorit dengan toggle instan via dedicated Wishlist page
+- [x] **Push Notifications (Web-Push)** - Browser push notifications via VAPID protocol dengan auto-cleanup expired subscriptions
 
 ### 🚧 **Future Enhancements**
 
-- [ ] **Wishlist System** - Simpan produk favorit
-- [ ] **Push Notifications** - Browser notifications
 - [ ] **Unit & E2E Testing** - Vitest + Playwright
 - [ ] **CI/CD Pipeline** - Automated testing & deployment
 - [ ] **Wishlist Sharing** - Share wishlist with friends
@@ -537,6 +597,9 @@ model DeliveryPartner {
 GroceShop/
 ├── client/                          # Frontend Application (React + Vite)
 │   ├── public/                      # Static assets
+│   │   ├── favicon.svg
+│   │   ├── sw.js                    # Service Worker (PWA + push notifications)
+│   │   └── icons/                   # PWA icons
 │   └── src/
 │       ├── assets/                  # Images, illustrations & mock data
 │       ├── components/              # Reusable UI components
@@ -561,8 +624,16 @@ GroceShop/
 │       ├── config/
 │       │   └── api.ts               # Axios instance + JWT interceptor
 │       ├── context/
-│       │   ├── AuthContext.tsx      # Global auth state
-│       │   └── CartContext.tsx      # Cart state + localStorage
+│       │   ├── AuthContext.tsx       # Global auth state
+│       │   ├── CartContext.tsx       # Cart state + localStorage
+│       │   ├── NotificationContext.tsx  # Push notification subscription
+│       │   ├── ThemeContext.tsx      # Dark mode state
+│       │   └── WishlistContext.tsx   # Wishlist state management
+│       ├── hooks/
+│       │   └── useCategories.ts     # Fetch dynamic categories
+│       ├── i18n/
+│       │   ├── i18n.ts
+│       │   └── locales/             # EN & ID translations
 │       ├── pages/
 │       │   ├── admin/               # Admin panel pages
 │       │   ├── delivery/            # Delivery partner pages
@@ -576,48 +647,55 @@ GroceShop/
 │       │   ├── OrderTracking.tsx
 │       │   ├── ProductPage.tsx
 │       │   ├── Products.tsx
-│       │   └── SearchResults.tsx
+│       │   ├── SearchResults.tsx
+│       │   └── Wishlist.tsx
 │       ├── types/
 │       │   └── index.ts             # TypeScript interfaces
+│       ├── utils/
+│       │   └── formatCurrency.ts
 │       ├── App.tsx                  # Main app component
 │       ├── index.css                # Global styles + design system
 │       └── main.tsx                 # App entry point
-│
+
 └── server/                          # Backend Application (Node.js + Express)
     ├── config/
     │   ├── cloudinary.ts            # Cloudinary configuration
     │   ├── nodemailer.ts            # Email service configuration
     │   └── prisma.ts                # Prisma + Neon client setup
     ├── controllers/
+    │   ├── addressController.ts     # Address management
     │   ├── adminController.ts       # Admin operations
     │   ├── authController.ts        # Authentication
+    │   ├── categoryController.ts    # Dynamic categories
     │   ├── deliveryController.ts    # Delivery partner operations
+    │   ├── notificationController.ts # Push notification management
     │   ├── orderController.ts       # Order management
     │   ├── productController.ts     # Product CRUD
-    │   ├── addressController.ts     # Address management
     │   ├── reviewController.ts      # Product reviews & ratings
-    │   └── webhooks.ts              # Stripe webhook handler
+    │   ├── suggestionController.ts  # Search autocomplete suggestions
+    │   ├── webhooks.ts              # Stripe webhook handler
+    │   └── wishlistController.ts    # Wishlist operations
     ├── inngest/                     # Background jobs
-    │   ├── functions/
-    │   │   ├── lowStockAlert.ts     # Low stock email alerts
-    │   │   ├── monthlyOffers.ts     # Monthly promo emails
-    │   │   └── autoAssignRider.ts   # Auto-assign delivery
-    │   └── index.ts
+    │   └── index.ts                 # Low stock alerts, monthly offers, auto-assign
     ├── middleware/
     │   ├── auth.ts                  # JWT user authentication + optionalAuth
     │   ├── admin.ts                 # Admin role guard
     │   └── deliveryAuth.ts          # Delivery partner JWT
     ├── prisma/
-    │   └── schema.prisma            # Database schema
+    │   └── schema.prisma            # Database schema (7 models)
     ├── routes/
-    │   ├── authRoutes.ts
-    │   ├── productRoutes.ts
-    │   ├── orderRoute.ts
     │   ├── addressRoute.ts
-    │   ├── reviewRoutes.ts
     │   ├── adminRoute.ts
+    │   ├── authRoutes.ts
     │   ├── deliveryPartnerRoute.ts
-    │   └── uploadRoutes.ts
+    │   ├── notificationRoutes.ts
+    │   ├── orderRoute.ts
+    │   ├── productRoutes.ts
+    │   ├── reviewRoutes.ts
+    │   ├── uploadRoutes.ts
+    │   └── wishlistRoutes.ts
+    ├── types/
+    │   └── express/                 # Express request type augmentation
     ├── generated/                   # Generated Prisma client
     ├── server.ts                    # Express + Socket.io entry
     ├── seed.ts                      # Database seeding
@@ -633,7 +711,7 @@ GroceShop/
 ```env
 VITE_BASE_URL=http://localhost:3000/api
 VITE_API_URL=http://localhost:3000
-VITE_CURRENCY_SYMBOL=$
+VITE_VAPID_PUBLIC_KEY=your_vapid_public_key
 ```
 
 ### **Server Environment Variables** (`server/.env`)
@@ -668,6 +746,13 @@ PORT=3000
 # Inngest (Background Jobs)
 INNGEST_SIGNING_KEY=your_inngest_signing_key
 INNGEST_EVENT_KEY=your_inngest_event_key
+
+# VAPID Keys (Push Notifications)
+VAPID_PUBLIC_KEY=your_vapid_public_key
+VAPID_PRIVATE_KEY=your_vapid_private_key
+
+# Sender Email (for VAPID mailto)
+SENDER_EMAIL=noreply@groceshop.com
 ```
 
 ### **Getting API Keys**
@@ -677,6 +762,7 @@ INNGEST_EVENT_KEY=your_inngest_event_key
 3. **Stripe**: Sign up at [stripe.com](https://stripe.com)
 4. **Brevo**: Sign up at [brevo.com](https://brevo.com)
 5. **Inngest**: Sign up at [inngest.com](https://inngest.com)
+6. **VAPID Keys**: Generate with `npx web-push generate-vapid-keys`
 
 ---
 
@@ -725,6 +811,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - React, TypeScript, Vite, Tailwind CSS
 - Express, Prisma, Socket.io
 - Leaflet, React Hot Toast, Lucide Icons
+- Web-push, i18next, Axios
 
 ---
 

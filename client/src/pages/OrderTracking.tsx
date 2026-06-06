@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { Order } from "../types";
+import { formatIDR } from "../utils/formatCurrency";
 import Loading from "../components/Loading";
 import { ArrowLeftIcon, MapPinIcon, PhoneIcon } from "lucide-react";
 import OrderOTP from "../components/OrderTracking/OrderOTP";
@@ -11,7 +12,6 @@ import api from "../config/api";
 import toast from "react-hot-toast";
 
 const OrderTracking = () => {
-    const currency = import.meta.env.VITE_CURRENCY_SYMBOL || '$';
     const { id } = useParams();
     const navigate = useNavigate();
     const [order, setOrder] = useState<Order | null>(null);
@@ -180,7 +180,7 @@ const OrderTracking = () => {
                                             <p className="text-xs text-app-text-light">x{item.quantity}</p>
                                         </div>
                                         <span className="text-sm font-semibold">
-                                            {currency}{(item.price * item.quantity).toFixed(2)}
+                                            {formatIDR(item.price * item.quantity)}
                                         </span>
                                     </div>
                                 ))}
@@ -189,20 +189,20 @@ const OrderTracking = () => {
                             <div className="mt-4 pt-3 border-t border-app-border space-y-1.5 text-sm">
                                 <div className="flex justify-between">
                                     <span className="text-app-text-light">Subtotal</span>
-                                    <span>{currency}{order.subtotal.toFixed(2)}</span>
+                                    <span>{formatIDR(order.subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-app-text-light">Delivery</span>
-                                    <span>{order.deliveryFee === 0 ? "Free" : `${currency}${order.deliveryFee.toFixed(2)}`}</span>
+                                    <span>{order.deliveryFee === 0 ? "Free" : formatIDR(order.deliveryFee)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-app-text-light">Tax</span>
-                                    <span>{currency}{order.tax.toFixed(2)} </span>
+                                    <span>{formatIDR(order.tax)} </span>
                                 </div>
 
                                 <div className="flex justify-between pt-2 border-t border-app-border font-semibold text-app-green">
                                     <span>Total</span>
-                                    <span>{currency}{order.total.toFixed(2)}</span>
+                                    <span>{formatIDR(order.total)}</span>
                                 </div>
                             </div>
                         </div>
