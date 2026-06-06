@@ -1,6 +1,7 @@
 import { CheckCircleIcon, ClockIcon, MapPinIcon, PhoneIcon, TruckIcon, XCircleIcon } from 'lucide-react'
 import type { Order } from '../../types'
 import { statusColors } from '../../assets/assets';
+import { formatPriceToIDR } from '../../utils/formatCurrency';
 
 interface DeliveryOrderCardProps {
     order: Order;
@@ -11,8 +12,6 @@ interface DeliveryOrderCardProps {
 }
 
 export default function DeliveryOrderCard({ order, tab, handleUpdateStatus, setOtpModal, setCancelModal }: DeliveryOrderCardProps) {
-
-    const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "$";
 
     const user = typeof order.user === "object" ? order.user : { name: "Customer", email: "", phone: "" };
 
@@ -26,7 +25,7 @@ export default function DeliveryOrderCard({ order, tab, handleUpdateStatus, setO
                         {order.status}
                     </span>
                 </div>
-                <span className="text-sm font-semibold text-zinc-900">{currency}{order.total.toFixed(2)}</span>
+                <span className="text-sm font-semibold text-zinc-900">{formatPriceToIDR(order.total)}</span>
             </div>
 
             {/* Body */}
