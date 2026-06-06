@@ -6,7 +6,12 @@
             "use": "@vercel/node",
             "config": {
                 "includeFiles": [
-                    "dist/**"
+                    "dist/**",
+                    "generated/**"
+                ],
+                "excludeFiles": [
+                    "**/*.test.ts",
+                    "scripts/**"
                 ]
             }
         }
