@@ -15,73 +15,29 @@ import reviewRouter from "./routes/reviewRoutes.js";
 import wishlistRouter from "./routes/wishlistRoutes.js";
 import notificationRouter from "./routes/notificationRoutes.js";
 
-import http from "http";
-import { Server } from "socket.io";
-import { prisma } from "./config/prisma.js";
 import { stripeWebhook } from "./controllers/webhooks.js";
 
+const IS_VERCEL = Boolean(process.env.VERCEL);
+
 const app = express();
-app.post("/api/stripe", express.raw({ type: 'application/json'}), stripeWebhook)
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: process.env.CLIENT_URL || "http://localhost:5173",
-        methods: ["GET", "POST"]
-    }
-});
-app.set("io", io);
 
-// WebSocket Server Logics
-io.on("connection", (socket) => {
-    console.log(`Socket connected: ${socket.id}`);
-
-    // Customer joins room by order ID (for order tracking updates)
-    socket.on("join-order-room", (orderId: string) => {
-        socket.join(`order:${orderId}`);
-        console.log(`Socket ${socket.id} joined room: order:${orderId}`);
-    });
-
-    // Delivery partner joins their personal room (for new assignment notifications)
-    socket.on("join-partner-room", (partnerId: string) => {
-        socket.join(`partner:${partnerId}`);
-        console.log(`Socket ${socket.id} joined room: partner:${partnerId}`);
-    });
-
-    // Send real-time coordinates from courier to customer & save to database
-    socket.on("send-live-location", async (data: { orderId: string; lat: number; lng: number }) => {
-        const { orderId, lat, lng } = data;
-        const updatedAt = new Date();
-
-        // Broadcast directly to customer in same room
-        socket.to(`order:${orderId}`).emit("receive-live-location", { lat, lng, updatedAt });
-
-        // Persist to database asynchronously
-        try {
-            await prisma.order.update({
-                where: { id: orderId },
-                data: {
-                    liveLocation: { lat, lng, updatedAt }
-                }
-            });
-        } catch (error) {
-            console.error("Failed to persist live location to database:", error);
-        }
-    });
-
-    socket.on("disconnect", () => {
-        console.log(`Socket disconnected: ${socket.id}`);
-    });
-});
+// Stripe webhook needs raw body BEFORE express.json() is applied
+app.post("/api/stripe", express.raw({ type: 'application/json' }), stripeWebhook);
 
 //Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
 
-const port = process.env.PORT || 3000;
-
+// Health check
 app.get('/', (req: Request, res: Response) => {
-    res.send('Server is live');
+    res.json({
+        status: "live",
+        env: process.env.NODE_ENV || "unknown",
+        vercel: IS_VERCEL,
+        timestamp: new Date().toISOString(),
+    });
 });
+
 app.use('/api/auth', authRouter);
 app.use('/api/products', productRouter);
 app.use('/api/upload', uploadRouter);
@@ -96,11 +52,70 @@ app.use('/api/notifications', notificationRouter);
 
 // Error Handling
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
-    console.error(error);
-    res.status(500).json({ message: error.message })
+    console.error("[error-handler]", error);
+    res.status(500).json({ message: error?.message || "Internal server error" });
+});
 
-})
+// ──────────────────────────────────────────────────────────────
+// WebSocket / HTTP server: only when NOT on Vercel.
+// Vercel serverless functions do NOT support persistent WebSocket
+// connections nor `server.listen()`. We export the express app
+// directly and let Vercel wire it into a serverless function.
+// ──────────────────────────────────────────────────────────────
+if (!IS_VERCEL) {
+    // Lazy-import heavy server-only modules so they don't break
+    // the serverless build on Vercel.
+    const http = await import("http");
+    const { Server } = await import("socket.io");
+    const { prisma } = await import("./config/prisma.js");
 
-server.listen(port, () => {
-    console.log(`Server with WebSocket is running at http://localhost:${port}`);
-})
+    const server = http.createServer(app);
+    const io = new Server(server, {
+        cors: {
+            origin: process.env.CLIENT_URL || "http://localhost:5173",
+            methods: ["GET", "POST"]
+        }
+    });
+    app.set("io", io);
+
+    io.on("connection", (socket) => {
+        console.log(`Socket connected: ${socket.id}`);
+
+        socket.on("join-order-room", (orderId: string) => {
+            socket.join(`order:${orderId}`);
+            console.log(`Socket ${socket.id} joined room: order:${orderId}`);
+        });
+
+        socket.on("join-partner-room", (partnerId: string) => {
+            socket.join(`partner:${partnerId}`);
+            console.log(`Socket ${socket.id} joined room: partner:${partnerId}`);
+        });
+
+        socket.on("send-live-location", async (data: { orderId: string; lat: number; lng: number }) => {
+            const { orderId, lat, lng } = data;
+            const updatedAt = new Date();
+            socket.to(`order:${orderId}`).emit("receive-live-location", { lat, lng, updatedAt });
+            try {
+                await prisma.order.update({
+                    where: { id: orderId },
+                    data: { liveLocation: { lat, lng, updatedAt } }
+                });
+            } catch (error) {
+                console.error("Failed to persist live location:", error);
+            }
+        });
+
+        socket.on("disconnect", () => {
+            console.log(`Socket disconnected: ${socket.id}`);
+        });
+    });
+
+    const port = process.env.PORT || 3000;
+    server.listen(port, () => {
+        console.log(`Server with WebSocket is running at http://localhost:${port}`);
+    });
+}
+
+// Export the app for Vercel (@vercel/node) to use as a serverless function.
+// On Vercel, do NOT call server.listen() — Vercel manages the request lifecycle.
+export default app;
