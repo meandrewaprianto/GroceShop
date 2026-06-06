@@ -10,10 +10,10 @@ import CheckoutReview from "../components/Checkout/CheckoutReview";
 import api from "../config/api";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
+import { formatPriceToIDR } from "../utils/formatCurrency";
 
 const Checkout = () => {
     const navigate = useNavigate();
-    const currency = import.meta.env.VITE_CURRENCY_SYMBOL || '$';
 
     const { items, cartTotal, clearCart } = useCart();
     const { user } = useAuth();
@@ -35,8 +35,8 @@ const Checkout = () => {
 
     const [paymentMethod, setPaymentMethod] = useState('card');
 
-    const deliveryFee = cartTotal > 20 ? 0 : 1.99;
-    const tax = cartTotal * 0.08;
+    const deliveryFee = cartTotal > 6 ? 0 : 1.99;
+    const tax = cartTotal * 0.11;
     const total = cartTotal + deliveryFee + tax;
 
     const steps:
@@ -151,22 +151,22 @@ const Checkout = () => {
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-app-text-light">Subtotal ({items.length} items)</span>
-                                <span>{currency}{cartTotal.toFixed(2)}</span>
+                                <span>{formatPriceToIDR(cartTotal)}</span>
                             </div>
 
                             <div className="flex justify-between">
                                 <span className="text-app-text-light">Delivery</span>
-                                <span>{deliveryFee === 0 ? <span className="text-app-success">Free</span> : `${currency}${deliveryFee.toFixed(2)}`}</span>
+                                <span>{deliveryFee === 0 ? <span className="text-app-success">Free</span> : formatPriceToIDR(deliveryFee)}</span>
                             </div>
 
                             <div className="flex justify-between">
-                                <span className="text-app-text-light">Tax</span>
-                                <span>{currency}{tax.toFixed(2)}</span>
+                                <span className="text-app-text-light">Tax (PPN 11%)</span>
+                                <span>{formatPriceToIDR(tax)}</span>
                             </div>
 
                             <div className="flex justify-between pt-3 border-t border-app-border text-base font-semibold">
                                 <span>Total</span>
-                                <span className="text-app-green">{currency}{total.toFixed(2)}</span>
+                                <span className="text-app-green">{formatPriceToIDR(total)}</span>
                             </div>
                         </div>
                     </div>

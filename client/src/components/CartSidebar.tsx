@@ -11,8 +11,8 @@ const CartSidebar = () => {
 
     if (!isCartOpen) return null;
 
-    const FREE_DELIVERY_THRESHOLD_USD = 6; // ~Rp 100.000
-    const deliveryFee = cartTotal > FREE_DELIVERY_THRESHOLD_USD ? 0 : 1.99
+    const FREE_DELIVERY_THRESHOLD = 6; // ~Rp 100.000 (6 * 16500)
+    const deliveryFee = cartTotal > FREE_DELIVERY_THRESHOLD ? 0 : 1.99
     const grandTotal = cartTotal + deliveryFee;
 
     return (
