@@ -93,22 +93,12 @@ export const getProduct = async (req: Request, res: Response) => {
 // POST /api/products
 export const createProduct = async (req: Request, res: Response) => {
     try {
-        const { name, description, price, originalPrice, image, images, category, unit, stock, isOrganic } = req.body;
+        const { name, description, price, originalPrice, image, category, unit, stock, isOrganic } = req.body;
 
         // Validation
         if (!name || !price || !image || !category || !unit) {
             res.status(400).json({ message: "Missing required fields: name, price, image, category, unit" });
             return;
-        }
-
-        // Build images array: ensure image is first
-        let imagesArray: string[] = [String(image).trim()];
-        if (images && Array.isArray(images)) {
-            const extraImages = images
-                .filter((img: string) => img && img !== String(image))
-                .map((img: string) => String(img).trim())
-                .slice(0, 2); // max 3 total (1 from image + 2 more)
-            imagesArray = [...imagesArray, ...extraImages];
         }
 
         // Sanitize & transform
@@ -119,7 +109,6 @@ export const createProduct = async (req: Request, res: Response) => {
                 price: Number(price),
                 originalPrice: originalPrice ? Number(originalPrice) : null,
                 image: String(image).trim(),
-                images: imagesArray,
                 category: String(category).toLowerCase().trim().replace(/\s+/g, '-'),
                 unit: String(unit).trim(),
                 stock: Number(stock) || 0,
