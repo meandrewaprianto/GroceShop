@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PackageIcon, UsersIcon, ShoppingBagIcon, AlertTriangleIcon, DollarSignIcon, TrendingUpIcon, TruckIcon, ArrowUpIcon, MoreHorizontalIcon } from "lucide-react";
@@ -186,9 +185,11 @@ export default function AdminDashboard() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-semibold text-zinc-900">Welcome back! 👋</h1>
-                <p className="text-sm text-zinc-500 mt-1">Here's what's happening with your store today.</p>
+            <div className="flex items-start justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-semibold text-zinc-900">Welcome back! 👋</h1>
+                    <p className="text-sm text-zinc-500 mt-1">Here's what's happening with your store today.</p>
+                </div>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

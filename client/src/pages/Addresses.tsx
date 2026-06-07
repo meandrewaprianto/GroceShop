@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import type { Address } from "../types";
 import { MapPinIcon, PlusIcon } from "lucide-react";
 import Loading from "../components/Loading";
 import AddressCard from "../components/AddressCard";
 import AddressForm from "../components/AddressForm";
 import { useAuth } from "../context/AuthContext";
+import useGeolocation from "../hooks/useGeolocation";
 import api from "../config/api";
 import toast from "react-hot-toast";
 
@@ -22,8 +23,38 @@ const Addresses = () => {
         city: "",
         state: "",
         zip: "",
+        lat: 0,
+        lng: 0,
         isDefault: false,
     });
+
+    const { detectedAddress, isDetecting, error: geoError, detectLocation, resetDetection } = useGeolocation();
+
+    // Ref to track if we already auto-detected to avoid repeated detection
+    const hasAutoDetected = useRef(false);
+
+    // Auto-detect location when the form opens (only for new addresses)
+    useEffect(() => {
+        if (showForm && !editingId && !hasAutoDetected.current) {
+            hasAutoDetected.current = true;
+            detectLocation();
+        }
+    }, [showForm, editingId, detectLocation]);
+
+    // When geolocation returns an address, pre-fill the form
+    useEffect(() => {
+        if (detectedAddress && showForm && !editingId) {
+            setForm((prev) => ({
+                ...prev,
+                address: detectedAddress.address,
+                city: detectedAddress.city,
+                state: detectedAddress.state,
+                zip: detectedAddress.zip,
+                lat: detectedAddress.lat,
+                lng: detectedAddress.lng,
+            }));
+        }
+    }, [detectedAddress, showForm, editingId]);
 
     const resetForm = () => {
         setForm({
@@ -32,50 +63,47 @@ const Addresses = () => {
             city: "",
             state: "",
             zip: "",
+            lat: 0,
+            lng: 0,
             isDefault: false,
         });
         setShowForm(false);
         setEditingId(null);
+        hasAutoDetected.current = false;
+        resetDetection();
     }
 
-    const getLocation = (retries = 3): Promise<{ lat: number; lng: number } | null> => {
-        return new Promise((resolve, reject) => {
-            if (!navigator.geolocation) {
-                reject(new Error("Geolocation not supported"));
-                return;
-            }
+    // Gunakan koordinat dari hasil deteksi lokasi, atau fallback geocode dari alamat
+    const getCoordinates = async (): Promise<{ lat: number; lng: number } | null> => {
+        // If we already have lat/lng from geolocation, use it directly
+        if (form.lat && form.lng) {
+            return { lat: form.lat, lng: form.lng };
+        }
 
-            const attempt = () => {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        resolve({
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                        })
-                    },
-                    (error) => {
-                        if (retries > 0) {
-                            retries--;
-                            setTimeout(attempt, 1000);
-                        } else {
-                            reject(new Error(error.message || "Failed to get location after retries"));
-                        }
-                    },
-                    {
-                        enableHighAccuracy: false,
-                        timeout: 15000,
-                        maximumAge: 60000,
-                    }
-                )
+        // Fallback: geocode alamat menggunakan OpenStreetMap Nominatim API
+        const query = `${form.address}, ${form.city}, ${form.state}, ${form.zip}`;
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
+                { headers: { "User-Agent": "GroceShop/1.0" } }
+            );
+            const data = await response.json();
+            if (data && data.length > 0) {
+                return {
+                    lat: parseFloat(data[0].lat),
+                    lng: parseFloat(data[0].lon),
+                };
             }
-            attempt();
-        })
-    }
+        } catch (err) {
+            console.warn("Geocoding failed, using approximate coords:", err);
+        }
+        return null;
+    };
 
-    const handleSubmit = async (e: React.SubmitEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const coords = await getLocation();
+            const coords = await getCoordinates();
             const payload = { ...form, ...coords };
 
             if (editingId) {
@@ -104,6 +132,8 @@ const Addresses = () => {
             city: add.city,
             state: add.state,
             zip: add.zip,
+            lat: add.lat,
+            lng: add.lng,
             isDefault: add.isDefault,
         });
         setEditingId(add.id);
@@ -136,7 +166,7 @@ const Addresses = () => {
                 </div>
 
                 {/* Form Modal */}
-                {showForm && <AddressForm resetForm={resetForm} handleSubmit={handleSubmit} form={form} setForm={setForm} editingId={editingId} />}
+                {showForm && <AddressForm resetForm={resetForm} handleSubmit={handleSubmit} form={form} setForm={setForm} editingId={editingId} detectLocation={detectLocation} isDetecting={isDetecting} geoError={geoError} />}
 
 
                 {/* Addresses List */}

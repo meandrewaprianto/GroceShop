@@ -33,9 +33,11 @@ export default function OrderTimeLine({ order }: { order: any }) {
                                 </div>
                                 {i < allStatuses.length - 1 && <div className={`w-0.5 h-12 ${i < currentIdx ? "bg-app-green" : "bg-app-border"}`} />}
                             </div>
-                            <div className="pb-6">
+                            <div className="pb-6 max-w-xs">
                                 <p className={`text-sm font-semibold ${isCompleted ? "text-app-green" : "text-app-text-light"}`}>{status}</p>
-                                {historyEntry && <p className="text-xs text-app-text-light mt-0.5">{new Date(historyEntry.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>}
+                                {historyEntry && (
+                                    <p className="text-xs text-app-text-light mt-0.5">{new Date(historyEntry.timestamp).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                                )}
                             </div>
                         </div>
                     );

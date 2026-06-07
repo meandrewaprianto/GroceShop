@@ -66,7 +66,19 @@ const OrderTracking = () => {
         // Dengarkan update status order secara real-time
         socket.on("order-status-updated", (data: { status: string; statusHistory: any[] }) => {
             console.log("Received status update:", data);
-            setOrder((prev) => prev ? { ...prev, status: data.status, statusHistory: data.statusHistory } : null);
+            setOrder((prev) => {
+                if (prev && prev.status !== data.status) {
+                    const statusMessages: Record<string, string> = {
+                        "Packed": "Pesanan sudah dikemas dan siap dikirim",
+                        "Out for Delivery": "Kurir sedang dalam perjalanan menuju lokasi kamu",
+                        "Delivered": "Pesanan sudah sampai! Terima kasih telah berbelanja 🎉",
+                        "Cancelled": "Pesanan dibatalkan",
+                    };
+                    const message = statusMessages[data.status] || `Status berubah menjadi ${data.status}`;
+                    toast.success(message);
+                }
+                return prev ? { ...prev, status: data.status, statusHistory: data.statusHistory } : null;
+            });
         });
 
         // Fallback polling: poll order status/location every 5 seconds in case WebSockets are not available
@@ -79,6 +91,16 @@ const OrderTracking = () => {
                 if (data.order) {
                     setOrder((prev) => {
                         if (!prev) return data.order;
+                        if (prev.status !== data.order.status) {
+                            const statusMessages: Record<string, string> = {
+                                "Packed": "Pesanan sudah dikemas dan siap dikirim",
+                                "Out for Delivery": "Kurir sedang dalam perjalanan menuju lokasi kamu",
+                                "Delivered": "Pesanan sudah sampai! Terima kasih telah berbelanja 🎉",
+                                "Cancelled": "Pesanan dibatalkan",
+                            };
+                            const message = statusMessages[data.order.status] || `Status berubah menjadi ${data.order.status}`;
+                            toast.success(message);
+                        }
                         if (prev.status !== data.order.status || JSON.stringify(prev.statusHistory) !== JSON.stringify(data.order.statusHistory)) {
                             return data.order;
                         }

@@ -5,8 +5,6 @@ import { useTranslation } from "react-i18next";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishlistContext";
-import { useNotification } from "../context/NotificationContext";
-import { BellIcon, BellOffIcon } from "lucide-react";
 import api from "../config/api";
 import LanguageSwitcher from "./LanguageSwitcher";
 import DarkModeToggle from "./DarkModeToggle";
@@ -24,7 +22,6 @@ interface Suggestion {
 const Navbar = () => {
     const { user, logout } = useAuth();
     const { wishlistCount } = useWishlist();
-    const { isSubscribed, isSupported, subscribeToPush, unsubscribeFromPush } = useNotification();
     const { cartCount, setIsCartOpen } = useCart()
     const [searchQuery, setSearchQuery] = useState("");
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -264,16 +261,6 @@ const Navbar = () => {
                                                 </Link>
                                             )}
 
-                                            {user && isSupported && (
-                                                <div className="border-t border-app-border pt-1">
-                                                    <button
-                                                        onClick={isSubscribed ? unsubscribeFromPush : subscribeToPush}
-                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-700 dark:text-slate-300 hover:bg-zinc-50 dark:hover:bg-gray-800 w-full transition-colors">
-                                                        {isSubscribed ? <BellOffIcon size={16} /> : <BellIcon size={16} />}
-                                                        {isSubscribed ? "Disable Notifications" : "Enable Notifications"}
-                                                    </button>
-                                                </div>
-                                            )}
                                             {user && (
                                                 <div className="border-t border-app-border pt-1">
                                                     <button

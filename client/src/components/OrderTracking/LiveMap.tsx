@@ -1,5 +1,5 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from "react-leaflet";
-import { NavigationIcon, LocateFixedIcon, PackageIcon, ClockIcon, TruckIcon } from "lucide-react";
+import { LocateFixedIcon, PackageIcon, ClockIcon, TruckIcon } from "lucide-react";
 import { iconsForLeafpad } from "../../assets/assets";
 import L from "leaflet";
 import { useEffect, useState, useMemo, useRef } from "react";
@@ -7,9 +7,8 @@ import axios from "axios";
 import type { Order } from "../../types";
 import "leaflet/dist/leaflet.css";
 
-const EXPEDITION_THRESHOLD_KM = 50; // Switch to expedition mode if distance >= 50km
+const EXPEDITION_THRESHOLD_KM = 50;
 
-// Create pulsing delivery marker using Leaflet divIcon
 function createPulseIcon() {
     return L.divIcon({
         className: "custom-delivery-marker",
@@ -25,7 +24,6 @@ function createPulseIcon() {
     });
 }
 
-// Component to re-center map and fit bounds (declared outside parent component)
 function MapUpdater({ live, dest, route }: { live: [number, number] | null; dest: [number, number] | null; route: [number, number][] }) {
     const map = useMap();
     useEffect(() => {
@@ -42,9 +40,8 @@ function MapUpdater({ live, dest, route }: { live: [number, number] | null; dest
     return null;
 }
 
-// Haversine formula to calculate straight-line distance between two coordinates (in km)
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-    const R = 6371; // Earth radius in km
+    const R = 6371;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLng = ((lng2 - lng1) * Math.PI) / 180;
     const a =
@@ -54,7 +51,6 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
     return R * c;
 }
 
-// Expedition mode component (for long distance >= 50km)
 function ExpeditionMode({ order }: { order: Order }) {
     return (
         <div className="bg-white rounded-2xl p-6 border border-app-border shadow-sm">
@@ -63,41 +59,46 @@ function ExpeditionMode({ order }: { order: Order }) {
                     <PackageIcon className="size-6 text-app-orange" />
                 </div>
                 <div>
-                    <h3 className="font-semibold text-app-green">Expedition Shipping</h3>
-                    <p className="text-xs text-app-text-light">Long distance delivery via courier partner</p>
+                    <h3 className="font-semibold text-app-green">Pengiriman Kurir</h3>
+                    <p className="text-xs text-app-text-light">Jarak jauh — dikirim via kurir ekspedisi</p>
+                </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+                <div className="flex items-center gap-2 text-sm text-amber-700">
+                    <TruckIcon className="size-4 shrink-0" />
+                    <span>Alamat tujuan cukup jauh. Pesanan akan dikirim menggunakan kurir kami. Mohon ditunggu ya 🚚</span>
                 </div>
             </div>
 
             <div className="space-y-4">
-                {/* Shipping Info Card */}
                 <div className="bg-app-cream rounded-xl p-4">
                     <div className="flex items-center gap-3 mb-3">
                         <TruckIcon className="size-5 text-app-green" />
-                        <span className="text-sm font-medium text-app-green">Standard Expedition</span>
+                        <span className="text-sm font-medium text-app-green">Kurir Ekspedisi</span>
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
-                            <p className="text-xs text-app-text-light">Origin</p>
+                            <p className="text-xs text-app-text-light">Asal</p>
                             <p className="font-medium text-app-green">GroceShop Warehouse</p>
                         </div>
                         <div>
-                            <p className="text-xs text-app-text-light">Destination</p>
+                            <p className="text-xs text-app-text-light">Tujuan</p>
                             <p className="font-medium text-app-green">
-                                {order.shippingAddress?.city || "Your Address"}
+                                {order.shippingAddress?.city || "Alamat Kamu"}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Timeline Status */}
                 <div className="space-y-3">
                     <h4 className="text-sm font-semibold text-app-green flex items-center gap-2">
                         <ClockIcon className="size-4" />
-                        Shipping Status
+                        Status Pengiriman
                     </h4>
                     <div className="relative pl-6 space-y-4">
-                        {["Packed", "Handover to Courier", "In Transit", "Out for Delivery", "Delivered"].map((stage, i) => {
-                            const currentIdx = ["Placed", "Packed", "Shipped", "Out for Delivery", "Delivered"].indexOf(order.status);
+                        {["Packed", "Out for Delivery", "Delivered"].map((stage, i) => {
+                            const currentIdx = ["Packed", "Out for Delivery", "Delivered"].indexOf(order.status);
                             const isCompleted = i <= currentIdx;
                             const isCurrent = i === currentIdx;
 
@@ -106,8 +107,8 @@ function ExpeditionMode({ order }: { order: Order }) {
                                     <div className={`absolute left-[-18px] top-1 size-3 rounded-full border-2 ${
                                         isCompleted ? "bg-app-green border-app-green" : isCurrent ? "bg-app-orange border-app-orange" : "bg-white border-app-border"
                                     }`} />
-                                    {i < 4 && (
-                                        <div className={`absolute left-[-14px] top-4 w-0.5 h-6 ${isCompleted ? "bg-app-green" : "bg-app-border"}`} />
+                                    {i < 2 && (
+                                        <div className={`absolute left-[-14px] top-4 w-0.5 h-9 ${isCompleted ? "bg-app-green" : "bg-app-border"}`} />
                                     )}
                                     <p className={`text-sm ${isCompleted ? "text-app-green font-medium" : isCurrent ? "text-app-orange font-medium" : "text-app-text-light"}`}>
                                         {stage}
@@ -118,11 +119,10 @@ function ExpeditionMode({ order }: { order: Order }) {
                     </div>
                 </div>
 
-                {/* Estimated delivery */}
                 <div className="border-t border-app-border pt-3 mt-2">
                     <div className="flex items-center justify-between text-sm">
-                        <span className="text-app-text-light">Estimated delivery</span>
-                        <span className="font-semibold text-app-green">3-5 business days</span>
+                        <span className="text-app-text-light">Estimasi sampai</span>
+                        <span className="font-semibold text-app-green">3-5 hari kerja</span>
                     </div>
                 </div>
             </div>
@@ -133,13 +133,12 @@ function ExpeditionMode({ order }: { order: Order }) {
 export default function LiveMap({ order, liveLocation }: { order: Order; liveLocation: { lat: number; lng: number } | null }) {
     const [routeCoords, setRouteCoords] = useState<[number, number][]>([]);
     const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string; distanceKm: number } | null>(null);
-    const [deliveryMode, setDeliveryMode] = useState<"loading" | "live" | "expedition">("loading");
+    const [deliveryMode, setDeliveryMode] = useState<"loading" | "live" | "expedition" | "preDelivery">("loading");
     const prevHasLocation = useRef(false);
 
     const destLat = order.shippingAddress?.lat ? Number(order.shippingAddress.lat) : null;
     const destLng = order.shippingAddress?.lng ? Number(order.shippingAddress.lng) : null;
 
-    // Custom icons (memoized to prevent re-creation)
     const pulseIcon = useMemo(() => createPulseIcon(), []);
     const destinationIcon = useMemo(() => new L.Icon({
         iconUrl: iconsForLeafpad.destination,
@@ -148,8 +147,14 @@ export default function LiveMap({ order, liveLocation }: { order: Order; liveLoc
         popupAnchor: [0, -36],
     }), []);
 
-    // Reset route state when live location disappears
+    const isDeliveryActive = order.status === "Assigned" || order.status === "Packed" || order.status === "Out for Delivery";
+
     useEffect(() => {
+        if (!isDeliveryActive) {
+            setDeliveryMode("preDelivery");
+            return;
+        }
+
         const hasLocation = liveLocation && liveLocation.lat !== 0 && !!destLat && !!destLng;
         if (!hasLocation && prevHasLocation.current) {
             setRouteCoords([]);
@@ -157,13 +162,11 @@ export default function LiveMap({ order, liveLocation }: { order: Order; liveLoc
             setDeliveryMode("loading");
         }
         prevHasLocation.current = !!hasLocation;
-    }, [liveLocation?.lat, destLat, destLng]);
+    }, [liveLocation?.lat, destLat, destLng, isDeliveryActive]);
 
-    // Fetch navigation path from OSRM and determine delivery mode
     useEffect(() => {
-        if (!liveLocation || liveLocation.lat === 0 || !destLat || !destLng) {
-            return;
-        }
+        if (!isDeliveryActive) return;
+        if (!liveLocation || liveLocation.lat === 0 || !destLat || !destLng) return;
 
         let cancelled = false;
 
@@ -178,23 +181,16 @@ export default function LiveMap({ order, liveLocation }: { order: Order; liveLoc
                     setRouteCoords(coords);
 
                     const distanceKm = route.distance / 1000;
-                    const km = distanceKm.toFixed(1);
                     const mins = Math.round(route.duration / 60);
 
                     setRouteInfo({
-                        distance: `${km} km`,
+                        distance: `${distanceKm.toFixed(1)} km`,
                         duration: `${mins} min`,
                         distanceKm,
                     });
 
-                    // Determine delivery mode based on distance
-                    if (distanceKm >= EXPEDITION_THRESHOLD_KM) {
-                        setDeliveryMode("expedition");
-                    } else {
-                        setDeliveryMode("live");
-                    }
+                    setDeliveryMode(distanceKm >= EXPEDITION_THRESHOLD_KM ? "expedition" : "live");
                 } else {
-                    // If OSRM fails, fall back to haversine estimation
                     const straightDist = haversineDistance(liveLocation.lat, liveLocation.lng, destLat, destLng);
                     setRouteCoords([[liveLocation.lat, liveLocation.lng], [destLat, destLng]]);
                     setRouteInfo({
@@ -206,8 +202,7 @@ export default function LiveMap({ order, liveLocation }: { order: Order; liveLoc
                 }
             } catch (error) {
                 if (cancelled) return;
-                console.error("OSRM Routing API failed, falling back to straight line:", error);
-                // Fallback: estimate with haversine
+                console.error("OSRM failed, falling back:", error);
                 const straightDist = haversineDistance(liveLocation.lat, liveLocation.lng, destLat, destLng);
                 setRouteCoords([[liveLocation.lat, liveLocation.lng], [destLat, destLng]]);
                 setRouteInfo({
@@ -220,24 +215,26 @@ export default function LiveMap({ order, liveLocation }: { order: Order; liveLoc
         };
 
         fetchRoute();
-
         return () => { cancelled = true; };
-    }, [liveLocation?.lat, liveLocation?.lng, destLat, destLng]);
+    }, [liveLocation?.lat, liveLocation?.lng, destLat, destLng, isDeliveryActive]);
 
-    // Hide everything if delivered/cancelled
     if (order.status === "Delivered" || order.status === "Cancelled") return null;
 
-    // EXPEDITION MODE: Show expedition info instead of map
+    // PRE-DELIVERY: Disembunyikan — OrderOTP sudah menangani ini
+    if (deliveryMode === "preDelivery" || !isDeliveryActive) {
+        return null;
+    }
+
+    // EXPEDITION MODE (>= 50km)
     if (deliveryMode === "expedition") {
         return (
             <>
-                {/* Distance notice */}
                 {routeInfo && (
                     <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 mb-3">
                         <div className="flex items-center gap-2 text-sm text-amber-700">
                             <TruckIcon className="size-4 shrink-0" />
                             <span>
-                                Delivery distance <strong>{routeInfo.distance}</strong> — shipped via expedition courier (no live tracking)
+                                Jarak pengiriman <strong>{routeInfo.distance}</strong> — dikirim via kurir (tidak ada live tracking)
                             </span>
                         </div>
                     </div>
@@ -247,11 +244,10 @@ export default function LiveMap({ order, liveLocation }: { order: Order; liveLoc
         );
     }
 
-    // LIVE MODE (distance < 50km): Show map with real-time tracking
+    // LIVE MODE — hanya tampilkan map jika ada lokasi live
     if (deliveryMode === "live") {
         return (
             <>
-                {/* ETA Banner - like Gojek/Grab */}
                 {liveLocation && liveLocation.lat !== 0 && routeInfo && (
                     <div className="bg-white rounded-2xl p-4 mb-3 border border-app-border shadow-sm">
                         <div className="flex items-center justify-between">
@@ -260,21 +256,20 @@ export default function LiveMap({ order, liveLocation }: { order: Order; liveLoc
                                     <LocateFixedIcon className="size-5 text-app-orange" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-app-text-light">Estimated arrival</p>
+                                    <p className="text-xs text-app-text-light">Estimasi sampai</p>
                                     <p className="text-lg font-bold text-app-green">{routeInfo.duration}</p>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <p className="text-xs text-app-text-light">Distance</p>
+                                <p className="text-xs text-app-text-light">Jarak</p>
                                 <p className="text-sm font-semibold text-app-green">{routeInfo.distance}</p>
                             </div>
                         </div>
                     </div>
                 )}
-                <div className="relative z-0 rounded-2xl overflow-hidden border border-app-border shadow-sm" style={{ height: 320 }}>
-                    {liveLocation && liveLocation.lat !== 0 ? (
+                {liveLocation && liveLocation.lat !== 0 ? (
+                    <div className="relative z-0 rounded-2xl overflow-hidden border border-app-border shadow-sm" style={{ height: 320 }}>
                         <MapContainer center={[liveLocation.lat, liveLocation.lng]} zoom={15} style={{ height: "100%", width: "100%" }} zoomControl={false}>
-                            {/* CartoDB Voyager tiles */}
                             <TileLayer
                                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
@@ -301,44 +296,12 @@ export default function LiveMap({ order, liveLocation }: { order: Order; liveLoc
                                 route={routeCoords}
                             />
                         </MapContainer>
-                    ) : destLat && destLng ? (
-                        <MapContainer center={[destLat, destLng]} zoom={15} style={{ height: "100%", width: "100%" }} zoomControl={false}>
-                            <TileLayer
-                                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-                            />
-                            <Marker position={[destLat, destLng]} icon={destinationIcon}>
-                                <Popup>Delivery Address</Popup>
-                            </Marker>
-                        </MapContainer>
-                    ) : (
-                        <div className="h-full bg-gradient-to-br from-app-cream to-app-green/5 flex-center">
-                            <div className="text-center">
-                                <div className="size-16 rounded-full bg-app-orange/10 flex items-center justify-center mx-auto mb-3 animate-pulse">
-                                    <NavigationIcon className="size-7 text-app-orange" />
-                                </div>
-                                <p className="text-sm text-app-green font-medium">Waiting for delivery partner location...</p>
-                                <p className="text-xs text-app-text-light mt-1">Driver will appear on map once they start</p>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                    </div>
+                ) : null}
             </>
         );
     }
 
-    // LOADING STATE: Still determining delivery mode
-    return (
-        <div className="bg-white rounded-2xl p-6 border border-app-border shadow-sm">
-            <div className="flex items-center gap-3">
-                <div className="size-12 rounded-full bg-app-cream flex items-center justify-center animate-pulse">
-                    <NavigationIcon className="size-6 text-app-green/40" />
-                </div>
-                <div className="flex-1">
-                    <div className="h-4 w-32 bg-app-cream rounded animate-pulse mb-2" />
-                    <div className="h-3 w-48 bg-app-cream rounded animate-pulse" />
-                </div>
-            </div>
-        </div>
-    );
+    // LOADING
+    return null;
 }

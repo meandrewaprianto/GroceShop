@@ -92,7 +92,7 @@ export const completeDelivery = async (req: Request, res: Response) => {
 
     const history = order.statusHistory as any[];
 
-    history.push({ status: "Delivered", note: "Delivered by partner", timestamp: new Date() });
+    history.push({ status: "Delivered", note: "Pesanan selesai. Terima kasih telah berbelanja! 🛒", timestamp: new Date() });
 
     // For COD orders, mark as paid when delivery is completed (payment collected at door)
     // Frontend sends "cash", kept "cod" as fallback for consistency

@@ -84,9 +84,9 @@ export default defineConfig({
           }
         ]
       },
-      // Show update notification to user
       devOptions: {
-        enabled: false
+        enabled: true,
+        type: 'module'
       }
     })
   ],
