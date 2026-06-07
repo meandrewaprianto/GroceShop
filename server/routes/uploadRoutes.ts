@@ -15,6 +15,7 @@ const upload = multer({
     limits: { fileSize: MAX_FILE_SIZE },
 });
 
+// Upload single image
 uploadRouter.post('/', auth, (req, res) => {
     upload.single('image')(req, res, async (multerErr: any) => {
         try {
@@ -50,6 +51,54 @@ uploadRouter.post('/', auth, (req, res) => {
             console.error("Cloudinary upload error:", error);
             res.status(500).json({
                 message: error?.message || "Failed to upload image to Cloudinary"
+            });
+        }
+    });
+});
+
+// Upload multiple images (up to 3)
+uploadRouter.post('/multiple', auth, (req, res) => {
+    upload.array('images', 3)(req, res, async (multerErr: any) => {
+        try {
+            if (multerErr) {
+                if (multerErr.code === "LIMIT_FILE_SIZE") {
+                    return res.status(413).json({
+                        message: `Images too large. Max size per image is ${MAX_FILE_SIZE / 1024 / 1024}MB.`
+                    });
+                }
+                if (multerErr.code === "LIMIT_UNEXPECTED_FILE" || multerErr.message?.includes("max files")) {
+                    return res.status(400).json({ message: "Maximum 3 images allowed" });
+                }
+                return res.status(400).json({ message: multerErr.message || "Upload failed" });
+            }
+
+            if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+                return res.status(400).json({ message: "No image files provided" });
+            }
+
+            // Verify Cloudinary config exists
+            if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+                console.error("Cloudinary env vars missing");
+                return res.status(500).json({ message: "Image upload service is not configured on the server." });
+            }
+
+            const uploadPromises = req.files.map((file) => {
+                const b64 = Buffer.from(file.buffer).toString("base64");
+                const dataURI = "data:" + file.mimetype + ";base64," + b64;
+                return cloudinary.uploader.upload(dataURI, {
+                    folder: "grocery-del",
+                    resource_type: "auto",
+                });
+            });
+
+            const results = await Promise.all(uploadPromises);
+            const urls = results.map((r) => r.secure_url);
+
+            res.json({ urls });
+        } catch (error: any) {
+            console.error("Cloudinary upload error:", error);
+            res.status(500).json({
+                message: error?.message || "Failed to upload images to Cloudinary"
             });
         }
     });

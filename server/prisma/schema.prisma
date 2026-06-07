@@ -46,6 +46,7 @@ model Product {
     price         Float
     originalPrice Float?
     image         String
+    images        Json?          @default("[]")
     category      String
     unit          String?        @default("piece")
     stock         Int?           @default(0)

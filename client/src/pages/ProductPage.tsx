@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import Loading from "../components/Loading";
 import type { Product } from "../types";
-import { ArrowLeftIcon, ArrowRightIcon, HomeIcon, LeafIcon, MinusIcon, PlusIcon, ShoppingCartIcon, StarIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, ChevronLeftIcon, ChevronRightIcon, HomeIcon, LeafIcon, MinusIcon, PlusIcon, ShoppingCartIcon, StarIcon } from "lucide-react";
 import ReviewsSection from "../components/ReviewsSection";
 import ProductCard from "../components/ProductCard";
 import api from "../config/api";
@@ -20,6 +20,7 @@ const ProductPage = () => {
     const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [localQuantity, setLocalQuantity] = useState(1);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     useEffect(() => {
         if (!id) return;
@@ -60,6 +61,11 @@ const ProductPage = () => {
     const cartItem = items.find((item) => item.product.id === product.id);
     const inCart = !!cartItem;
     const displayQuantity = inCart ? cartItem.quantity : localQuantity;
+
+    // Get all available images (from `images` array or fallback to single `image`)
+    const allImages = product.images && product.images.length > 0
+        ? product.images
+        : [product.image];
 
     const categoryLabel = product.category.replace(/-/g, " ");
 
@@ -113,9 +119,52 @@ const ProductPage = () => {
                 {/* Product Detail Section */}
                 <div className="bg-white/50 dark:bg-[#1a2332] rounded-2xl overflow-hidden dark:border dark:border-app-border/40">
                     <div className="grid md:grid-cols-2 gap-0">
-                        {/* Left Side - Image */}
-                        <div className="relative flex-center p-8 md:p-12 min-h-[320px] md:min-h-[480px] dark:bg-[#151d2a]">
-                            <img src={product.image} alt={product.name} className="max-h-[360px] w-auto object-contain" />
+                        {/* Left Side - Image Slider */}
+                        <div className="relative flex flex-col items-center justify-center p-8 md:p-12 min-h-[320px] md:min-h-[480px] dark:bg-[#151d2a]">
+                            {/* Main image */}
+                            <div className="relative w-full flex-center flex-1">
+                                <img
+                                    src={allImages[currentImageIndex]}
+                                    alt={product.name}
+                                    className="max-h-[320px] w-auto object-contain"
+                                />
+                            </div>
+
+                            {/* Navigation Arrows */}
+                            {allImages.length > 1 && (
+                                <>
+                                    <button
+                                        onClick={() => setCurrentImageIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1))}
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 size-9 rounded-full bg-white/80 hover:bg-white shadow-md flex-center transition-all z-10"
+                                    >
+                                        <ChevronLeftIcon className="size-5 text-zinc-700" />
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentImageIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1))}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 size-9 rounded-full bg-white/80 hover:bg-white shadow-md flex-center transition-all z-10"
+                                    >
+                                        <ChevronRightIcon className="size-5 text-zinc-700" />
+                                    </button>
+                                </>
+                            )}
+
+                            {/* Thumbnails */}
+                            {allImages.length > 1 && (
+                                <div className="flex gap-2 mt-4">
+                                    {allImages.map((img, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setCurrentImageIndex(i)}
+                                            className={`size-14 rounded-lg border-2 overflow-hidden transition-all ${
+                                                i === currentImageIndex ? "border-app-green opacity-100" : "border-transparent opacity-60 hover:opacity-80"
+                                            }`}
+                                        >
+                                            <img src={img} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
                             {/* Badges */}
                             <div className="absolute top-5 left-5 flex flex-wrap gap-1.5">
                                 {product.isOrganic && (
