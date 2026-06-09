@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import type { Product } from "../../types";
 
 const Hero = () => {
-    const [products, setProducts] = useState<Product[]>([]);
     const [activeProduct, setActiveProduct] = useState<Product | null>(null);
     const [quantity, setQuantity] = useState(1);
     const { addToCart } = useCart();
@@ -16,7 +15,6 @@ const Hero = () => {
         api.get("/products")
             .then(({ data }) => {
                 const dbProds = data.products || [];
-                setProducts(dbProds);
                 if (dbProds.length > 0) {
                     // Choose a highlighted product that is stable for the current calendar day
                     const today = new Date();
