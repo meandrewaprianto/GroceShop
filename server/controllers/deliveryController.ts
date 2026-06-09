@@ -192,3 +192,55 @@ export const updateDeliveryLocation = async (req: Request, res: Response) => {
 
     res.json({ succes: true })
 }
+
+// Get delivery partner stats & earnings history
+// GET /api/delivery/stats
+export const getDeliveryStats = async (req: Request, res: Response) => {
+    try {
+        const partnerId = req.partner?.id;
+
+        const partner = await prisma.deliveryPartner.findUnique({
+            where: { id: partnerId },
+            select: { id: true, name: true, email: true, phone: true, avatar: true, vehicleType: true, isActive: true }
+        });
+
+        if (!partner) {
+            return res.status(404).json({ message: "Partner not found" });
+        }
+
+        // Fetch all orders assigned to this partner
+        const allOrders = await prisma.order.findMany({
+            where: { deliveryPartnerId: partnerId },
+            orderBy: { createdAt: "desc" }
+        });
+
+        const completedOrders = allOrders.filter(o => o.status === "Delivered");
+        const activeOrders = allOrders.filter(o => ["Assigned", "Packed", "Out for Delivery"].includes(o.status));
+        const cancelledOrders = allOrders.filter(o => o.status === "Cancelled");
+
+        // 5% commission of the total price of completed orders
+        const totalEarnings = completedOrders.reduce((sum, order) => sum + (order.total * 0.05), 0);
+
+        // Map completed orders to earnings history
+        const earningsHistory = completedOrders.map(order => ({
+            orderId: order.id,
+            totalPrice: order.total,
+            commission: order.total * 0.05,
+            date: order.createdAt
+        }));
+
+        res.json({
+            partner,
+            stats: {
+                totalCompleted: completedOrders.length,
+                totalActive: activeOrders.length,
+                totalCancelled: cancelledOrders.length,
+                totalEarnings,
+            },
+            earningsHistory,
+            recentDeliveries: allOrders.slice(0, 5)
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || "Failed to load stats" });
+    }
+};

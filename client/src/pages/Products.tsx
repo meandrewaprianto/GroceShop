@@ -25,6 +25,7 @@ const Products = () => {
     const minPrice = searchParams.get("minPrice") || "";
     const maxPrice = searchParams.get("maxPrice") || "";
 
+
     const ITEMS_PER_PAGE = 8;
 
     const fetchProducts = async () => {
@@ -42,6 +43,7 @@ const Products = () => {
             if (minPrice) params.minPrice = minPrice;
             if (maxPrice) params.maxPrice = maxPrice;
             if (apiSort) params.sort = apiSort;
+
 
             const { data } = await api.get("/products/", { params });
             const allProducts = data.products || [];
@@ -127,7 +129,9 @@ const Products = () => {
                         {/* Header */}
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h1 className="text-2xl font-semibold text-app-green">{activateCategory ? activateCategory.name : "All Products"}</h1>
+                                <h1 className="text-2xl font-semibold text-app-green">
+                                    {activateCategory ? activateCategory.name : "All Products"}
+                                </h1>
                                 <p className="text-sm text-app-text-light mt-0.5">{totalFilteredCount} products found</p>
                             </div>
 

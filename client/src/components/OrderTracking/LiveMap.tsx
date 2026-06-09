@@ -9,18 +9,26 @@ import "leaflet/dist/leaflet.css";
 
 const EXPEDITION_THRESHOLD_KM = 50;
 
-function createPulseIcon() {
+function createDriverIcon(vehicleType: "bike" | "scooter" | "car" | string) {
+    const isCar = vehicleType === "car";
+    const bgColor = isCar ? "#3b82f6" : "#f97316";
+    const svgIcon = isCar 
+        ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18" height="18" style="display:block;"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.27-3.82c.14-.4.52-.68.95-.68h9.56c.43 0 .81.27.95.68L19 11H5z"/></svg>`
+        : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18" height="18" style="display:block;"><path d="M19.5 13.5c-1.4 0-2.6.8-3.2 2H10.7c-.5-1.2-1.7-2-3.2-2-1.9 0-3.5 1.6-3.5 3.5s1.6 3.5 3.5 3.5c1.4 0 2.6-.8 3.2-2h5.6c.5 1.2 1.7 2 3.2 2 1.9 0 3.5-1.6 3.5-3.5s-1.6-3.5-3.5-3.5zm-12 5c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5zm12 0c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5zm-5.8-7.5l-2.2-4.4c-.2-.4-.6-.6-1-.6H7v2h3.2l1.8 3.6H6.5c-.8 0-1.5.7-1.5 1.5v1h2v-1h5.8l2-4h2.7v-2h-3.9z"/></svg>`;
+
     return L.divIcon({
-        className: "custom-delivery-marker",
+        className: "custom-driver-marker",
         html: `
-            <div style="position:relative;width:40px;height:40px;">
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;background:#f97316;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:2;"></div>
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:rgba(249,115,22,0.25);border-radius:50%;animation:pulse 2s infinite;z-index:1;"></div>
+            <div style="position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;">
+                <div style="position:absolute;width:44px;height:44px;background:${bgColor};opacity:0.25;border-radius:50%;animation:marker-pulse 2s infinite ease-out;z-index:1;"></div>
+                <div style="position:absolute;width:28px;height:28px;background:${bgColor};border:2px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:2;display:flex;align-items:center;justify-content:center;">
+                    ${svgIcon}
+                </div>
             </div>
         `,
-        iconSize: [40, 40],
-        iconAnchor: [20, 20],
-        popupAnchor: [0, -20],
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
+        popupAnchor: [0, -22],
     });
 }
 
@@ -139,7 +147,7 @@ export default function LiveMap({ order, liveLocation }: { order: Order; liveLoc
     const destLat = order.shippingAddress?.lat ? Number(order.shippingAddress.lat) : null;
     const destLng = order.shippingAddress?.lng ? Number(order.shippingAddress.lng) : null;
 
-    const pulseIcon = useMemo(() => createPulseIcon(), []);
+    const driverIcon = useMemo(() => createDriverIcon(order.deliveryPartner?.vehicleType || "bike"), [order.deliveryPartner?.vehicleType]);
     const destinationIcon = useMemo(() => new L.Icon({
         iconUrl: iconsForLeafpad.destination,
         iconSize: [36, 36],
@@ -248,33 +256,88 @@ export default function LiveMap({ order, liveLocation }: { order: Order; liveLoc
     if (deliveryMode === "live") {
         return (
             <>
-                {liveLocation && liveLocation.lat !== 0 && routeInfo && (
-                    <div className="bg-white rounded-2xl p-4 mb-3 border border-app-border shadow-sm">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="size-10 rounded-full bg-app-orange/10 flex items-center justify-center">
-                                    <LocateFixedIcon className="size-5 text-app-orange" />
-                                </div>
-                                <div>
-                                    <p className="text-xs text-app-text-light">Estimasi sampai</p>
-                                    <p className="text-lg font-bold text-app-green">{routeInfo.duration}</p>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-xs text-app-text-light">Jarak</p>
-                                <p className="text-sm font-semibold text-app-green">{routeInfo.distance}</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
                 {liveLocation && liveLocation.lat !== 0 ? (
-                    <div className="relative z-0 rounded-2xl overflow-hidden border border-app-border shadow-sm" style={{ height: 320 }}>
+                    <div className="relative z-0 rounded-2xl overflow-hidden border border-app-border/60 dark:border-zinc-800 shadow-xl" style={{ height: 380 }}>
+                        <style dangerouslySetInnerHTML={{ __html: `
+                            @keyframes marker-pulse {
+                                0% {
+                                    transform: scale(0.6);
+                                    opacity: 0.8;
+                                }
+                                100% {
+                                    transform: scale(1.3);
+                                    opacity: 0;
+                                }
+                            }
+                        `}} />
+
+                        {/* Floating Status Card */}
+                        {routeInfo && (
+                            <div className="absolute top-4 left-4 right-4 sm:right-auto sm:w-80 z-[1000] backdrop-blur-md bg-white/90 dark:bg-zinc-900/90 shadow-lg border border-app-border/40 dark:border-zinc-800/40 rounded-2xl p-4 animate-fade-in">
+                                {/* Route Info */}
+                                <div className="flex items-center justify-between border-b border-app-border/40 dark:border-zinc-800/40 pb-3 mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="size-10 rounded-full bg-app-orange/10 flex items-center justify-center">
+                                            <LocateFixedIcon className="size-5 text-app-orange" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] uppercase font-semibold tracking-wider text-app-text-light dark:text-zinc-400">Estimasi Tiba</p>
+                                            <p className="text-lg font-extrabold text-app-green dark:text-app-green-light">{routeInfo.duration}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[10px] uppercase font-semibold tracking-wider text-app-text-light dark:text-zinc-400">Jarak</p>
+                                        <p className="text-sm font-bold text-app-green dark:text-app-green-light">{routeInfo.distance}</p>
+                                    </div>
+                                </div>
+
+                                {/* Driver Details */}
+                                {order.deliveryPartner ? (
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            {order.deliveryPartner.avatar ? (
+                                                <img 
+                                                    src={order.deliveryPartner.avatar} 
+                                                    alt={order.deliveryPartner.name} 
+                                                    className="size-10 rounded-full object-cover border-2 border-white dark:border-zinc-800 shadow-sm"
+                                                />
+                                            ) : (
+                                                <div className="size-10 rounded-full bg-app-green/10 dark:bg-app-green/20 flex items-center justify-center text-app-green dark:text-app-green-light font-bold text-sm border-2 border-white dark:border-zinc-800 shadow-sm">
+                                                    {order.deliveryPartner.name.charAt(0)}
+                                                </div>
+                                            )}
+                                            <div>
+                                                <p className="text-[10px] text-app-text-light dark:text-zinc-400">Kurir Pengantar</p>
+                                                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100 leading-tight">{order.deliveryPartner.name}</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            {order.deliveryPartner.vehicleType === 'car' ? (
+                                                <span className="text-[10px] font-semibold uppercase tracking-wider bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 px-2.5 py-1 rounded-md border border-blue-100 dark:border-blue-800/40">
+                                                    Mobil
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] font-semibold uppercase tracking-wider bg-orange-50 text-app-orange dark:bg-orange-900/30 dark:text-orange-400 px-2.5 py-1 rounded-md border border-orange-100 dark:border-orange-800/40">
+                                                    Motor
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 text-xs text-app-text-light dark:text-zinc-400 py-1">
+                                        <div className="size-2 rounded-full bg-app-orange animate-ping" />
+                                        <span>Menghubungkan ke kurir...</span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         <MapContainer center={[liveLocation.lat, liveLocation.lng]} zoom={15} style={{ height: "100%", width: "100%" }} zoomControl={false}>
                             <TileLayer
                                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
                             />
-                            <Marker position={[liveLocation.lat, liveLocation.lng]} icon={pulseIcon}>
+                            <Marker position={[liveLocation.lat, liveLocation.lng]} icon={driverIcon}>
                                 <Popup>Delivery Partner</Popup>
                             </Marker>
                             {destLat && destLng && (

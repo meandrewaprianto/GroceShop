@@ -61,6 +61,7 @@ Aplikasi ini didesain dengan estetika berkelas menggunakan palet warna natural (
 - 📍 **Real-Time Tracking** - Pelacakan kurir live dengan peta interaktif
 - ⭐ **Product Reviews** - Review & rating dengan integrasi purchase verification (hanya pembeli)
 - 📱 **Responsive Design** - Mobile-first approach untuk semua device
+- 🖼️ **Multiple Product Images** - Upload hingga 3 foto per produk dengan slider interaktif dan thumbnails di halaman pembeli
 
 ### 👨‍💼 **Admin Dashboard**
 
@@ -329,7 +330,9 @@ npm run seed
 | GET    | `/api/admin/stats`             | Get dashboard statistics  | ✅ Admin      |
 | GET    | `/api/admin/delivery-partners` | Get all delivery partners | ✅ Admin      |
 | POST   | `/api/admin/delivery-partners` | Create delivery partner   | ✅ Admin      |
-| PUT    | `/api/admin/orders/:id/assign` | Assign delivery partner   | ✅ Admin      |
+| GET    | `/api/admin/orders/:id/assign` | Assign delivery partner   | ✅ Admin      |
+
+
 
 ### **Delivery Endpoints**
 
@@ -366,9 +369,9 @@ model User {
     orders            Order[]
     wishlist          WishlistItem[]
     pushSubscriptions PushSubscription[]
-    reviews           Review[]
     createdAt         DateTime           @default(now())
     updatedAt         DateTime           @updatedAt
+    reviews           Review[]
 }
 
 model Address {
@@ -394,6 +397,7 @@ model Product {
     price         Float
     originalPrice Float?
     image         String
+    images        Json?          @default("[]")
     category      String
     unit          String?        @default("piece")
     stock         Int?           @default(0)

@@ -57,7 +57,11 @@ export const getProducts = async (req: Request, res: Response) => {
 
         const takeLimit = limit ? Number(limit) : undefined;
 
-        const products = await prisma.product.findMany({ where, orderBy, ...(takeLimit ? { take: takeLimit } : {}) });
+        const products = await prisma.product.findMany({
+            where,
+            orderBy,
+            ...(takeLimit ? { take: takeLimit } : {})
+        });
 
         const productsWithDiscount = products.map((p: any) => {
             const discount = p.originalPrice && p.price ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100) : 0;
@@ -74,7 +78,9 @@ export const getProducts = async (req: Request, res: Response) => {
 // GET /api/products/:id
 export const getProduct = async (req: Request, res: Response) => {
     try {
-        const product = await prisma.product.findUnique({ where: { id: req.params.id as string } })
+        const product = await prisma.product.findUnique({
+            where: { id: req.params.id as string }
+        });
 
         if (!product) {
             res.status(404).json({ message: "Product not found" });
@@ -93,12 +99,21 @@ export const getProduct = async (req: Request, res: Response) => {
 // POST /api/products
 export const createProduct = async (req: Request, res: Response) => {
     try {
-        const { name, description, price, originalPrice, image, category, unit, stock, isOrganic } = req.body;
+        const { name, description, price, originalPrice, image, images, category, unit, stock, isOrganic } = req.body;
 
         // Validation
         if (!name || !price || !image || !category || !unit) {
             res.status(400).json({ message: "Missing required fields: name, price, image, category, unit" });
             return;
+        }
+        // Build images array: ensure main image is first
+        let imagesArray: string[] = [String(image).trim()];
+        if (images && Array.isArray(images)) {
+            const extraImages = images
+                .filter((img: string) => img && img !== String(image))
+                .map((img: string) => String(img).trim())
+                .slice(0, 2); // max 3 total (1 from image + 2 more)
+            imagesArray = [...imagesArray, ...extraImages];
         }
 
         // Sanitize & transform
@@ -109,6 +124,7 @@ export const createProduct = async (req: Request, res: Response) => {
                 price: Number(price),
                 originalPrice: originalPrice ? Number(originalPrice) : null,
                 image: String(image).trim(),
+                images: imagesArray,
                 category: String(category).toLowerCase().trim().replace(/\s+/g, '-'),
                 unit: String(unit).trim(),
                 stock: Number(stock) || 0,
@@ -129,8 +145,44 @@ export const createProduct = async (req: Request, res: Response) => {
 // PUT /api/products/:id
 export const updateProduct = async (req: Request, res: Response) => {
     try {
-        const product = await prisma.product.update({ where: { id: req.params.id as string }, data: req.body })
-        res.json({ product });
+        const id = req.params.id as string;
+        const { name, description, price, originalPrice, image, images, category, unit, stock, isOrganic } = req.body;
+
+        const existingProduct = await prisma.product.findUnique({ where: { id } });
+        if (!existingProduct) {
+            res.status(404).json({ message: "Product not found" });
+            return;
+        }
+
+        const data: any = {};
+        if (name !== undefined) data.name = String(name).trim();
+        if (description !== undefined) data.description = String(description || "").trim();
+        if (price !== undefined) data.price = Number(price);
+        if (originalPrice !== undefined) data.originalPrice = originalPrice ? Number(originalPrice) : null;
+        if (image !== undefined) data.image = String(image).trim();
+        if (category !== undefined) data.category = String(category).toLowerCase().trim().replace(/\s+/g, '-');
+        if (unit !== undefined) data.unit = String(unit).trim();
+        if (stock !== undefined) data.stock = Number(stock) || 0;
+        if (isOrganic !== undefined) data.isOrganic = Boolean(isOrganic);
+
+        if (images !== undefined) {
+            let imagesArray: string[] = [data.image || existingProduct.image];
+            if (images && Array.isArray(images)) {
+                const extraImages = images
+                    .filter((img: string) => img && img !== (data.image || existingProduct.image))
+                    .map((img: string) => String(img).trim())
+                    .slice(0, 2);
+                imagesArray = [...imagesArray, ...extraImages];
+            }
+            data.images = imagesArray;
+        }
+
+        const updatedProduct = await prisma.product.update({
+            where: { id },
+            data,
+        });
+
+        res.json({ product: updatedProduct });
     } catch (error: any) {
         console.error("Error updating product:", error);
         if (error.code === "P2025") {
@@ -144,7 +196,14 @@ export const updateProduct = async (req: Request, res: Response) => {
 // DELETE /api/products/:id
 export const deleteProduct = async (req: Request, res: Response) => {
     try {
-        await prisma.product.update({ where: { id: req.params.id as string }, data: { stock: Number(0) } });
+        const id = req.params.id as string;
+        const existingProduct = await prisma.product.findUnique({ where: { id } });
+        if (!existingProduct) {
+            res.status(404).json({ message: "Product not found" });
+            return;
+        }
+
+        await prisma.product.update({ where: { id }, data: { stock: Number(0) } });
         res.json({ message: "Product Updated" });
     } catch (error) {
         console.error("Error deleting product:", error);

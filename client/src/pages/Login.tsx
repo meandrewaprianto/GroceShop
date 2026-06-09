@@ -3,7 +3,6 @@ import { heroSectionData } from "../assets/assets";
 import { Link } from "react-router-dom";
 import { BikeIcon, Loader2Icon } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import toast from "react-hot-toast";
 
 const Login = () => {
     const [isLoginState, setIsLoginState] = useState(true);
@@ -23,14 +22,12 @@ const Login = () => {
             } else {
                 await register(name, email, password);
             }
-        } catch (error: unknown) {
-            if(error instanceof Error) {
-                toast.error(error.message);
-            }
+        } catch (error) {
+            // toasted inside AuthContext
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
     return (
         <div className="min-h-screen flex">
             {/* Left Side */}

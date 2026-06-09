@@ -1,36 +1,39 @@
-import { useEffect, useRef } from 'react';
-import { ChevronRightIcon, LoaderIcon, MapPinIcon, PlusIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronRightIcon, MapPinIcon, PlusIcon } from 'lucide-react';
 import useGeolocation from '../../hooks/useGeolocation';
-import AddressAutocomplete from '../AddressAutocomplete';
+import AddressForm from '../AddressForm';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../config/api';
+import toast from 'react-hot-toast';
 
-const CheckoutAddress = ({ user, address, setAddress, setStep }: any) => {
-    const { detectedAddress, isDetecting, error: geoError, detectLocation } = useGeolocation();
+const CheckoutAddress = ({ address, setAddress, setStep }: any) => {
+    const { user, updateUser } = useAuth();
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [newAddressForm, setNewAddressForm] = useState({
+        label: "",
+        address: "",
+        city: "",
+        state: "",
+        zip: "",
+        lat: 0,
+        lng: 0,
+        isDefault: false,
+    });
+
+    const { detectedAddress, isDetecting, error: geoError, detectLocation, resetDetection } = useGeolocation();
     const prevDetectedRef = useRef<any>(null);
 
     const handleDetectLocation = async () => {
         detectLocation();
     };
 
-    const handleAddressSelect = (result: { address: string; city: string; state: string; zip: string; lat: number; lng: number }) => {
-        setAddress((prev: any) => ({
-            ...prev,
-            address: result.address,
-            city: result.city,
-            state: result.state,
-            zip: result.zip,
-            lat: result.lat,
-            lng: result.lng,
-        }));
-    };
-
-    // When geolocation returns an address, pre-fill the checkout address
+    // When geolocation returns an address, pre-fill the modal form
     useEffect(() => {
         if (detectedAddress && detectedAddress !== prevDetectedRef.current) {
             prevDetectedRef.current = detectedAddress;
-            setAddress((prev: any) => ({
+            setNewAddressForm((prev: any) => ({
                 ...prev,
-                label: "Home",
+                label: prev.label || "Home",
                 address: detectedAddress.address || prev.address,
                 city: detectedAddress.city || prev.city,
                 state: detectedAddress.state || prev.state,
@@ -39,48 +42,104 @@ const CheckoutAddress = ({ user, address, setAddress, setStep }: any) => {
                 lng: detectedAddress.lng,
             }));
         }
-    }, [detectedAddress, setAddress]);
+    }, [detectedAddress]);
+
+    const getCoordinatesForNewAddress = async (): Promise<{ lat: number; lng: number } | null> => {
+        if (newAddressForm.lat && newAddressForm.lng) {
+            return { lat: newAddressForm.lat, lng: newAddressForm.lng };
+        }
+        const query = `${newAddressForm.address}, ${newAddressForm.city}, ${newAddressForm.state}, ${newAddressForm.zip}`;
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
+                { headers: { "User-Agent": "GroceShop/1.0" } }
+            );
+            const data = await response.json();
+            if (data && data.length > 0) {
+                return {
+                    lat: parseFloat(data[0].lat),
+                    lng: parseFloat(data[0].lon),
+                };
+            }
+        } catch (err) {
+            console.warn("Geocoding failed, using approximate coords:", err);
+        }
+        return null;
+    };
+
+    const handleAddressSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newAddressForm.address || !newAddressForm.address.trim()) {
+            toast.error("Nama jalan (street address) wajib diisi!");
+            return;
+        }
+        if (!newAddressForm.state || !newAddressForm.state.trim()) {
+            toast.error("Provinsi (state) wajib diisi!");
+            return;
+        }
+
+        try {
+            const coords = await getCoordinatesForNewAddress();
+            if (!coords || !coords.lat || !coords.lng || coords.lat === 0 || coords.lng === 0) {
+                toast.error("Lokasi koordinat tidak ditemukan. Mohon pilih alamat dari rekomendasi yang muncul.");
+                return;
+            }
+            const payload = { ...newAddressForm, ...coords };
+
+            const { data } = await api.post(`/addresses/`, payload);
+            updateUser({ addresses: data.addresses });
+
+            const newAddr = data.addresses[data.addresses.length - 1];
+            if (newAddr) {
+                setAddress({
+                    id: newAddr.id,
+                    label: newAddr.label,
+                    address: newAddr.address,
+                    city: newAddr.city,
+                    state: newAddr.state,
+                    zip: newAddr.zip,
+                    isDefault: newAddr.isDefault,
+                    lat: newAddr.lat,
+                    lng: newAddr.lng,
+                });
+            }
+
+            toast.success("Alamat berhasil ditambahkan!");
+            setShowAddModal(false);
+            setNewAddressForm({
+                label: "",
+                address: "",
+                city: "",
+                state: "",
+                zip: "",
+                lat: 0,
+                lng: 0,
+                isDefault: false,
+            });
+            resetDetection();
+        } catch (error: any) {
+            toast.error(error.message || "Failed to add address");
+        }
+    };
+
+
 
     return (
         <div className="bg-white rounded-2xl p-6 animate-fade-in">
             <h2 className="text-lg font-semibold text-app-green mb-5 flex items-center gap-2">
-                <MapPinIcon className="size-5" /> Delivery Address
+                <MapPinIcon className="size-5" /> Alamat Pengiriman
             </h2>
 
-            {/* Detect Location Button */}
-            <button
-                type="button"
-                onClick={handleDetectLocation}
-                disabled={isDetecting}
-                className="w-full mb-4 py-2.5 border-2 border-dashed border-app-green text-app-green text-sm font-semibold rounded-xl hover:bg-app-cream transition-colors flex-center gap-2 disabled:opacity-50"
-            >
-                {isDetecting ? (
-                    <>
-                        <LoaderIcon className="size-4 animate-spin" />
-                        Detecting your location...
-                    </>
-                ) : (
-                    <>
-                        <MapPinIcon className="size-4" />
-                        Detect My Location
-                    </>
-                )}
-            </button>
-
-            {/* Geo Error Message */}
-            {geoError && (
-                <p className="text-xs text-red-500 mb-3 text-center bg-red-50 p-2 rounded-lg">{geoError}</p>
-            )}
-
             {/* Saved Addresses */}
-            {user?.addresses && user.addresses.length > 0 && (
+            {user?.addresses && user.addresses.length > 0 ? (
                 <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-app-green mb-3">Saved Addresses</h3>
+                    <h3 className="text-sm font-semibold text-app-green mb-3">Pilih Alamat Terdaftar</h3>
                     <div className="grid sm:grid-cols-2 gap-3">
                         {user.addresses.map((addr: any) => (
                             <div
                                 key={addr.id || addr.label}
                                 onClick={() => setAddress({
+                                    id: addr.id,
                                     label: addr.label,
                                     address: addr.address,
                                     city: addr.city,
@@ -89,7 +148,7 @@ const CheckoutAddress = ({ user, address, setAddress, setStep }: any) => {
                                     lat: addr.lat,
                                     lng: addr.lng,
                                 })}
-                                className={`p-4 rounded-xl border cursor-pointer transition-colors ${address.label === addr.label && address.address === addr.address ? 'border-app-green bg-app-cream' : 'border-app-border hover:bg-app-cream'}`}
+                                className={`p-4 rounded-xl border cursor-pointer transition-colors ${address.id === addr.id ? 'border-app-green bg-app-cream' : 'border-app-border hover:bg-app-cream'}`}
                             >
                                 <div className="flex items-center gap-2 mb-1">
                                     <MapPinIcon className="size-4 text-app-green" />
@@ -102,73 +161,63 @@ const CheckoutAddress = ({ user, address, setAddress, setStep }: any) => {
                         ))}
                     </div>
                 </div>
+            ) : (
+                <div className="text-center py-6 border border-dashed border-app-border rounded-xl mb-6 bg-app-cream/30">
+                    <MapPinIcon className="size-10 text-app-border mx-auto mb-2" />
+                    <p className="text-sm text-app-text-light font-medium">Anda belum mendaftarkan alamat pengiriman.</p>
+                </div>
             )}
 
-            {/* Manual Address Fields */}
-            <div className="space-y-3 mb-6">
-                <h3 className="text-sm font-semibold text-app-green mb-3">Or enter address manually</h3>
-                <div>
-                    <label className="block text-xs font-medium text-app-green mb-1">Label</label>
-                    <input
-                        type="text"
-                        placeholder="Home, Work, etc."
-                        value={address.label}
-                        onChange={(e) => setAddress((prev: any) => ({ ...prev, label: e.target.value }))}
-                        className="w-full px-4 py-2.5 text-sm rounded-xl border border-app-border focus:border-app-green outline-none"
-                    />
-                </div>
-                <div>
-                    <AddressAutocomplete
-                        value={address.address}
-                        label="Street Address"
-                        placeholder="Cari nama jalan atau alamat..."
-                        required
-                        onSelect={handleAddressSelect}
-                        onChange={(val) => setAddress((prev: any) => ({ ...prev, address: val }))}
-                    />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                    <div>
-                        <label className="block text-xs font-medium text-app-green mb-1">City</label>
-                        <input
-                            type="text"
-                            required
-                            value={address.city}
-                            onChange={(e) => setAddress((prev: any) => ({ ...prev, city: e.target.value }))}
-                            className="w-full px-4 py-2.5 text-sm rounded-xl border border-app-border focus:border-app-green outline-none"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-app-green mb-1">State</label>
-                        <input
-                            type="text"
-                            required
-                            value={address.state}
-                            onChange={(e) => setAddress((prev: any) => ({ ...prev, state: e.target.value }))}
-                            className="w-full px-4 py-2.5 text-sm rounded-xl border border-app-border focus:border-app-green outline-none"
-                        />
-                    </div>
-                </div>
-                <div>
-                    <label className="block text-xs font-medium text-app-green mb-1">ZIP Code</label>
-                    <input
-                        type="text"
-                        required
-                        value={address.zip}
-                        onChange={(e) => setAddress((prev: any) => ({ ...prev, zip: e.target.value }))}
-                        className="w-full px-4 py-2.5 text-sm rounded-xl border border-app-border focus:border-app-green outline-none"
-                    />
-                </div>
-            </div>
+            {/* Floating/Popup Address Form Modal */}
+            {showAddModal && (
+                <AddressForm
+                    resetForm={() => setShowAddModal(false)}
+                    handleSubmit={handleAddressSubmit}
+                    form={newAddressForm}
+                    setForm={setNewAddressForm}
+                    editingId={null}
+                    detectLocation={handleDetectLocation}
+                    isDetecting={isDetecting}
+                    geoError={geoError}
+                />
+            )}
 
-            <Link to="/addresses" className="w-full px-6 py-3 border border-gray-600 text-gray-600 rounded-xl flex-center gap-2 mb-3">
+
+
+            <button
+                onClick={() => {
+                    resetDetection();
+                    setNewAddressForm({
+                        label: "",
+                        address: "",
+                        city: "",
+                        state: "",
+                        zip: "",
+                        lat: 0,
+                        lng: 0,
+                        isDefault: false,
+                    });
+                    prevDetectedRef.current = null;
+                    setShowAddModal(true);
+                }}
+                className="w-full px-6 py-3 border border-app-green text-app-green hover:bg-app-cream rounded-xl flex-center gap-2 mb-4 font-semibold transition-colors"
+            >
                 Add New Address <PlusIcon className="size-4" />
-            </Link>
-            <button onClick={() => { setStep("payment"); scrollTo(0, 0) }} disabled={!address.address || !address.city} className="w-full px-6 py-3 bg-app-green text-white font-semibold rounded-xl hover:bg-app-green-light transition-colors disabled:opacity-50 flex items-center gap-2">
+            </button>
+
+            {address.address && (
+                <div className="p-4 bg-app-cream/40 border border-app-border rounded-xl mb-6">
+                    <p className="text-xs font-semibold text-app-orange uppercase tracking-wider mb-1">Alamat Terpilih</p>
+                    <p className="text-sm font-bold text-app-green">{address.label}</p>
+                    <p className="text-sm text-zinc-700 mt-1">{address.address}, {address.city}, {address.state} {address.zip}</p>
+                </div>
+            )}
+
+            <button onClick={() => { setStep("payment"); scrollTo(0, 0) }} disabled={!address.address || !address.city} className="w-full px-6 py-3 bg-app-green text-white font-semibold rounded-xl hover:bg-app-green-light transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                 Continue to Payment <ChevronRightIcon className="size-4" />
             </button>
         </div>
-    )
-}
+    );
+};
 
-export default CheckoutAddress
+export default CheckoutAddress;

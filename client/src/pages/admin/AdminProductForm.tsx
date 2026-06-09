@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, XIcon } from "lucide-react";
 import { useCategories } from "../../hooks/useCategories";
 import Loading from "../../components/Loading";
 import CurrencyInput from "../../components/CurrencyInput";
@@ -59,6 +59,8 @@ export default function AdminProductForm() {
     const [originalSize, setOriginalSize] = useState<number | null>(null);
     const [compressedSize, setCompressedSize] = useState<number | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
+    const multiFileInputRef = useRef<HTMLInputElement | null>(null);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -66,6 +68,7 @@ export default function AdminProductForm() {
         price: "",
         originalPrice: "",
         image: "",
+        images: [] as string[],
         category: "",
         unit: "",
         stock: "",
@@ -84,6 +87,7 @@ export default function AdminProductForm() {
                         price: p.price.toString(),
                         originalPrice: p.originalPrice ? p.originalPrice.toString() : "",
                         image: p.image,
+                        images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []),
                         category: p.category,
                         unit: p.unit,
                         stock: p.stock.toString(),
@@ -127,12 +131,52 @@ export default function AdminProductForm() {
             setCompressing(false);
         }
     };
+    const handleMultiFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        const remaining = 3 - (imageFiles.length + (imageFile ? 1 : 0) + (isEdit ? formData.images.length : 0));
+        const toProcess = Array.from(files).slice(0, remaining);
+
+        if (toProcess.length === 0) {
+            toast.error("Maximum 3 images allowed for a product");
+            return;
+        }
+
+        setCompressing(true);
+        try {
+            const compressed = await Promise.all(
+                toProcess.map((file) => compressImage(file))
+            );
+            setImageFiles((prev) => [...prev, ...compressed].slice(0, 3));
+            toast.success(`${compressed.length} additional image(s) processed.`);
+        } catch (err) {
+            console.error("Compression failed:", err);
+            setImageFiles((prev) => [...prev, ...toProcess].slice(0, 3));
+        } finally {
+            setCompressing(false);
+        }
+
+        if (multiFileInputRef.current) multiFileInputRef.current.value = "";
+    };
+
+    const removeImageFile = (index: number) => {
+        setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    const removeExistingImage = (index: number) => {
+        setFormData((prev) => ({
+            ...prev,
+            images: prev.images.filter((_, i) => i !== index),
+        }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
         try {
             let finalImageUrl = formData.image;
+            let finalImages: string[] = [];
 
             if (imageFile) {
                 const formDataUpload = new FormData();
@@ -149,9 +193,27 @@ export default function AdminProductForm() {
                 return
             }
 
+            // Upload additional images
+            if (imageFiles.length > 0) {
+                const formMulti = new FormData();
+                imageFiles.forEach((file) => formMulti.append("images", file));
+                const { data } = await api.post("/upload/multiple", formMulti, {
+                    timeout: 120000,
+                });
+                finalImages = data.urls || [];
+            }
+
+            // Combine existing + new uploaded images; max 3
+            const allImages = [
+                finalImageUrl,
+                ...finalImages,
+                ...(isEdit ? formData.images.filter((img) => img !== finalImageUrl) : []),
+            ].slice(0, 3);
+
             const payload = {
                 ...formData,
                 image: finalImageUrl,
+                images: allImages,
                 price: Number(formData.price),
                 originalPrice: formData.originalPrice ? Number(formData.originalPrice) : 0,
                 stock: Number(formData.stock),
@@ -244,11 +306,13 @@ export default function AdminProductForm() {
                                 <input required type="number" min="0" value={formData.stock} onChange={e => setFormData({ ...formData, stock: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 focus:border-app-green focus:ring-1 focus:ring-app-green outline-none transition-all" />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-zinc-700 mb-2">Product Image</label>
-                                <div className="flex items-center gap-4">
+                                <label className="block text-sm font-medium text-zinc-700 mb-2">Product Images <span className="text-zinc-400 font-normal">(Maximum 3 images)</span></label>
+                                
+                                {/* Main image upload */}
+                                <div className="flex items-center gap-4 mb-4">
                                     {(imageFile || formData.image) && (
-                                        <div className="size-16 rounded-lg border border-zinc-200 overflow-hidden shrink-0 bg-app-cream">
-                                            <img src={imageFile ? URL.createObjectURL(imageFile) : formData.image} alt="Preview" className="w-full h-full object-cover" />
+                                        <div className="size-20 rounded-xl border border-zinc-200 overflow-hidden shrink-0 bg-app-cream">
+                                            <img src={imageFile ? URL.createObjectURL(imageFile) : formData.image} alt="Preview Utama" className="w-full h-full object-cover" />
                                         </div>
                                     )}
                                     <div className="flex-1">
@@ -257,23 +321,77 @@ export default function AdminProductForm() {
                                             type="file"
                                             accept="image/*"
                                             onChange={handleFileChange}
-                                            className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 focus:border-app-green outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-app-orange file:text-white hover:file:bg-orange-600 cursor-pointer"
+                                            className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 focus:border-app-green outline-none transition-all file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-app-green/10 file:text-app-green hover:file:bg-app-green/20 cursor-pointer"
                                         />
-                                        {compressing && (
-                                            <p className="text-xs text-zinc-500 mt-1">Compressing image...</p>
-                                        )}
+                                        <p className="text-xs text-zinc-400 mt-1">Main Product Image (required)</p>
                                         {!compressing && originalSize && compressedSize && originalSize !== compressedSize && (
                                             <p className="text-xs text-zinc-500 mt-1">
                                                 Compressed: {(originalSize / 1024).toFixed(0)}KB → {(compressedSize / 1024).toFixed(0)}KB
                                             </p>
                                         )}
-                                        {!compressing && compressedSize && (
-                                            <p className="text-xs text-zinc-500 mt-1">
-                                                Max upload size: 4MB (Vercel limit)
-                                            </p>
-                                        )}
                                     </div>
                                 </div>
+
+                                {/* Existing Additional Images */}
+                                {isEdit && formData.images.filter(img => img !== formData.image).length > 0 && (
+                                    <div className="mb-4">
+                                        <p className="text-xs font-semibold text-zinc-500 mb-2">Existing extra images:</p>
+                                        <div className="flex gap-3 flex-wrap">
+                                            {formData.images.filter(img => img !== formData.image).map((img, i) => (
+                                                <div key={i} className="relative group">
+                                                    <img src={img} alt={`Product extra ${i + 1}`} className="size-16 rounded-xl border border-zinc-200 object-cover" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeExistingImage(formData.images.indexOf(img))}
+                                                        className="absolute -top-1.5 -right-1.5 size-5 bg-red-500 text-white rounded-full flex-center text-xs shadow-md active:scale-95 transition-transform"
+                                                    >
+                                                        <XIcon className="size-3" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* New Additional Uploaded Files */}
+                                {imageFiles.length > 0 && (
+                                    <div className="mb-4">
+                                        <p className="text-xs font-semibold text-zinc-500 mb-2">New extra images to upload:</p>
+                                        <div className="flex gap-3 flex-wrap">
+                                            {imageFiles.map((file, i) => (
+                                                <div key={i} className="relative group">
+                                                    <img src={URL.createObjectURL(file)} alt={`New upload ${i + 1}`} className="size-16 rounded-xl border border-zinc-200 object-cover" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeImageFile(i)}
+                                                        className="absolute -top-1.5 -right-1.5 size-5 bg-red-500 text-white rounded-full flex-center text-xs shadow-md active:scale-95 transition-transform"
+                                                    >
+                                                        <XIcon className="size-3" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Additional files input trigger */}
+                                {((imageFile ? 1 : (formData.image ? 1 : 0)) + imageFiles.length + (isEdit ? formData.images.filter(img => img !== formData.image).length : 0)) < 3 && (
+                                    <div className="mt-2">
+                                        <input
+                                            ref={multiFileInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={handleMultiFilesChange}
+                                            className="w-full px-4 py-2.5 rounded-lg border border-dashed border-zinc-300 focus:border-app-green outline-none transition-all file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-app-orange/10 file:text-app-orange hover:file:bg-app-orange/20 cursor-pointer"
+                                        />
+                                        <p className="text-xs text-zinc-400 mt-1">Upload additional images (maximum 3 images total for this product)</p>
+                                    </div>
+                                )}
+
+                                {compressing && (
+                                    <p className="text-xs text-zinc-500 mt-1">Compressing images...</p>
+                                )}
                             </div>
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-zinc-700 mb-2">Description</label>

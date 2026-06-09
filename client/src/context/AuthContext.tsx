@@ -43,10 +43,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             localStorage.setItem("auth_user", JSON.stringify(data.user));
             toast.success("Login successfully");
             navigate('/');
-        } catch (error: unknown) {
-            if(error instanceof Error) {
-                toast.error(error.message);
-            }
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || error?.message || "Login failed");
         }
     }
 
@@ -59,10 +57,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             localStorage.setItem("auth_user", JSON.stringify(data.user));
             toast.success("Registration successfully");
             navigate('/');
-        } catch (error: unknown) {
-            if(error instanceof Error) {
-                toast.error(error.message);
-            }
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || error?.message || "Registration failed");
         }
     }
 

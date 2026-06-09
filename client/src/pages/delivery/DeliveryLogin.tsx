@@ -19,10 +19,8 @@ export default function DeliveryLogin() {
             localStorage.setItem("delivery_partner", JSON.stringify(data.partner));
             toast.success("Login Successfully");
             navigate('/delivery')
-        } catch (error: unknown) {
-            if(error instanceof Error) {
-                toast.error(error.message);
-            }
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || error?.message || "Login failed");
         } finally {
             setLoading(false);
         }

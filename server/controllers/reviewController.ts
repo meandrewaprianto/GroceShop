@@ -437,3 +437,36 @@ export const markReviewHelpful = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Failed to mark review as helpful', error: error.message });
     }
 };
+
+// GET /api/reviews/recent - Get recent reviews across the store
+export const getRecentReviews = async (req: Request, res: Response) => {
+    try {
+        const reviews = await prisma.review.findMany({
+            take: 6,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        avatar: true
+                    }
+                },
+                product: {
+                    select: {
+                        id: true,
+                        name: true,
+                        price: true,
+                        image: true,
+                        category: true
+                    }
+                }
+            }
+        });
+
+        res.json({ reviews });
+    } catch (error) {
+        console.error('Error fetching recent reviews:', error);
+        res.status(500).json({ message: 'Failed to fetch recent reviews' });
+    }
+};

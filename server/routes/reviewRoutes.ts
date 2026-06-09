@@ -4,11 +4,15 @@ import {
     createReview,
     updateReview,
     deleteReview,
-    markReviewHelpful
+    markReviewHelpful,
+    getRecentReviews
 } from "../controllers/reviewController.js";
 import auth, { optionalAuth } from "../middleware/auth.js";
 
 const router = Router();
+
+// GET /api/reviews/recent - Get recent reviews (public)
+router.get("/recent", getRecentReviews);
 
 // GET /api/reviews/product/:productId - Get all reviews for a product (public, optional auth)
 router.get("/product/:productId", optionalAuth, getProductReviews);

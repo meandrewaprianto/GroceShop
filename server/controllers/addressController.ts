@@ -17,9 +17,17 @@ export const getAddresses = async (req: Request, res: Response) => {
 export const addAddress = async (req: Request, res: Response) => {
     const { label, address, city, state, zip, isDefault, lat, lng } = req.body;
 
+    // Require Street Address and State
+    if (!address || !address.trim()) {
+        return res.status(400).json({ message: "Nama jalan (street address) wajib diisi." });
+    }
+    if (!state || !state.trim()) {
+        return res.status(400).json({ message: "Provinsi (state) wajib diisi." });
+    }
+
     // Require Coordinates
-    if (lat == null || lng == null) {
-        return res.status(400).json({ message: "Location coordinates are required. Please allow location access." });
+    if (lat == null || lng == null || Number(lat) === 0 || Number(lng) === 0) {
+        return res.status(400).json({ message: "Koordinat lokasi tidak valid. Mohon pilih alamat dari rekomendasi atau gunakan deteksi GPS." });
     }
 
     const currentAddresses = await prisma.address.findMany({
@@ -62,9 +70,17 @@ export const addAddress = async (req: Request, res: Response) => {
 export const updateAddress = async (req: Request, res: Response) => {
     const { label, address, city, state, zip, isDefault, lat, lng } = req.body;
 
+    // Require Street Address and State
+    if (!address || !address.trim()) {
+        return res.status(400).json({ message: "Nama jalan (street address) wajib diisi." });
+    }
+    if (!state || !state.trim()) {
+        return res.status(400).json({ message: "Provinsi (state) wajib diisi." });
+    }
+
     // Require Coordinates
-    if (lat == null || lng == null) {
-        return res.status(400).json({ message: "Location coordinates are required. Please allow location access." });
+    if (lat == null || lng == null || Number(lat) === 0 || Number(lng) === 0) {
+        return res.status(400).json({ message: "Koordinat lokasi tidak valid. Mohon pilih alamat dari rekomendasi atau gunakan deteksi GPS." });
     }
 
     if (isDefault) {

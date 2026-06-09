@@ -74,11 +74,16 @@ export default function DeliveryOrderCard({ order, tab, handleUpdateStatus, setO
             )}
 
             {tab === "completed" && (
-                <div className="px-5 py-3 border-t border-app-border">
+                <div className="px-5 py-3 border-t border-app-border flex items-center justify-between">
                     <p className="text-xs text-zinc-500 flex items-center gap-1">
                         <ClockIcon className="size-3" />
-                        {new Date(order.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        {new Date(order.createdAt).toLocaleDateString("id-ID", { month: "short", day: "numeric", year: "numeric" })}
                     </p>
+                    {order.status === "Delivered" && (
+                        <span className="text-xs font-bold text-app-green bg-green-50 px-2.5 py-1 rounded-lg">
+                            Komisi: Rp {(order.total * 0.05).toLocaleString("id-ID")}
+                        </span>
+                    )}
                 </div>
             )}
         </div>

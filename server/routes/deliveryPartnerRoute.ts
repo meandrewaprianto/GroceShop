@@ -1,10 +1,11 @@
 import express from "express";
-import { cancelDelivery, completeDelivery, getDeliveryDetail, getMyDelivery, loginPartner, updateDeliveryLocation, updateDeliveryStatus } from "../controllers/deliveryController.js";
+import { cancelDelivery, completeDelivery, getDeliveryDetail, getMyDelivery, loginPartner, updateDeliveryLocation, updateDeliveryStatus, getDeliveryStats } from "../controllers/deliveryController.js";
 import deliveryAuth from "../middleware/deliveryAuth.js";
 
 const deliveryPartnerRouter = express.Router();
 
 deliveryPartnerRouter.post("/login", loginPartner);
+deliveryPartnerRouter.get("/stats", deliveryAuth, getDeliveryStats);
 deliveryPartnerRouter.get("/my-deliveries", deliveryAuth, getMyDelivery);
 deliveryPartnerRouter.get("/my-deliveries/:id", deliveryAuth, getDeliveryDetail);
 deliveryPartnerRouter.put("/my-deliveries/:id/complete", deliveryAuth, completeDelivery);

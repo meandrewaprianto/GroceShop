@@ -102,8 +102,21 @@ const Addresses = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!form.address || !form.address.trim()) {
+            toast.error("Nama jalan (street address) wajib diisi!");
+            return;
+        }
+        if (!form.state || !form.state.trim()) {
+            toast.error("Provinsi (state) wajib diisi!");
+            return;
+        }
+
         try {
             const coords = await getCoordinates();
+            if (!coords || !coords.lat || !coords.lng || coords.lat === 0 || coords.lng === 0) {
+                toast.error("Lokasi koordinat tidak ditemukan. Mohon pilih alamat dari rekomendasi yang muncul.");
+                return;
+            }
             const payload = { ...form, ...coords };
 
             if (editingId) {
